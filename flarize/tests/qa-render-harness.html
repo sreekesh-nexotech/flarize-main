@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QA Quotation Render</title>
+<style id="q-page-styles"></style>
+<style>
+@page { size: A4 portrait; margin: 0; }
+body { margin: 0; padding: 0; }
+</style>
+</head>
+<body>
+<main id="q-document"></main>
+<script type="module">
+import { renderPage1, PAGE_ONE_STYLES, blockedFields,
+         renderPage2, PAGE_TWO_STYLES, blockedFieldsPage2,
+         renderPage3, PAGE_THREE_STYLES, blockedFieldsPage3,
+         renderPage4,
+         renderPage5, PAGE_FIVE_STYLES, blockedFieldsPage5,
+         renderPage6Testimonials,
+         renderPage7, PAGE_SEVEN_STYLES, blockedFieldsPage7,
+         renderPage8, PAGE_EIGHT_STYLES, blockedFieldsPage8,
+         renderPage9Timeline,
+         renderPage10Terms,
+         renderPage11Terms,
+         renderPage12, PAGE_TWELVE_STYLES, blockedFieldsPage12,
+         FULL_DOCUMENT_STYLES } from '../public/lib/quotationDocument.js';
+
+document.getElementById('q-page-styles').textContent =
+  PAGE_ONE_STYLES + PAGE_TWO_STYLES + PAGE_THREE_STYLES +
+  PAGE_FIVE_STYLES + PAGE_SEVEN_STYLES + PAGE_EIGHT_STYLES +
+  PAGE_TWELVE_STYLES + FULL_DOCUMENT_STYLES;
+
+// Load payload from global
+const payload = window.__QA_PAYLOAD__;
+if (payload) {
+  document.getElementById('q-document').innerHTML =
+    renderPage1(payload) + renderPage2(payload) + renderPage3(payload) +
+    renderPage4(payload) + renderPage5(payload) +
+    renderPage6Testimonials(payload) + renderPage7(payload) + renderPage8(payload) +
+    renderPage9Timeline(payload) + renderPage10Terms(payload) + renderPage11Terms(payload) +
+    renderPage12(payload);
+
+  const blocked = [
+    ...blockedFields(payload), ...blockedFieldsPage2(payload),
+    ...blockedFieldsPage3(payload), ...blockedFieldsPage5(payload),
+    ...blockedFieldsPage7(payload), ...blockedFieldsPage8(payload),
+    ...blockedFieldsPage12(payload),
+  ];
+  window.__QA_BLOCKED__ = blocked;
+  window.__QA_RENDERED__ = true;
+  console.log('[QA] Rendered. Blocked:', blocked.length, blocked);
+} else {
+  document.getElementById('q-document').innerHTML = '<p>No payload</p>';
+}
+</script>
+</body>
+</html>

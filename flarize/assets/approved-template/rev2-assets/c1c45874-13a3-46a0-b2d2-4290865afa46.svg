@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rev2 PAGE 3 — Your Home Load Profile — PAINT layer.
+  Purpose: show the customer their appliance-load calculation. All
+  appliance rows are DATA (HTML overlay); this PAINT layer holds only
+  the grid backing + column headers + summary labels + footer identity.
+
+  Contract:
+    - Column headers baked as PAINT: Appliance / Qty / Watts / Hrs/day / Daily kWh
+    - 12-row grid backing, alternating white / cream
+    - Total Daily Consumption + Recommended System Size labels PAINT;
+      values are DATA rectangles
+    - No appliance names / quantities / watts / hours / kWh painted
+    - "…and N more" conditional line has a DATA slot below the grid
+    - Footer C7-locked issuer line (verbatim)
+  Dimensions: A4 portrait 595 × 842 pt.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 595 842"
+     width="595" height="842">
+  <title>Rev2 Page 3 — Your Home Load Profile (PAINT layer)</title>
+  <defs>
+    <style>
+      .h  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; }
+      .b  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; }
+      .r  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 400; }
+      .u  { text-transform: uppercase; letter-spacing: 1.5px; }
+      .guide { fill: none; stroke: #cbd5d0; stroke-width: 0.6; stroke-dasharray: 3 3; opacity: 0.55; }
+    </style>
+  </defs>
+
+  <rect width="595" height="842" fill="#ffffff"/>
+
+  <!-- Header: FLARIZE + parent line -->
+  <g transform="translate(40 42)">
+    <circle cx="14" cy="14" r="8.2" fill="#F5901E"/>
+    <g stroke="#F5901E" stroke-width="2.4" stroke-linecap="round">
+      <line x1="14" y1="0"  x2="14" y2="4"/>
+      <line x1="14" y1="24" x2="14" y2="28"/>
+      <line x1="0"  y1="14" x2="4"  y2="14"/>
+      <line x1="24" y1="14" x2="28" y2="14"/>
+    </g>
+    <text x="38" y="20" class="h" font-size="22" fill="#123f35" letter-spacing="0.3">FLARIZE</text>
+    <text x="38" y="34" class="b u" font-size="7" fill="#5b656a">Backed by Golden Ray</text>
+  </g>
+
+  <!-- Right-side energy graphic -->
+  <g transform="translate(490 30)">
+    <circle cx="30" cy="30" r="14" fill="#F5901E" opacity="0.15"/>
+    <g stroke="#F5901E" stroke-width="1.4" stroke-linecap="round">
+      <line x1="30" y1="12" x2="30" y2="16"/>
+      <line x1="30" y1="44" x2="30" y2="48"/>
+      <line x1="12" y1="30" x2="16" y2="30"/>
+      <line x1="44" y1="30" x2="48" y2="30"/>
+      <line x1="17" y1="17" x2="20" y2="20"/>
+      <line x1="40" y1="40" x2="43" y2="43"/>
+      <line x1="17" y1="43" x2="20" y2="40"/>
+      <line x1="40" y1="20" x2="43" y2="17"/>
+    </g>
+    <circle cx="30" cy="30" r="7" fill="#F5901E"/>
+  </g>
+
+  <!-- Page title -->
+  <g transform="translate(40 108)">
+    <text x="0" y="0"  class="h" font-size="26" fill="#123f35">Your Home Load Profile</text>
+    <rect x="0" y="10" width="90" height="3" fill="#F5901E"/>
+    <text x="0" y="34" class="r" font-size="10.5" fill="#5b656a">These are the appliances Flarize used to size your recommended solar system.</text>
+  </g>
+
+  <!-- Column headers band (PAINT) -->
+  <g transform="translate(40 176)">
+    <rect x="0" y="0" width="515" height="30" fill="#123f35"/>
+    <text x="14"  y="20" class="b u" font-size="9" fill="#ffffff">Appliance</text>
+    <text x="240" y="20" class="b u" font-size="9" fill="#ffffff" text-anchor="middle">Qty</text>
+    <text x="320" y="20" class="b u" font-size="9" fill="#ffffff" text-anchor="middle">Watts</text>
+    <text x="400" y="20" class="b u" font-size="9" fill="#ffffff" text-anchor="middle">Hrs/day</text>
+    <text x="490" y="20" class="b u" font-size="9" fill="#ffffff" text-anchor="middle">Daily kWh</text>
+  </g>
+
+  <!-- 12-row grid backing (alternating white / cream); PAINT ONLY -->
+  <g transform="translate(40 206)">
+    <!-- backgrounds -->
+    <rect x="0" y="0"   width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="30"  width="515" height="30" fill="#ffffff"/>
+    <rect x="0" y="60"  width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="90"  width="515" height="30" fill="#ffffff"/>
+    <rect x="0" y="120" width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="150" width="515" height="30" fill="#ffffff"/>
+    <rect x="0" y="180" width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="210" width="515" height="30" fill="#ffffff"/>
+    <rect x="0" y="240" width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="270" width="515" height="30" fill="#ffffff"/>
+    <rect x="0" y="300" width="515" height="30" fill="#FAF3E0"/>
+    <rect x="0" y="330" width="515" height="30" fill="#ffffff"/>
+    <!-- column dividers -->
+    <line x1="220" y1="0" x2="220" y2="360" stroke="#e5e7ea" stroke-width="0.8"/>
+    <line x1="280" y1="0" x2="280" y2="360" stroke="#e5e7ea" stroke-width="0.8"/>
+    <line x1="360" y1="0" x2="360" y2="360" stroke="#e5e7ea" stroke-width="0.8"/>
+    <line x1="440" y1="0" x2="440" y2="360" stroke="#e5e7ea" stroke-width="0.8"/>
+    <!-- outer frame -->
+    <rect x="0" y="0" width="515" height="360" fill="none" stroke="#cbd5d0" stroke-width="1"/>
+    <!-- DATA guides for the 12 rows (transparent — HTML overlay fills each row) -->
+    <g class="guide">
+      <rect x="14" y="6"   width="490" height="18"/>
+      <rect x="14" y="36"  width="490" height="18"/>
+      <rect x="14" y="66"  width="490" height="18"/>
+      <rect x="14" y="96"  width="490" height="18"/>
+      <rect x="14" y="126" width="490" height="18"/>
+      <rect x="14" y="156" width="490" height="18"/>
+      <rect x="14" y="186" width="490" height="18"/>
+      <rect x="14" y="216" width="490" height="18"/>
+      <rect x="14" y="246" width="490" height="18"/>
+      <rect x="14" y="276" width="490" height="18"/>
+      <rect x="14" y="306" width="490" height="18"/>
+      <rect x="14" y="336" width="490" height="18"/>
+    </g>
+  </g>
+
+  <!-- "…and N more" DATA slot (conditional; renderer emits only when appliances.length > 12) -->
+  <g transform="translate(40 576)">
+    <rect class="guide" x="0" y="0" width="515" height="16"/>
+    <!-- No painted text here — full line is DATA. -->
+  </g>
+
+  <!-- Summary bar (labels PAINT; values DATA) -->
+  <g transform="translate(40 606)">
+    <rect x="0" y="0" width="515" height="42" fill="#FAF3E0"/>
+    <text x="18"  y="26" class="b" font-size="12" fill="#123f35">Total Daily Consumption:</text>
+    <rect class="guide" x="220" y="12" width="130" height="22"/>
+    <text x="18"  y="26" transform="translate(220 0)" opacity="0"/>
+  </g>
+
+  <g transform="translate(40 660)">
+    <rect x="0" y="0" width="515" height="42" fill="#123f35"/>
+    <text x="18"  y="26" class="b" font-size="12" fill="#F5901E">Recommended System Size:</text>
+    <rect class="guide" x="240" y="12" width="130" height="22"/>
+  </g>
+
+  <!-- Static explanation copy -->
+  <g transform="translate(40 716)">
+    <text x="0" y="12" class="r" font-size="9" fill="#5b656a">Recommendation is based on your typical daily consumption and Kerala solar irradiance;</text>
+    <text x="0" y="26" class="r" font-size="9" fill="#5b656a">final size is confirmed after a site survey.</text>
+  </g>
+
+  <!-- Footer teal band with C7-LOCKED issuer identity (verbatim) -->
+  <g transform="translate(0 810)">
+    <rect x="0" y="0" width="595" height="32" fill="#123f35"/>
+    <text x="20"  y="14" class="r" font-size="6.5" fill="#ffffff">FLARIZE TECHNOLOGIES PRIVATE LIMITED  ·  GSTIN 32AAGCF7283D1ZR  ·  Reg. AAP-6531</text>
+    <text x="20"  y="24" class="r" font-size="6.5" fill="#cfe3d6">Floor 01, Building 49/190/B, Tharath Building, Ambalappuzha, Alappuzha North, Alappuzha, Kerala 688007</text>
+    <text x="440" y="24" class="r" font-size="6.5" fill="#cfe3d6">+91 99950 73579  ·  sales@flarize.com  ·  www.flarize.com</text>
+  </g>
+</svg>

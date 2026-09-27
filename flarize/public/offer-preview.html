@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Offer page preview · Flarize</title>
+<style>
+  html,body{margin:0;background:#e9ecef;font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#1c2430}
+  .bar{padding:10px 16px;background:#1e293b;color:#cbd5e1;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .bar b{color:#fff}.bar a{color:#60a5fa}
+  .wrap{padding:18px;display:flex;justify-content:center}
+  .page{box-shadow:0 8px 30px rgba(0,0,0,.25);background:#fff}
+  .msg{max-width:700px;margin:40px auto;background:#fff;border:1px solid #e3e7ec;border-radius:12px;padding:18px 20px}
+  @media print{.bar{display:none}.wrap{padding:0}.page{box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="bar"><b>Offer page preview</b> — this is page 2 exactly as it prints from the SAVED campaign. <a href="/quotation-content.html">← back to Quotation content</a> <span style="flex:1"></span><span id="state"></span></div>
+<div class="wrap" id="out"><div class="msg">Loading…</div></div>
+<script type="module">
+import { renderPage2, PAGE_TWO_STYLES, PAGE_A4_CONTRACT_STYLES } from '/lib/quotationDocument.js';
+const token = () => { try { return sessionStorage.getItem('gr_session_token') || ''; } catch { return ''; } };
+const api = async (url) => { const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token() } }); if (!r.ok) throw new Error(`${r.status} ${url}`); return r.json(); };
+const out = document.getElementById('out'); const state = document.getElementById('state');
+try {
+  const [{ campaigns }, prof] = await Promise.all([api('/api/cms/campaigns'), api('/api/admin/company-profile').catch(() => ({ profile: {} }))]);
+  const list = (campaigns || []).filter(c => c.status !== 'ARCHIVED');
+  const hasContent = (c) => !!(c.headline || c.subheadline || c.primaryBenefit || (Array.isArray(c.offers) && c.offers.length));
+  const c = list.find(c => c.status === 'ACTIVE') || list.filter(hasContent).sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || '')))[0] || null;
+  if (!c) { out.innerHTML = '<div class="msg">No offer page saved yet. Go back, fill the form (or "Load approved Onam design") and Save.</div>'; }
+  else {
+    const p = prof.profile || {};
+    const payload = { campaign: { available: true, source: 'CMS', value: { id: c.campaignId, active: c.status === 'ACTIVE', ...c } }, company: { available: true, source: 'COMPANY_MASTER', value: { website: p.website || null, phone: p.phone || null } } };
+    const style = document.createElement('style'); style.textContent = PAGE_A4_CONTRACT_STYLES + PAGE_TWO_STYLES; document.head.appendChild(style);
+    out.innerHTML = renderPage2(payload);
+    state.textContent = `${c.name} · ${c.status === 'ACTIVE' ? 'ON — printed in new quotations' : 'OFF — not printed until switched ON'}`;
+  }
+} catch (e) { out.innerHTML = `<div class="msg">Could not load: ${e.message}. Log in as Admin first.</div>`; }
+</script>
+</body>
+</html>

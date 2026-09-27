@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Profile — Golden Ray Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f5f6fa; color: #23272f; }
+    .topbar { background: #1a2332; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .topbar h1 { font-size: 18px; font-weight: 600; }
+    .topbar .back { color: #8fc6ff; text-decoration: none; font-size: 14px; }
+    .container { max-width: 800px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 16px; color: #1a2332; margin-bottom: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    label.field { display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fi { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; }
+    .fi:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.15); }
+    textarea.fi { min-height: 60px; resize: vertical; }
+    .btn { padding: 10px 24px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+    .alert { padding: 10px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .alert-success { background: #d1fae5; color: #065f46; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .alert-info { background: #dbeafe; color: #1e40af; }
+    .status-bar { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status-dot.configured { background: #10b981; }
+    .status-dot.not-configured { background: #f59e0b; }
+    .actions { display: flex; gap: 12px; margin-top: 16px; }
+    .login-box { max-width: 400px; margin: 80px auto; }
+    @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<div class="topbar">
+  <a class="back" href="/">← Back to App</a>
+  <h1>Company Profile</h1>
+</div>
+
+<div class="container">
+  <!-- Login -->
+  <div id="login-section" class="login-box">
+    <div class="card">
+      <h2>Admin Login</h2>
+      <div id="login-alert"></div>
+      <div class="form-row full">
+        <div><label class="field">Username</label><input class="fi" id="login-user" type="text" placeholder="admin" /></div>
+      </div>
+      <div class="form-row full">
+        <div><label class="field">Password</label><input class="fi" id="login-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" style="margin-top:12px">Login</button>
+    </div>
+  </div>
+
+  <!-- Profile Form -->
+  <div id="profile-section" hidden>
+    <div id="alert-area"></div>
+    <div class="status-bar">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Loading...</span>
+    </div>
+
+    <!-- Company Identity -->
+    <div class="card">
+      <h2>Company Identity</h2>
+      <div class="form-row">
+        <div><label class="field">Legal / Company Name</label><input class="fi" id="f-legalName" placeholder="e.g. Golden Ray Renewable Energy Pvt. Ltd." /></div>
+        <div><label class="field">Display / Trading Name</label><input class="fi" id="f-displayName" placeholder="e.g. Golden Ray Solar" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">GSTIN</label><input class="fi" id="f-gstin" placeholder="e.g. 32AABCG1234A1ZP" maxlength="15" /></div>
+        <div><label class="field">Company Registration Number</label><input class="fi" id="f-companyRegistration" placeholder="e.g. U40106KL2024PTC12345" /></div>
+      </div>
+      <!-- C7 (2026-09-04): brand + parent-backing line, semantically separate
+           from legalName. Customer-facing artwork binds these; legal / T&C /
+           payment stay on legalName. Empty → renderer suppresses. -->
+      <div class="form-row">
+        <div><label class="field">Brand Name (Customer-facing)</label><input class="fi" id="f-brandName" placeholder="e.g. FLARIZE" /></div>
+        <div><label class="field">Parent / Backing Line</label><input class="fi" id="f-parentBrandLine" placeholder="e.g. Backed by Golden Ray" /></div>
+      </div>
+    </div>
+
+    <!-- Contact Details -->
+    <div class="card">
+      <h2>Contact Details</h2>
+      <div class="form-row full">
+        <div><label class="field">Address</label><input class="fi" id="f-address" placeholder="Street address" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">City</label><input class="fi" id="f-city" placeholder="City" /></div>
+        <div><label class="field">State</label><input class="fi" id="f-state" placeholder="State" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">Pincode</label><input class="fi" id="f-pincode" placeholder="6-digit pincode" maxlength="6" /></div>
+        <div><label class="field">Phone</label><input class="fi" id="f-phone" placeholder="10-digit mobile" maxlength="10" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">Email</label><input class="fi" id="f-email" placeholder="company@example.com" type="email" /></div>
+        <div><label class="field">Website</label><input class="fi" id="f-website" placeholder="www.example.com" /></div>
+      </div>
+    </div>
+
+    <!-- Payment Details -->
+    <div class="card">
+      <h2>Payment Details</h2>
+      <div class="form-row">
+        <div><label class="field">Bank Name</label><input class="fi" id="f-bankName" placeholder="e.g. State Bank of India" /></div>
+        <div><label class="field">Account Name</label><input class="fi" id="f-bankAccountName" placeholder="Account holder name" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">Account Number</label><input class="fi" id="f-bankAccountNumber" placeholder="Bank account number" /></div>
+        <div><label class="field">IFSC Code</label><input class="fi" id="f-bankIfsc" placeholder="e.g. SBIN0001234" maxlength="11" /></div>
+      </div>
+      <!-- C7 (2026-09-04): bank branch (display only) + UPI receiving details.
+           Leave blank until Finance supplies real Flarize account values.
+           Never populate from historical Golden Ray LLP artwork. -->
+      <div class="form-row">
+        <div><label class="field">Bank Branch</label><input class="fi" id="f-bankBranch" placeholder="e.g. Alappuzha Main Branch" /></div>
+        <div><label class="field">UPI ID</label><input class="fi" id="f-upiId" placeholder="e.g. flarize@axis" /></div>
+      </div>
+      <div class="form-row">
+        <div><label class="field">UPI QR image (printed in "Book now")</label>
+          <div style="display:flex;align-items:center;gap:10px"><img id="prev-upiQr" alt="" style="width:64px;height:64px;object-fit:contain;border:1px solid #e3e7ec;border-radius:8px;background:#fff;visibility:hidden"><input type="file" accept="image/png,image/jpeg" data-upload="upiQr"></div>
+          <input class="fi" id="f-upiQrAssetId" type="hidden" /><input class="fi" id="f-upiQrImageUri" type="hidden" />
+        </div>
+        <div class="hint" style="font-size:12px;color:#66707d;align-self:end">PNG or JPEG up to 5 MB. Upload replaces the previous image.</div>
+      </div>
+      <div class="form-row full">
+        <div><label class="field">Payment Instructions</label><textarea class="fi" id="f-paymentInstructions" placeholder="Additional payment instructions for the quotation..."></textarea></div>
+      </div>
+    </div>
+
+    <!-- C7 (2026-09-04): Signature + Seal (CMS asset references). Uploaded
+         via existing CMS asset infrastructure; renderer binds them to the
+         dynamic sections. Null → renderer suppresses the slot. -->
+    <div class="card">
+      <h2>Signature &amp; Seal</h2>
+      <div class="form-row">
+        <div><label class="field">Signature image (page 1 letter)</label>
+          <div style="display:flex;align-items:center;gap:10px"><img id="prev-signature" alt="" style="width:120px;height:56px;object-fit:contain;border:1px solid #e3e7ec;border-radius:8px;background:#fff;visibility:hidden"><input type="file" accept="image/png,image/jpeg" data-upload="signature"></div>
+          <input class="fi" id="f-signatureAssetId" type="hidden" /><input class="fi" id="f-signatureImageUri" type="hidden" />
+        </div>
+        <div><label class="field">Company seal image</label>
+          <div style="display:flex;align-items:center;gap:10px"><img id="prev-seal" alt="" style="width:64px;height:64px;object-fit:contain;border:1px solid #e3e7ec;border-radius:8px;background:#fff;visibility:hidden"><input type="file" accept="image/png,image/jpeg" data-upload="seal"></div>
+          <input class="fi" id="f-sealAssetId" type="hidden" /><input class="fi" id="f-sealImageUri" type="hidden" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 2026-09-09: trust badges printed on quotation page 1 (approved template:
+         "300+ Homes · Installed in Kerala" and "MNRE Empanelled"). Blank = badge not printed. -->
+    <div class="card">
+      <h2>Quotation Trust Badges</h2>
+      <p class="hint" style="margin:0 0 10px;color:#66707d;font-size:13px">Printed on page 1 of every quotation next to the subsidy badge. Leave blank and the badge is left out — nothing is claimed that is not entered here.</p>
+      <div class="form-row">
+        <div><label class="field">Completed installations (number)</label><input class="fi" id="f-completedInstallations" type="number" min="0" step="1" placeholder="e.g. 300" /></div>
+        <div><label class="field">Years of industry experience (number)</label><input class="fi" id="f-yearsExperience" type="number" min="0" step="1" placeholder="e.g. 8" /></div>
+        <div><label class="field">MNRE empanelled</label><select class="fi" id="f-mnreEmpanelled"><option value="">— not stated —</option><option value="true">Yes — print "MNRE Empanelled · Government certified"</option><option value="false">No</option></select></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="save-btn" onclick="saveProfile()">Save Company Profile</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let token = null;
+const $ = id => document.getElementById(id);
+
+async function api(method, url, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(url, opts);
+  const data = await r.json();
+  if (!r.ok) throw data;
+  return data;
+}
+
+// 2026-09-10 — image uploads (UPI QR / signature / seal) go to the CMS asset
+// store; the profile keeps the asset id + public file URL the renderer prints.
+function refreshPreviews() {
+  for (const k of ['upiQr', 'signature', 'seal']) {
+    const uri = $('f-' + k + 'ImageUri').value;
+    const img = $('prev-' + k); if (!img) continue;
+    img.src = uri || ''; img.style.visibility = uri ? 'visible' : 'hidden';
+  }
+}
+document.addEventListener('change', async (ev) => {
+  const input = ev.target;
+  if (!(input instanceof HTMLInputElement) || input.type !== 'file' || !input.dataset.upload) return;
+  const file = input.files[0]; input.value = '';
+  if (!file) return;
+  try {
+    if (!/^image\/(png|jpeg)$/.test(file.type)) throw { error: 'Only PNG or JPEG images are accepted' };
+    if (file.size > 5 * 1024 * 1024) throw { error: 'Image larger than 5 MB' };
+    const data = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result).split(',')[1]); r.onerror = reject; r.readAsDataURL(file); });
+    const out = await api('POST', '/api/cms/assets', { data, filename: file.name, mimeType: file.type });
+    const id = out.assetId || out.asset?.assetId;
+    $('f-' + input.dataset.upload + 'AssetId').value = id;
+    $('f-' + input.dataset.upload + 'ImageUri').value = '/api/cms/assets/' + encodeURIComponent(id) + '/file';
+    refreshPreviews();
+    showAlert('Image uploaded — click "Save Company Profile" to keep it.', 'success');
+  } catch (e) { showAlert(e.error || e.message || 'Upload failed', 'error'); }
+});
+
+function showAlert(msg, type) {
+  const el = $('alert-area');
+  el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  setTimeout(() => { if (el.firstChild) el.firstChild.remove(); }, 5000);
+}
+
+async function doLogin() {
+  try {
+    const username = ($('login-user') || {}).value || 'admin';
+    const r = await api('POST', '/api/auth/login', { username, password: $('login-pw').value });
+    token = r.token;
+    try { sessionStorage.setItem('gr_session_token', token); sessionStorage.setItem('gr_user_role', r.user?.role||''); sessionStorage.setItem('gr_user_name', r.user?.name||r.user?.username||''); } catch {}
+    flarizeNav.init({ current: 'company' });
+    $('login-section').hidden = true;
+    $('profile-section').hidden = false;
+    loadProfile();
+  } catch (e) {
+    $('login-alert').innerHTML = `<div class="alert alert-error">${e.error || 'Login failed'}</div>`;
+  }
+}
+
+const FIELDS = [
+  'legalName', 'displayName', 'brandName', 'parentBrandLine',
+  'gstin', 'companyRegistration',
+  'address', 'city', 'state', 'pincode', 'phone', 'email', 'website',
+  'bankName', 'bankAccountName', 'bankAccountNumber', 'bankIfsc',
+  'bankBranch', 'upiId', 'upiQrAssetId', 'upiQrImageUri',
+  'paymentInstructions',
+  'signatureAssetId', 'signatureImageUri', 'sealAssetId', 'sealImageUri'
+];
+
+function populateForm(profile) {
+  for (const f of FIELDS) {
+    const el = $('f-' + f);
+    if (el) el.value = profile?.[f] || '';
+  }
+  $('f-completedInstallations').value = profile?.completedInstallations != null ? String(profile.completedInstallations) : '';
+  $('f-yearsExperience').value = profile?.yearsExperience != null ? String(profile.yearsExperience) : '';
+  $('f-mnreEmpanelled').value = profile?.mnreEmpanelled === true ? 'true' : profile?.mnreEmpanelled === false ? 'false' : '';
+  refreshPreviews();
+}
+
+function collectForm() {
+  const data = {};
+  for (const f of FIELDS) {
+    const el = $('f-' + f);
+    if (el) data[f] = el.value.trim() || null;
+  }
+  const ci = $('f-completedInstallations').value.trim();
+  data.completedInstallations = ci === '' ? null : Number(ci);
+  const ye = $('f-yearsExperience').value.trim();
+  data.yearsExperience = ye === '' ? null : Number(ye);
+  const mn = $('f-mnreEmpanelled').value;
+  data.mnreEmpanelled = mn === 'true' ? true : mn === 'false' ? false : null;
+  return data;
+}
+
+async function loadProfile() {
+  try {
+    const r = await api('GET', '/api/admin/company-profile');
+    const profile = r.profile;
+    populateForm(profile);
+    if (profile) {
+      $('status-dot').className = 'status-dot configured';
+      $('status-text').textContent = 'Profile configured — last updated ' + (profile.updatedAt ? new Date(profile.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'unknown');
+    } else {
+      $('status-dot').className = 'status-dot not-configured';
+      $('status-text').textContent = 'Not configured — fill in your company details below';
+    }
+  } catch (e) {
+    showAlert(e.error || 'Failed to load profile', 'error');
+  }
+}
+
+async function saveProfile() {
+  $('save-btn').disabled = true;
+  $('save-btn').textContent = 'Saving...';
+  try {
+    const data = collectForm();
+    const r = await api('PUT', '/api/admin/company-profile', data);
+    showAlert('Company profile saved successfully.', 'success');
+    populateForm(r.profile);
+    $('status-dot').className = 'status-dot configured';
+    $('status-text').textContent = 'Profile configured — last updated ' + new Date(r.profile.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch (e) {
+    const msg = e.errors ? e.errors.join(', ') : (e.error || 'Save failed');
+    showAlert(msg, 'error');
+  } finally {
+    $('save-btn').disabled = false;
+    $('save-btn').textContent = 'Save Company Profile';
+  }
+}
+
+// Auto-login if token in sessionStorage (standard key: gr_session_token)
+try {
+  const saved = sessionStorage.getItem('gr_session_token');
+  if (saved) { token = saved; flarizeNav.init({ current: 'company' }); $('login-section').hidden = true; $('profile-section').hidden = false; loadProfile(); }
+} catch(e) {}
+</script>
+</body>
+</html>

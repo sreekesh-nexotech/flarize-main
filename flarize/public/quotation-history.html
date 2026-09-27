@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quotation History — Flarize</title>
+<!--
+  QUOTATION HISTORY — Phase B.
+  Sales-friendly history view: search, filter, version history.
+  Reads from /api/sales/* endpoints. No business calculation.
+  Server-authoritative: ownership, RBAC, and filters enforced server-side.
+-->
+<style>
+:root {
+  --bg: #f8fafc; --panel: #ffffff; --line: #e2e8f0; --fg: #1e293b;
+  --dim: #64748b; --accent: #2563eb; --accent-hover: #1d4ed8;
+  --ok: #16a34a; --warn: #d97706; --bad: #dc2626;
+  --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 14px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: var(--bg); color: var(--fg); min-height: 100vh; }
+
+.app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 16px; flex-wrap: wrap; }
+header h1 { font-size: 18px; font-weight: 700; }
+header .user-info { margin-left: auto; font-size: 13px; color: var(--dim); display: flex; gap: 12px; align-items: center; }
+header .nav-links { display: flex; gap: 8px; }
+header .nav-links a { font-size: 13px; color: var(--accent); text-decoration: none; padding: 4px 10px;
+  border: 1px solid var(--line); border-radius: 6px; }
+header .nav-links a:hover { background: var(--accent); color: #fff; }
+.logout-btn { background: none; border: 1px solid var(--line); border-radius: 6px; padding: 4px 12px;
+  font: inherit; font-size: 13px; cursor: pointer; color: var(--dim); }
+.logout-btn:hover { background: var(--bad); color: #fff; border-color: var(--bad); }
+
+/* Login */
+.login-box { max-width: 360px; margin: 80px auto; background: var(--panel); border: 1px solid var(--line);
+             border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); text-align: center; }
+.login-box h2 { margin-bottom: 20px; font-size: 20px; }
+.login-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+                   font: inherit; margin-bottom: 12px; }
+.login-box button { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none;
+                    border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; }
+.login-box button:hover { background: var(--accent-hover); }
+.login-error { color: var(--bad); font-size: 13px; margin-top: 8px; }
+
+/* Filters */
+.filters { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+           padding: 16px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.filters-title { font-size: 13px; font-weight: 600; color: var(--dim); margin-bottom: 10px; text-transform: uppercase;
+                 letter-spacing: .03em; }
+.filter-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.filter-group { display: flex; flex-direction: column; gap: 3px; }
+.filter-group label { font-size: 11px; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .03em; }
+.filter-group input, .filter-group select { padding: 7px 10px; border: 1px solid var(--line); border-radius: 6px;
+  font: inherit; font-size: 13px; min-width: 120px; }
+.filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+.search-input { min-width: 200px !important; }
+
+/* Stats bar */
+.stats-bar { display: flex; gap: 16px; align-items: center; margin-bottom: 12px; font-size: 13px; color: var(--dim); }
+.stats-bar .count { font-weight: 600; color: var(--fg); }
+
+/* Table */
+.table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line);
+              border-radius: var(--radius); box-shadow: var(--shadow); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+thead { background: #f1f5f9; }
+th { text-align: left; padding: 10px 12px; font-weight: 600; color: var(--dim); font-size: 11px;
+     text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid var(--line); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tr:hover { background: #f8fafc; }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover { background: #eff6ff; }
+
+/* Status badges */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;
+         text-transform: uppercase; letter-spacing: .03em; }
+.badge-draft { background: #fef3c7; color: #92400e; }
+.badge-issued { background: #d1fae5; color: #065f46; }
+.badge-cancelled { background: #fee2e2; color: #991b1b; }
+
+/* Source badges */
+.src-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.src-direct { background: #dbeafe; color: #1e40af; }
+.src-affiliate { background: #fce7f3; color: #9d174d; }
+.src-district { background: #e0e7ff; color: #3730a3; }
+
+/* Amount */
+.amount { font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Detail panel */
+.detail-overlay { position: fixed; top: 0; right: 0; bottom: 0; left: 0; background: rgba(0,0,0,.3);
+                  z-index: 100; display: none; }
+.detail-overlay.open { display: flex; justify-content: flex-end; }
+.detail-panel { width: 480px; max-width: 90vw; background: var(--panel); height: 100%;
+                overflow-y: auto; box-shadow: -4px 0 20px rgba(0,0,0,.15); padding: 24px; }
+.detail-panel h2 { font-size: 16px; margin-bottom: 4px; }
+.detail-panel .sub { font-size: 13px; color: var(--dim); margin-bottom: 16px; }
+.detail-close { float: right; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--dim);
+                padding: 4px 8px; }
+.detail-close:hover { color: var(--fg); }
+
+/* Version timeline */
+.version-list { list-style: none; padding: 0; margin: 16px 0; }
+.version-item { position: relative; padding: 12px 16px 12px 32px; border-left: 2px solid var(--line);
+                margin-left: 8px; }
+.version-item:last-child { border-left-color: transparent; }
+.version-item::before { content: ''; position: absolute; left: -6px; top: 16px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--line); border: 2px solid var(--panel); }
+.version-item.issued::before { background: var(--ok); }
+.version-item.draft::before { background: var(--warn); }
+.version-item .v-num { font-weight: 700; font-size: 14px; }
+.version-item .v-status { margin-left: 8px; }
+.version-item .v-meta { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.version-item .v-amount { font-weight: 600; color: var(--fg); }
+
+/* Detail info grid */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-bottom: 16px;
+             font-size: 13px; }
+.info-grid dt { color: var(--dim); font-weight: 500; }
+.info-grid dd { color: var(--fg); font-weight: 500; }
+
+/* Actions */
+.action-bar { display: flex; gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+.btn { padding: 8px 16px; border: none; border-radius: 6px; font: inherit; font-size: 13px;
+       font-weight: 600; cursor: pointer; transition: all .15s; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--panel); color: var(--fg); border: 1px solid var(--line); }
+.btn-secondary:hover { background: #f1f5f9; }
+
+.empty-state { text-align: center; padding: 48px 16px; color: var(--dim); }
+.empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+
+/* Loading */
+.loading { text-align: center; padding: 32px; color: var(--dim); }
+
+@media (max-width: 700px) {
+  .filter-row { flex-direction: column; }
+  .filter-group input, .filter-group select { min-width: unset; width: 100%; }
+  .info-grid { grid-template-columns: 1fr; }
+  .detail-panel { width: 100vw; }
+}
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<!-- LOGIN -->
+<div id="loginView" class="login-box" style="display:none">
+  <h2>Flarize Sales</h2>
+  <form id="loginForm">
+    <input type="text" id="loginUser" placeholder="Username" autocomplete="username" required />
+    <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" required />
+    <button type="submit">Sign In</button>
+  </form>
+  <div id="loginError" class="login-error" style="display:none"></div>
+</div>
+
+<!-- MAIN APP -->
+<div id="appView" class="app" style="display:none">
+  <header>
+    <h1 id="pageTitle">Quotation History</h1>
+    <div class="nav-links">
+      <a href="/sales.html">New Quotation</a>
+    </div>
+    <div class="user-info">
+      <span id="userLabel"></span>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Search</label>
+        <input type="text" id="fSearch" class="search-input" placeholder="Quotation no., customer, phone…" />
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select id="fStatus">
+          <option value="">All</option>
+          <option value="DRAFT">Draft</option>
+          <option value="ISSUED">Issued</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Source</label>
+        <select id="fSource">
+          <option value="">All</option>
+          <option value="DIRECT">Direct</option>
+          <option value="AFFILIATE">Affiliate</option>
+          <option value="DISTRICT">District</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>District</label>
+        <select id="fDistrict">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>From</label>
+        <input type="date" id="fDateFrom" />
+      </div>
+      <div class="filter-group">
+        <label>To</label>
+        <input type="date" id="fDateTo" />
+      </div>
+      <div class="filter-group" id="salespersonGroup" style="display:none">
+        <label>Salesperson</label>
+        <select id="fSalesperson">
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <span><span class="count" id="totalCount">0</span> quotations</span>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Quotation No.</th>
+          <th>Customer</th>
+          <th>System</th>
+          <th>Amount</th>
+          <th>Source</th>
+          <th>District</th>
+          <th id="thSalesperson" style="display:none">Salesperson</th>
+          <th>Status</th>
+          <th>Version</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="10" class="loading">Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div id="detailOverlay" class="detail-overlay" onclick="if(event.target===this)closeDetail()">
+  <div class="detail-panel">
+    <button class="detail-close" onclick="closeDetail()">&times;</button>
+    <h2 id="detailTitle"></h2>
+    <div class="sub" id="detailSub"></div>
+    <dl class="info-grid" id="detailInfo"></dl>
+    <h3 style="font-size:14px;margin-bottom:8px;color:var(--dim)">Version History</h3>
+    <ul class="version-list" id="versionList"></ul>
+    <div class="action-bar" id="detailActions"></div>
+  </div>
+</div>
+
+<script>
+// ---- state ----
+let token = (function() { try { return sessionStorage.getItem('gr_session_token') || ''; } catch { return ''; } })();
+let sessionInfo = null; // { role, userId, isSalesRole }
+let debounceTimer = null;
+
+// ---- API helper ----
+async function api(method, path, body) {
+  const h = { 'Content-Type': 'application/json' };
+  if (token) h['Authorization'] = 'Bearer ' + token;
+  const opts = { method, headers: h };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(path, opts);
+  const text = await res.text();
+  let parsed; try { parsed = JSON.parse(text); } catch { parsed = text; }
+  if (res.status === 401) { doLogout(); throw new Error('Session expired'); }
+  return { status: res.status, data: parsed };
+}
+
+// ---- auth ----
+function showLogin() {
+  document.getElementById('loginView').style.display = '';
+  document.getElementById('appView').style.display = 'none';
+}
+function showApp() {
+  flarizeNav.init({ current: 'quotation-history' });
+  document.getElementById('loginView').style.display = 'none';
+  document.getElementById('appView').style.display = '';
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  try {
+    const r = await api('POST', '/api/auth/login', {
+      username: document.getElementById('loginUser').value,
+      password: document.getElementById('loginPass').value,
+    });
+    if (r.status === 200 && r.data.token) {
+      token = r.data.token;
+      try { sessionStorage.setItem('gr_session_token', token); sessionStorage.setItem('gr_user_role', r.data.user?.role||''); sessionStorage.setItem('gr_user_name', r.data.user?.name||r.data.user?.username||''); } catch {}
+      await initApp();
+    } else {
+      errEl.textContent = r.data.error || 'Login failed';
+      errEl.style.display = '';
+    }
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = '';
+  }
+});
+
+function doLogout() {
+  api('POST', '/api/auth/logout').catch(() => {});
+  token = null;
+  try { sessionStorage.removeItem('gr_session_token'); sessionStorage.removeItem('gr_user_role'); sessionStorage.removeItem('gr_user_name'); } catch {}
+  sessionInfo = null;
+  window.location.href = '/login.html';
+}
+
+// ---- init ----
+async function initApp() {
+  try {
+    const sess = await api('GET', '/api/sales/session');
+    if (sess.status !== 200) { showLogin(); return; }
+    sessionInfo = sess.data;
+    const role = sessionInfo.role;
+    const INDIVIDUAL = ['SALES', 'SALES_CRS', 'FIELD_SALES'];
+    const isIndividual = INDIVIDUAL.includes(role);
+
+    document.getElementById('userLabel').textContent =
+      (sessionInfo.userId || '') + (role ? ' (' + role.replace(/_/g, ' ') + ')' : '');
+    document.getElementById('pageTitle').textContent =
+      isIndividual ? 'My Quotations' : 'All Quotations';
+
+    // Salesperson filter: show for SALES_HEAD/ADMIN only
+    if (!isIndividual) {
+      document.getElementById('salespersonGroup').style.display = '';
+      document.getElementById('thSalesperson').style.display = '';
+      loadSalespersons();
+    }
+
+    loadDistricts();
+    loadHistory();
+  } catch {
+    showLogin();
+  }
+}
+
+// ---- load filter options ----
+async function loadSalespersons() {
+  try {
+    const r = await api('GET', '/api/sales/salespersons');
+    if (r.status === 200 && r.data.salespersons) {
+      const sel = document.getElementById('fSalesperson');
+      sel.innerHTML = '<option value="">All</option>';
+      for (const sp of r.data.salespersons) {
+        const opt = document.createElement('option');
+        opt.value = sp.userId;
+        opt.textContent = sp.name || sp.username;
+        sel.appendChild(opt);
+      }
+    }
+  } catch {}
+}
+
+async function loadDistricts() {
+  try {
+    const r = await api('GET', '/api/sales/districts');
+    if (r.status === 200 && r.data.districts) {
+      const sel = document.getElementById('fDistrict');
+      sel.innerHTML = '<option value="">All</option>';
+      for (const d of r.data.districts) {
+        const opt = document.createElement('option');
+        opt.value = d;
+        opt.textContent = d;
+        sel.appendChild(opt);
+      }
+    }
+  } catch {}
+}
+
+// ---- load history ----
+async function loadHistory() {
+  const params = new URLSearchParams();
+  const q = document.getElementById('fSearch').value.trim();
+  const status = document.getElementById('fStatus').value;
+  const source = document.getElementById('fSource').value;
+  const district = document.getElementById('fDistrict').value;
+  const dateFrom = document.getElementById('fDateFrom').value;
+  const dateTo = document.getElementById('fDateTo').value;
+  const sp = document.getElementById('fSalesperson').value;
+  if (q) params.set('q', q);
+  if (status) params.set('status', status);
+  if (source) params.set('source', source);
+  if (district) params.set('district', district);
+  if (dateFrom) params.set('dateFrom', dateFrom);
+  if (dateTo) params.set('dateTo', dateTo);
+  if (sp) params.set('salesperson', sp);
+
+  const qs = params.toString();
+  const url = '/api/sales/quotation-history' + (qs ? '?' + qs : '');
+
+  document.getElementById('tableBody').innerHTML =
+    '<tr><td colspan="10" class="loading">Loading…</td></tr>';
+
+  try {
+    const r = await api('GET', url);
+    if (r.status === 200) {
+      renderTable(r.data.quotations || [], r.data.total || 0);
+    } else {
+      document.getElementById('tableBody').innerHTML =
+        '<tr><td colspan="10" class="empty-state">Error loading quotations</td></tr>';
+    }
+  } catch (err) {
+    document.getElementById('tableBody').innerHTML =
+      '<tr><td colspan="10" class="empty-state">Error: ' + err.message + '</td></tr>';
+  }
+}
+
+// ---- render ----
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function fmtAmount(amt) {
+  if (amt == null) return '—';
+  return '₹' + Number(amt).toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+function fmtSystem(sys) {
+  if (!sys) return '—';
+  const parts = [];
+  if (sys.systemSizeKw) parts.push(sys.systemSizeKw + ' kW');
+  if (sys.systemType) {
+    const t = sys.systemType;
+    parts.push(t === 'ongrid' ? 'On-Grid' : t === 'hybrid' ? 'Hybrid' : t.charAt(0).toUpperCase() + t.slice(1));
+  }
+  if (sys.phase) parts.push(sys.phase);
+  return parts.join(' ') || '—';
+}
+
+function statusBadge(s) {
+  const cls = s === 'ISSUED' ? 'badge-issued' : s === 'CANCELLED' ? 'badge-cancelled' : 'badge-draft';
+  return '<span class="badge ' + cls + '">' + (s || 'DRAFT') + '</span>';
+}
+
+function sourceBadge(src) {
+  const s = (src || 'DIRECT').toUpperCase();
+  const cls = s === 'AFFILIATE' ? 'src-affiliate' : s === 'DISTRICT' ? 'src-district' : 'src-direct';
+  return '<span class="src-badge ' + cls + '">' + s + '</span>';
+}
+
+const INDIVIDUAL_ROLES = ['SALES', 'SALES_CRS', 'FIELD_SALES'];
+function isTeamView() {
+  return sessionInfo && !INDIVIDUAL_ROLES.includes(sessionInfo.role);
+}
+
+function renderTable(quotations, total) {
+  document.getElementById('totalCount').textContent = total;
+  const tbody = document.getElementById('tableBody');
+  if (quotations.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="10" class="empty-state">' +
+      '<div class="icon">📋</div>No quotations found</td></tr>';
+    return;
+  }
+
+  const showSP = isTeamView();
+  // Customer / district text comes from user input — always escaped (2026-09-09).
+  const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  tbody.innerHTML = quotations.map(q => {
+    const spCell = showSP
+      ? '<td>' + esc(q.salespersonName || q.proposalBy || '—') + '</td>'
+      : '';
+    return '<tr class="clickable" onclick="openDetail(\'' + q.quotationId + '\')">' +
+      '<td><strong>' + esc(q.quotationNumber || q.quotationId.slice(0, 8)) + '</strong></td>' +
+      '<td>' + esc(q.customer?.name || '—') + '</td>' +
+      '<td>' + fmtSystem(q.system) + '</td>' +
+      '<td class="amount">' + fmtAmount(q.amount) + '</td>' +
+      '<td>' + sourceBadge(q.quotationSource) + '</td>' +
+      '<td>' + esc(q.district || '—') + '</td>' +
+      spCell +
+      '<td>' + statusBadge(q.status) + '</td>' +
+      '<td>v' + (q.currentVersion || q.versionCount || 1) + '</td>' +
+      '<td>' + fmtDate(q.quotationDate) + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+// ---- detail panel ----
+async function openDetail(quotationId) {
+  const overlay = document.getElementById('detailOverlay');
+  overlay.classList.add('open');
+
+  document.getElementById('detailTitle').textContent = 'Loading…';
+  document.getElementById('detailSub').textContent = '';
+  document.getElementById('detailInfo').innerHTML = '';
+  document.getElementById('versionList').innerHTML = '';
+  document.getElementById('detailActions').innerHTML = '';
+
+  try {
+    const r = await api('GET', '/api/sales/quotation-versions/' + quotationId);
+    if (r.status !== 200) {
+      document.getElementById('detailTitle').textContent = 'Error';
+      document.getElementById('detailSub').textContent = r.data.error || 'Could not load quotation';
+      return;
+    }
+    const q = r.data;
+    document.getElementById('detailTitle').textContent = q.quotationNumber || quotationId.slice(0, 8);
+    document.getElementById('detailSub').textContent =
+      (q.customer?.customerName || q.customer?.name || '') + ' — ' + statusBadge(q.status);
+    document.getElementById('detailSub').innerHTML =
+      (q.customer?.customerName || q.customer?.name || 'Customer') +
+      ' &nbsp; ' + statusBadge(q.status);
+
+    // Info grid
+    const info = document.getElementById('detailInfo');
+    const fields = [
+      ['Quotation No.', q.quotationNumber || '—'],
+      ['Status', q.status || '—'],
+      ['System', fmtSystem(q.system)],
+      ['Current Version', 'v' + (q.currentVersion || 1)],
+      ['Source', (q.versions?.[0]?.quotationSource || 'DIRECT')],
+      ['District', (q.versions?.[0]?.district || '—')],
+    ];
+    info.innerHTML = fields.map(([k, v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('');
+
+    // Version timeline
+    const vl = document.getElementById('versionList');
+    const versions = q.versions || [];
+    if (versions.length === 0) {
+      vl.innerHTML = '<li class="version-item draft"><span class="v-num">v1</span>' +
+        '<span class="v-status badge badge-draft">DRAFT</span>' +
+        '<div class="v-meta">No versions recorded</div></li>';
+    } else {
+      vl.innerHTML = versions.map(v => {
+        const st = (v.status || 'DRAFT').toUpperCase();
+        const cls = st === 'ISSUED' ? 'issued' : 'draft';
+        return '<li class="version-item ' + cls + '">' +
+          '<span class="v-num">v' + v.version + '</span> ' +
+          '<span class="v-status badge badge-' + (st === 'ISSUED' ? 'issued' : 'draft') + '">' + st + '</span>' +
+          (v.amount != null ? ' <span class="v-amount">' + fmtAmount(v.amount) + '</span>' : '') +
+          '<div class="v-meta">' + fmtDate(v.createdAt) +
+          (v.createdBy ? ' · ' + v.createdBy : '') +
+          (v.quotationNumber ? ' · ' + v.quotationNumber : '') +
+          '</div></li>';
+      }).join('');
+    }
+
+    // Actions
+    const actions = document.getElementById('detailActions');
+    const btns = [];
+    if (q.status === 'DRAFT') {
+      btns.push('<a class="btn btn-primary" href="/sales.html#edit=' + quotationId + '">Continue Editing</a>');
+    }
+    if (q.status === 'ISSUED') {
+      btns.push('<a class="btn btn-primary" href="/quotation-document.html?id=' + encodeURIComponent(quotationId) + '" target="_blank">View quotation</a>');
+      btns.push('<a class="btn btn-secondary" href="/quotation-document.html?id=' + encodeURIComponent(quotationId) + '&download=1" target="_blank">Download PDF</a>');
+      if (isTeamView()) btns.push('<a class="btn btn-secondary" href="/quotation.html?id=' + encodeURIComponent(quotationId) + '" target="_blank">Internal review</a>');
+    }
+    btns.push('<button class="btn btn-secondary" onclick="closeDetail()">Close</button>');
+    actions.innerHTML = btns.join('');
+
+  } catch (err) {
+    document.getElementById('detailTitle').textContent = 'Error';
+    document.getElementById('detailSub').textContent = err.message;
+  }
+}
+
+function closeDetail() {
+  document.getElementById('detailOverlay').classList.remove('open');
+}
+
+// ---- filter event bindings ----
+function onFilterChange() {
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(loadHistory, 300);
+}
+
+document.getElementById('fSearch').addEventListener('input', onFilterChange);
+document.getElementById('fStatus').addEventListener('change', () => loadHistory());
+document.getElementById('fSource').addEventListener('change', () => loadHistory());
+document.getElementById('fDistrict').addEventListener('change', () => loadHistory());
+document.getElementById('fDateFrom').addEventListener('change', () => loadHistory());
+document.getElementById('fDateTo').addEventListener('change', () => loadHistory());
+document.getElementById('fSalesperson').addEventListener('change', () => loadHistory());
+
+// Escape closes detail
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeDetail();
+});
+
+// ---- boot ----
+(async () => {
+  if (token) {
+    try {
+      const check = await api('GET', '/api/auth/session');
+      if (check.status === 200) {
+        await initApp();
+        showApp();
+        return;
+      }
+    } catch {}
+  }
+  showLogin();
+})();
+</script>
+</body>
+</html>

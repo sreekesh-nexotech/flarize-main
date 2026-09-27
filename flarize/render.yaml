@@ -1,0 +1,23 @@
+# Render Blueprint — Flarize BOM / Quotation platform (UAT).
+# Dashboard → New + → Blueprint → pick this repo → Apply.
+# Render asks for ADMIN_PASSWORD at creation (sync: false).
+services:
+  - type: web
+    name: flarize-bom-uat
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore          # closest region to Kerala
+    plan: starter              # a persistent disk needs a paid instance; use "free" (and delete the disk block) for a throw-away test — data then resets on every restart
+    healthCheckPath: /login.html
+    autoDeploy: true
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false            # entered once in the dashboard, never committed
+      - key: PRODUCTION_MODE
+        value: "false"
+      - key: DATA_DISK
+        value: /var/data
+    disk:
+      name: flarize-data
+      mountPath: /var/data
+      sizeGB: 1

@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CMS Page Designer — Flarize / Golden Ray</title>
+<!--
+  CMS PAGE DESIGNER UI.  (C11-J)
+
+  This page implements NO engineering rule and NO commercial formula. It renders
+  exactly what /api/cms/* returns. Specifically:
+    * Page content is validated by the CMS service, not here.
+    * Block types come from the approved whitelist.
+    * Dynamic fields come from the field registry.
+    * Assets are served through the authenticated CMS API.
+    * Workflow transitions are enforced server-side.
+  If a value is missing here, it is missing in the CMS data.
+-->
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e6e9ef; --dim:#8b93a5;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --acc:#4493f8; --sel:#1a3a5c; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:13px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  header { padding:10px 16px; border-bottom:1px solid var(--line); display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; font-weight:600; letter-spacing:.2px; }
+  .topbar { display:flex; gap:8px; align-items:center; }
+  main { display:grid; grid-template-columns:240px 1fr 300px; gap:0; min-height:calc(100vh - 46px); }
+  main.no-editor { grid-template-columns:1fr; }
+  aside { border-right:1px solid var(--line); padding:12px; overflow-y:auto; max-height:calc(100vh - 46px); }
+  .right-panel { border-left:1px solid var(--line); padding:12px; overflow-y:auto; max-height:calc(100vh - 46px); }
+  .center { padding:14px; overflow-y:auto; max-height:calc(100vh - 46px); }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; margin-bottom:12px; }
+  .panel h2 { font-size:11px; text-transform:uppercase; letter-spacing:.8px; color:var(--dim); margin:0 0 8px; }
+  label { display:block; font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; margin:6px 0 2px; }
+  input, select, button, textarea { font:inherit; background:#0d1017; color:var(--fg); border:1px solid var(--line);
+    border-radius:5px; padding:5px 7px; }
+  textarea { resize:vertical; width:100%; min-height:60px; }
+  button { cursor:pointer; background:#1f2733; white-space:nowrap; }
+  button:hover { border-color:var(--acc); }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  button.primary { background:var(--acc); color:#fff; border-color:var(--acc); }
+  button.danger { background:var(--bad); color:#fff; border-color:var(--bad); }
+  button.sm { padding:3px 8px; font-size:11px; }
+  .pill { display:inline-block; padding:1px 7px; border-radius:999px; font-size:10px; font-weight:600; letter-spacing:.4px; }
+  .DRAFT { background:rgba(68,147,248,.15); color:var(--acc); }
+  .REVIEW { background:rgba(210,153,34,.15); color:var(--warn); }
+  .APPROVED { background:rgba(63,185,80,.15); color:var(--ok); }
+  .PUBLISHED { background:rgba(63,185,80,.3); color:var(--ok); }
+  .ARCHIVED { background:rgba(139,147,165,.15); color:var(--dim); }
+  .ACTIVE { background:rgba(63,185,80,.15); color:var(--ok); }
+  .INACTIVE { background:rgba(139,147,165,.15); color:var(--dim); }
+  .muted { color:var(--dim); }
+  .err { color:var(--bad); white-space:pre-wrap; font-size:12px; margin:6px 0; }
+  .row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .tabs { display:flex; gap:0; border-bottom:1px solid var(--line); margin-bottom:10px; }
+  .tab { padding:6px 14px; cursor:pointer; font-size:12px; border-bottom:2px solid transparent; color:var(--dim); }
+  .tab:hover { color:var(--fg); }
+  .tab.active { color:var(--acc); border-bottom-color:var(--acc); }
+  .list-item { padding:8px 10px; border:1px solid var(--line); border-radius:6px; margin-bottom:6px; cursor:pointer; }
+  .list-item:hover { border-color:var(--acc); }
+  .list-item.selected { border-color:var(--acc); background:var(--sel); }
+  .block-btn { display:block; width:100%; text-align:left; padding:6px 8px; margin-bottom:4px; font-size:12px; }
+  .block-btn:hover { background:var(--sel); }
+  .block-item { border:1px solid var(--line); border-radius:4px; padding:6px 8px; margin-bottom:4px;
+    cursor:grab; font-size:12px; display:flex; align-items:center; gap:6px; }
+  .block-item:hover { border-color:var(--acc); }
+  .block-item.selected { background:var(--sel); border-color:var(--acc); }
+  .block-item .drag-handle { color:var(--dim); cursor:grab; user-select:none; }
+  .block-item .block-label { flex:1; }
+  .block-item .block-actions { display:flex; gap:3px; }
+  .canvas-wrap { background:#2a2d35; border-radius:8px; padding:20px; display:flex; justify-content:center; overflow:auto; }
+  .a4-canvas { width:397px; height:561px; background:#fff; position:relative; overflow:hidden;
+    box-shadow:0 2px 16px rgba(0,0,0,.4); transform-origin:top center; }
+  .a4-canvas.full { width:794px; height:1123px; }
+  .overlay-handle { position:absolute; border:1px dashed var(--acc); cursor:move; z-index:20; }
+  .overlay-handle:hover { background:rgba(68,147,248,.1); }
+  .resize-handle { position:absolute; width:8px; height:8px; background:var(--acc); border-radius:2px; cursor:nwse-resize; right:-4px; bottom:-4px; z-index:21; }
+  .field-chip { display:inline-block; background:rgba(68,147,248,.12); border:1px solid var(--acc); border-radius:4px;
+    padding:2px 8px; margin:2px; font-size:11px; cursor:pointer; }
+  .field-chip:hover { background:rgba(68,147,248,.25); }
+  .asset-thumb { width:60px; height:60px; object-fit:cover; border-radius:4px; border:1px solid var(--line); cursor:pointer; }
+  .asset-thumb:hover { border-color:var(--acc); }
+  .version-row { padding:6px 8px; border:1px solid var(--line); border-radius:4px; margin-bottom:4px; font-size:12px; }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th, td { text-align:left; padding:4px 6px; border-bottom:1px solid var(--line); }
+  th { font-size:10px; text-transform:uppercase; letter-spacing:.5px; color:var(--dim); }
+  .hidden { display:none !important; }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<header>
+  <h1>CMS Page Designer</h1>
+  <span class="muted">Flarize / Golden Ray</span>
+  <span style="flex:1"></span>
+  <div class="topbar">
+    <label style="margin:0">Role</label>
+    <select id="role"></select>
+    <input id="user" type="hidden" value="operator" />
+  </div>
+</header>
+
+<div id="listView">
+  <main class="no-editor">
+    <div style="padding:16px;max-width:1200px;margin:0 auto;width:100%">
+      <div id="error" class="err"></div>
+
+      <!-- Tabs: Pages / Campaigns / Assets -->
+      <div class="tabs">
+        <div class="tab active" data-tab="pages">Pages</div>
+        <div class="tab" data-tab="campaigns">Campaigns</div>
+        <div class="tab" data-tab="assets">Assets</div>
+      </div>
+
+      <!-- Pages tab -->
+      <div id="tab-pages">
+        <div class="row" style="margin-bottom:12px">
+          <input id="newPageName" placeholder="Page name" style="flex:1" />
+          <select id="newPageType"><option value="campaign">Campaign</option><option value="custom">Custom</option><option value="template">Template</option></select>
+          <button id="createPageBtn" class="primary">Create Page</button>
+        </div>
+        <div id="pageList" class="muted">Loading…</div>
+      </div>
+
+      <!-- Campaigns tab -->
+      <div id="tab-campaigns" class="hidden">
+        <div class="row" style="margin-bottom:12px">
+          <input id="newCampaignName" placeholder="Campaign name" style="flex:1" />
+          <button id="createCampaignBtn" class="primary">Create Campaign</button>
+        </div>
+        <div id="campaignList" class="muted">Loading…</div>
+      </div>
+
+      <!-- Assets tab -->
+      <div id="tab-assets" class="hidden">
+        <div class="row" style="margin-bottom:12px">
+          <input type="file" id="assetFile" accept="image/png,image/jpeg" />
+          <button id="uploadAssetBtn" class="primary">Upload</button>
+        </div>
+        <div id="assetList" class="muted">Loading…</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Editor view (hidden until a page is opened) -->
+<div id="editorView" class="hidden">
+  <main>
+    <!-- Left: block palette + structure -->
+    <aside>
+      <div class="panel">
+        <div class="row" style="margin-bottom:8px">
+          <button id="backBtn" class="sm">&larr; Back</button>
+          <span id="editorPageName" style="font-weight:600;flex:1;font-size:13px"></span>
+        </div>
+        <div class="row" style="margin-bottom:6px">
+          <span id="editorStatus"></span>
+          <span class="muted" id="editorPageType"></span>
+        </div>
+        <div class="row" style="flex-wrap:wrap;gap:4px">
+          <button id="saveDraftBtn" class="sm primary">Save Draft</button>
+          <button id="submitReviewBtn" class="sm">Submit Review</button>
+          <button id="approveBtn" class="sm">Approve</button>
+          <button id="publishBtn" class="sm">Publish</button>
+          <button id="archiveBtn" class="sm danger">Archive</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Add Block</h2>
+        <button class="block-btn" data-add="section">+ Section</button>
+        <button class="block-btn" data-add="columns">+ Columns (2)</button>
+        <button class="block-btn" data-add="heading">+ Heading</button>
+        <button class="block-btn" data-add="text">+ Text</button>
+        <button class="block-btn" data-add="image">+ Image</button>
+        <button class="block-btn" data-add="divider">+ Divider</button>
+        <button class="block-btn" data-add="spacer">+ Spacer</button>
+        <button class="block-btn" data-add="dynamicField">+ Dynamic Field</button>
+        <button class="block-btn" data-add="qr">+ QR Code</button>
+        <button class="block-btn" data-add="overlay">+ Overlay</button>
+        <button class="block-btn" data-add="backgroundImage">+ Background Image</button>
+      </div>
+
+      <div class="panel">
+        <h2>Page Structure</h2>
+        <div id="blockTree" class="muted">No blocks yet.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Version History</h2>
+        <div id="versionList" class="muted">—</div>
+      </div>
+    </aside>
+
+    <!-- Center: A4 canvas -->
+    <div class="center">
+      <div id="editorError" class="err"></div>
+      <div class="row" style="margin-bottom:10px;gap:8px">
+        <button id="previewBtn" class="sm">Preview</button>
+        <button id="zoomBtn" class="sm">Toggle Zoom</button>
+        <label style="margin:0;font-size:11px">Upload A4 artwork:</label>
+        <input type="file" id="artworkFile" accept="image/png,image/jpeg" style="font-size:11px" />
+        <button id="uploadArtworkBtn" class="sm">Set Background</button>
+      </div>
+      <div class="canvas-wrap">
+        <div class="a4-canvas" id="canvas">
+          <div id="canvasContent"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: block properties + field picker -->
+    <div class="right-panel">
+      <div class="panel" id="propPanel">
+        <h2>Block Properties</h2>
+        <div id="blockProps" class="muted">Select a block to edit.</div>
+      </div>
+      <div class="panel">
+        <h2>Dynamic Fields</h2>
+        <div id="fieldPicker"></div>
+      </div>
+      <div class="panel">
+        <h2>Asset Library</h2>
+        <div id="editorAssets" style="display:flex;flex-wrap:wrap;gap:4px"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script type="module">
+flarizeNav.init({ current: 'cms' });
+// ═══════════════════════════════════════════════════════════════════════
+// CMS UI — C11-J
+// Transport only. No calculation, no engineering, no pricing.
+// ═══════════════════════════════════════════════════════════════════════
+
+const $ = (id) => document.getElementById(id);
+const now = () => new Date().toISOString();
+let FIELDS = [];
+let ASSETS = [];
+let CURRENT_PAGE = null;
+let CONTENT = { sections: [], overlays: [] };
+let SELECTED_BLOCK = null;
+let ZOOMED = false;
+
+// Shared auth — read Bearer token from application session (set by BOM login).
+const SESSION_KEY = 'gr_session_token';
+function getToken() {
+  try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+}
+if (!getToken()) { location.href = '/login.html'; }
+
+// ── API ─────────────────────────────────────────────────────────────
+
+async function api(method, url, body) {
+  const token = getToken();
+  if (!token) { location.href = '/login.html'; throw new Error('Session expired'); }
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + token, 'X-Actor-Role':$('role').value, 'X-Actor-User':$('user').value },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data.code ? data.code + ': ' : '') + (data.error || res.statusText));
+  return data;
+}
+const show = (e, id='error') => { $(id).textContent = e ? String(e.message || e) : ''; };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pill = (s) => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+const wrap = (fn, errId) => async (...a) => { try { show(null, errId||'error'); await fn(...a); } catch(e) { show(e, errId||'error'); } };
+let _idCounter = 0;
+const genId = () => 'blk_' + (++_idCounter) + '_' + Date.now().toString(36);
+
+// ── Tabs ────────────────────────────────────────────────────────────
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    for (const name of ['pages','campaigns','assets']) {
+      $('tab-' + name).classList.toggle('hidden', name !== t.dataset.tab);
+    }
+    if (t.dataset.tab === 'campaigns') loadCampaigns();
+    if (t.dataset.tab === 'assets') loadAssets();
+  });
+});
+
+// ── Boot ────────────────────────────────────────────────────────────
+
+async function boot() {
+  const s = await api('GET', '/api/cms/pages');
+  // Populate roles from quotation session (CMS shares the same RBAC)
+  try {
+    const qs = await api('GET', '/api/workspace/session');
+    $('role').innerHTML = qs.roles.map(r => `<option${r==='ADMIN'?' selected':''}>${r}</option>`).join('');
+  } catch { $('role').innerHTML = '<option>ADMIN</option><option>PROJECT_HEAD</option>'; }
+  await loadPages();
+  await loadFieldRegistry();
+}
+
+// ── Pages ───────────────────────────────────────────────────────────
+
+async function loadPages() {
+  const r = await api('GET', '/api/cms/pages');
+  if (!r.pages.length) { $('pageList').innerHTML = '<span class="muted">No pages yet.</span>'; return; }
+  $('pageList').innerHTML = r.pages.map(p => `
+    <div class="list-item" data-page="${esc(p.pageId)}">
+      <div class="row">
+        <span style="font-weight:600">${esc(p.name)}</span>
+        ${pill(p.status || 'DRAFT')}
+        <span class="muted" style="font-size:11px">${esc(p.pageType)}</span>
+      </div>
+      <div class="muted" style="font-size:11px">ID: ${esc(p.pageId)} · Created: ${esc(p.createdAt?.slice(0,10) || '—')}</div>
+    </div>
+  `).join('');
+  $('pageList').querySelectorAll('.list-item').forEach(el => {
+    el.addEventListener('click', () => openPage(el.dataset.page));
+  });
+}
+
+$('createPageBtn').addEventListener('click', wrap(async () => {
+  const name = $('newPageName').value.trim();
+  if (!name) return;
+  await api('POST', '/api/cms/pages', { name, pageType: $('newPageType').value });
+  $('newPageName').value = '';
+  await loadPages();
+}));
+
+// ── Open page in editor ─────────────────────────────────────────────
+
+async function openPage(pageId) {
+  const page = await api('GET', '/api/cms/pages/' + pageId);
+  CURRENT_PAGE = page;
+  CONTENT = page.draftContent && typeof page.draftContent === 'object' && (page.draftContent.sections || page.draftContent.overlays)
+    ? JSON.parse(JSON.stringify(page.draftContent))
+    : { sections: [], overlays: [] };
+  SELECTED_BLOCK = null;
+
+  $('listView').classList.add('hidden');
+  $('editorView').classList.remove('hidden');
+  $('editorPageName').textContent = page.name;
+  $('editorStatus').innerHTML = pill(page.status || 'DRAFT');
+  $('editorPageType').textContent = page.pageType;
+
+  await loadEditorAssets();
+  await loadVersions(pageId);
+  renderBlockTree();
+  renderCanvas();
+  renderBlockProps();
+}
+
+$('backBtn').addEventListener('click', () => {
+  $('editorView').classList.add('hidden');
+  $('listView').classList.remove('hidden');
+  CURRENT_PAGE = null;
+  loadPages();
+});
+
+// ── Block tree ──────────────────────────────────────────────────────
+
+function flattenBlocks(blocks, depth = 0) {
+  const result = [];
+  if (!Array.isArray(blocks)) return result;
+  for (const b of blocks) {
+    result.push({ block: b, depth });
+    if (b.children) result.push(...flattenBlocks(b.children, depth + 1));
+  }
+  return result;
+}
+
+function renderBlockTree() {
+  const all = [
+    ...flattenBlocks(CONTENT.sections || []),
+    ...flattenBlocks(CONTENT.overlays || []).map(x => ({ ...x, isOverlay: true })),
+  ];
+  if (!all.length) { $('blockTree').innerHTML = '<span class="muted">No blocks.</span>'; return; }
+
+  $('blockTree').innerHTML = all.map(({ block: b, depth, isOverlay }) => {
+    const indent = depth * 16;
+    const sel = SELECTED_BLOCK === b.id ? ' selected' : '';
+    const label = b.blockType + (b.content ? ': ' + esc(b.content.slice(0, 25)) : '')
+      + (b.fieldId ? ': ' + esc(b.fieldId) : '')
+      + (isOverlay && depth === 0 ? ' (overlay)' : '');
+    return `<div class="block-item${sel}" data-block-id="${esc(b.id)}" style="margin-left:${indent}px" draggable="true">
+      <span class="drag-handle">⋮⋮</span>
+      <span class="block-label">${label}</span>
+      <span class="block-actions">
+        <button class="sm" data-move-up="${esc(b.id)}" title="Move up">↑</button>
+        <button class="sm" data-move-down="${esc(b.id)}" title="Move down">↓</button>
+        <button class="sm danger" data-delete="${esc(b.id)}" title="Delete">×</button>
+      </span>
+    </div>`;
+  }).join('');
+
+  // Click to select
+  $('blockTree').querySelectorAll('.block-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      SELECTED_BLOCK = el.dataset.blockId;
+      renderBlockTree();
+      renderBlockProps();
+    });
+  });
+
+  // Delete
+  $('blockTree').querySelectorAll('[data-delete]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      deleteBlock(btn.dataset.delete);
+      renderBlockTree();
+      renderCanvas();
+    });
+  });
+
+  // Move up/down
+  $('blockTree').querySelectorAll('[data-move-up]').forEach(btn => {
+    btn.addEventListener('click', () => { moveBlock(btn.dataset.moveUp, -1); });
+  });
+  $('blockTree').querySelectorAll('[data-move-down]').forEach(btn => {
+    btn.addEventListener('click', () => { moveBlock(btn.dataset.moveDown, 1); });
+  });
+}
+
+// ── Block manipulation ──────────────────────────────────────────────
+
+function findBlockArray(id, blocks) {
+  if (!Array.isArray(blocks)) return null;
+  for (let i = 0; i < blocks.length; i++) {
+    if (blocks[i].id === id) return { arr: blocks, idx: i };
+    if (blocks[i].children) {
+      const r = findBlockArray(id, blocks[i].children);
+      if (r) return r;
+    }
+  }
+  return null;
+}
+
+function findBlock(id) {
+  const r = findBlockArray(id, CONTENT.sections) || findBlockArray(id, CONTENT.overlays || []);
+  return r ? r.arr[r.idx] : null;
+}
+
+function deleteBlock(id) {
+  const r = findBlockArray(id, CONTENT.sections) || findBlockArray(id, CONTENT.overlays || []);
+  if (r) { r.arr.splice(r.idx, 1); if (SELECTED_BLOCK === id) SELECTED_BLOCK = null; }
+}
+
+function moveBlock(id, dir) {
+  const r = findBlockArray(id, CONTENT.sections) || findBlockArray(id, CONTENT.overlays || []);
+  if (!r) return;
+  const newIdx = r.idx + dir;
+  if (newIdx < 0 || newIdx >= r.arr.length) return;
+  [r.arr[r.idx], r.arr[newIdx]] = [r.arr[newIdx], r.arr[r.idx]];
+  // Update sort orders
+  r.arr.forEach((b, i) => { b.sortOrder = i + 1; });
+  renderBlockTree();
+  renderCanvas();
+}
+
+// ── Add blocks ──────────────────────────────────────────────────────
+
+const BLOCK_TEMPLATES = {
+  section: () => ({ blockType:'section', id:genId(), sortOrder:999, children:[], padding:{top:10,right:10,bottom:10,left:10} }),
+  columns: () => ({ blockType:'columns', id:genId(), sortOrder:999, children:[
+    { blockType:'column', id:genId(), sortOrder:1, widthPercent:50, children:[] },
+    { blockType:'column', id:genId(), sortOrder:2, widthPercent:50, children:[] },
+  ]}),
+  heading: () => ({ blockType:'heading', id:genId(), sortOrder:999, content:'Heading', level:2, fontSize:24, fontWeight:'700' }),
+  text: () => ({ blockType:'text', id:genId(), sortOrder:999, content:'Text content' }),
+  image: () => ({ blockType:'image', id:genId(), sortOrder:999, assetId:null, alt:'', width:200 }),
+  divider: () => ({ blockType:'divider', id:genId(), sortOrder:999, thickness:1, color:'#cccccc' }),
+  spacer: () => ({ blockType:'spacer', id:genId(), sortOrder:999, height:20 }),
+  dynamicField: () => ({ blockType:'dynamicField', id:genId(), sortOrder:999, fieldId:'customer.name', fallback:'blocked' }),
+  qr: () => ({ blockType:'qr', id:genId(), sortOrder:999, size:100, staticValue:'https://flarize.com' }),
+  overlay: () => ({ blockType:'overlay', id:genId(), sortOrder:999, x:50, y:50, width:200, height:60, children:[] }),
+  backgroundImage: () => ({ blockType:'backgroundImage', id:genId(), sortOrder:999, assetId:null, fit:'cover' }),
+};
+
+document.querySelectorAll('[data-add]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const type = btn.dataset.add;
+    const tmpl = BLOCK_TEMPLATES[type];
+    if (!tmpl) return;
+    const block = tmpl();
+
+    // Overlays go to overlays array
+    if (type === 'overlay') {
+      if (!CONTENT.overlays) CONTENT.overlays = [];
+      CONTENT.overlays.push(block);
+    } else if (type === 'backgroundImage') {
+      CONTENT.background = block;
+    } else if (SELECTED_BLOCK) {
+      // Add to selected block's children if it's a container
+      const parent = findBlock(SELECTED_BLOCK);
+      if (parent && (parent.blockType === 'section' || parent.blockType === 'column' || parent.blockType === 'overlay')) {
+        if (!parent.children) parent.children = [];
+        parent.children.push(block);
+      } else {
+        CONTENT.sections.push(block);
+      }
+    } else {
+      CONTENT.sections.push(block);
+    }
+
+    // Reindex sort orders
+    CONTENT.sections.forEach((b, i) => { b.sortOrder = i + 1; });
+    if (CONTENT.overlays) CONTENT.overlays.forEach((b, i) => { b.sortOrder = i + 1; });
+
+    SELECTED_BLOCK = block.id;
+    renderBlockTree();
+    renderCanvas();
+    renderBlockProps();
+  });
+});
+
+// ── Block properties panel ──────────────────────────────────────────
+
+function renderBlockProps() {
+  if (!SELECTED_BLOCK) { $('blockProps').innerHTML = '<span class="muted">Select a block.</span>'; return; }
+  const b = findBlock(SELECTED_BLOCK);
+  if (!b) { $('blockProps').innerHTML = '<span class="muted">Block not found.</span>'; return; }
+
+  let html = `<div style="margin-bottom:6px"><b>${esc(b.blockType)}</b> <span class="muted">${esc(b.id)}</span></div>`;
+
+  // Common props
+  html += `<label>Visible</label><select data-prop="visible"><option value="true"${b.visible!==false?' selected':''}>Yes</option><option value="false"${b.visible===false?' selected':''}>No</option></select>`;
+
+  // Type-specific
+  switch (b.blockType) {
+    case 'heading':
+    case 'text':
+      html += `<label>Content</label><textarea data-prop="content">${esc(b.content || '')}</textarea>`;
+      if (b.blockType === 'heading') {
+        html += `<label>Level</label><select data-prop="level"><option value="1"${b.level===1?' selected':''}>H1</option><option value="2"${b.level===2||!b.level?' selected':''}>H2</option><option value="3"${b.level===3?' selected':''}>H3</option></select>`;
+      }
+      html += `<label>Font Size</label><input type="number" data-prop="fontSize" value="${b.fontSize||14}" min="8" max="72" />`;
+      html += `<label>Font Weight</label><select data-prop="fontWeight">${['400','500','600','700','800'].map(w=>`<option${b.fontWeight===w?' selected':''}>${w}</option>`).join('')}</select>`;
+      html += `<label>Color</label><input type="color" data-prop="color" value="${b.color||'#000000'}" />`;
+      html += `<label>Text Align</label><select data-prop="textAlign">${['left','center','right','justify'].map(a=>`<option${b.textAlign===a?' selected':''}>${a}</option>`).join('')}</select>`;
+      break;
+
+    case 'image':
+      html += `<label>Asset ID</label><input data-prop="assetId" value="${esc(b.assetId||'')}" style="width:100%" />`;
+      html += `<label>Alt text</label><input data-prop="alt" value="${esc(b.alt||'')}" style="width:100%" />`;
+      html += `<label>Width (px)</label><input type="number" data-prop="width" value="${b.width||''}" />`;
+      html += `<label>Height (px)</label><input type="number" data-prop="height" value="${b.height||''}" />`;
+      break;
+
+    case 'backgroundImage':
+      html += `<label>Asset ID</label><input data-prop="assetId" value="${esc(b.assetId||'')}" style="width:100%" />`;
+      html += `<label>Fit</label><select data-prop="fit">${['cover','contain','fill','none'].map(f=>`<option${b.fit===f?' selected':''}>${f}</option>`).join('')}</select>`;
+      break;
+
+    case 'divider':
+      html += `<label>Thickness (px)</label><input type="number" data-prop="thickness" value="${b.thickness||1}" min="1" max="20" />`;
+      html += `<label>Color</label><input type="color" data-prop="color" value="${b.color||'#cccccc'}" />`;
+      break;
+
+    case 'spacer':
+      html += `<label>Height (px)</label><input type="number" data-prop="height" value="${b.height||10}" min="1" max="200" />`;
+      break;
+
+    case 'dynamicField':
+      html += `<label>Field ID</label><select data-prop="fieldId">${FIELDS.map(f=>`<option value="${esc(f.fieldId)}"${b.fieldId===f.fieldId?' selected':''}>${esc(f.fieldId)} (${esc(f.label)})</option>`).join('')}</select>`;
+      html += `<label>Fallback</label><select data-prop="fallback">${['blocked','hide','fallbackText'].map(f=>`<option${b.fallback===f?' selected':''}>${f}</option>`).join('')}</select>`;
+      html += `<label>Font Size</label><input type="number" data-prop="fontSize" value="${b.fontSize||14}" />`;
+      html += `<label>Color</label><input type="color" data-prop="color" value="${b.color||'#000000'}" />`;
+      break;
+
+    case 'qr':
+      html += `<label>Static Value</label><input data-prop="staticValue" value="${esc(b.staticValue||'')}" style="width:100%" />`;
+      html += `<label>Size (px)</label><input type="number" data-prop="size" value="${b.size||100}" />`;
+      break;
+
+    case 'overlay':
+      html += `<label>X (px)</label><input type="number" data-prop="x" value="${b.x||0}" />`;
+      html += `<label>Y (px)</label><input type="number" data-prop="y" value="${b.y||0}" />`;
+      html += `<label>Width (px)</label><input type="number" data-prop="width" value="${b.width||200}" />`;
+      html += `<label>Height (px)</label><input type="number" data-prop="height" value="${b.height||60}" />`;
+      break;
+
+    case 'section':
+      html += `<label>Background Color</label><input type="color" data-prop="backgroundColor" value="${b.backgroundColor||'#ffffff'}" />`;
+      html += `<label>Padding Top</label><input type="number" data-prop="padding.top" value="${b.padding?.top||0}" />`;
+      html += `<label>Padding Left</label><input type="number" data-prop="padding.left" value="${b.padding?.left||0}" />`;
+      html += `<label>Padding Right</label><input type="number" data-prop="padding.right" value="${b.padding?.right||0}" />`;
+      html += `<label>Padding Bottom</label><input type="number" data-prop="padding.bottom" value="${b.padding?.bottom||0}" />`;
+      break;
+
+    case 'column':
+      html += `<label>Width %</label><input type="number" data-prop="widthPercent" value="${b.widthPercent||50}" min="1" max="100" />`;
+      break;
+  }
+
+  html += `<div style="margin-top:10px"><button id="applyProps" class="sm primary">Apply</button></div>`;
+  $('blockProps').innerHTML = html;
+
+  $('applyProps')?.addEventListener('click', () => {
+    $('blockProps').querySelectorAll('[data-prop]').forEach(el => {
+      const prop = el.dataset.prop;
+      let val = el.value;
+
+      // Type coercion
+      if (['fontSize','level','thickness','height','width','size','x','y','widthPercent'].includes(prop)) {
+        val = Number(val);
+      }
+      if (prop === 'visible') val = val === 'true';
+
+      // Nested props like padding.top
+      if (prop.includes('.')) {
+        const [parent, child] = prop.split('.');
+        if (!b[parent]) b[parent] = {};
+        b[parent][child] = Number(val);
+      } else {
+        b[prop] = val;
+      }
+    });
+    renderCanvas();
+    renderBlockTree();
+  });
+}
+
+// ── Field registry ──────────────────────────────────────────────────
+
+async function loadFieldRegistry() {
+  try {
+    const r = await api('GET', '/api/cms/fields');
+    FIELDS = r.fields || [];
+  } catch { FIELDS = []; }
+  renderFieldPicker();
+}
+
+function renderFieldPicker() {
+  const grouped = {};
+  for (const f of FIELDS) {
+    if (!grouped[f.category]) grouped[f.category] = [];
+    grouped[f.category].push(f);
+  }
+  let html = '';
+  for (const [cat, fields] of Object.entries(grouped)) {
+    html += `<div style="margin-bottom:6px"><span class="muted" style="font-size:10px">${esc(cat)}</span></div>`;
+    html += fields.map(f => `<span class="field-chip" data-field="${esc(f.fieldId)}" title="${esc(f.label)}">${esc(f.fieldId)}</span>`).join('');
+  }
+  $('fieldPicker').innerHTML = html || '<span class="muted">No fields.</span>';
+
+  // Click to insert a dynamic field block
+  $('fieldPicker').querySelectorAll('.field-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const block = { blockType:'dynamicField', id:genId(), sortOrder:999, fieldId:chip.dataset.field, fallback:'blocked', fontSize:14 };
+      // If a container is selected, add as child
+      const parent = SELECTED_BLOCK ? findBlock(SELECTED_BLOCK) : null;
+      if (parent && ['section','column','overlay'].includes(parent.blockType)) {
+        if (!parent.children) parent.children = [];
+        parent.children.push(block);
+      } else {
+        CONTENT.sections.push(block);
+      }
+      CONTENT.sections.forEach((b, i) => { b.sortOrder = i + 1; });
+      SELECTED_BLOCK = block.id;
+      renderBlockTree();
+      renderCanvas();
+      renderBlockProps();
+    });
+  });
+}
+
+// ── Canvas rendering ────────────────────────────────────────────────
+
+function renderCanvas() {
+  // Simple preview — use a simplified renderer inline (no import from quotationDocument)
+  let html = '';
+
+  // Background
+  if (CONTENT.background?.assetId) {
+    const url = '/api/cms/assets/' + encodeURIComponent(CONTENT.background.assetId) + '/file';
+    const fit = CONTENT.background.fit || 'cover';
+    const bgSize = fit === 'fill' ? '100% 100%' : fit;
+    html += `<div style="position:absolute;top:0;left:0;width:100%;height:100%;background-image:url('${url}');background-size:${bgSize};background-position:center;background-repeat:no-repeat;z-index:0"></div>`;
+  }
+
+  // Sections
+  html += '<div style="position:relative;z-index:1;width:100%;height:100%">';
+  html += renderBlocksPreview(CONTENT.sections || []);
+  html += '</div>';
+
+  // Overlays
+  for (const ov of (CONTENT.overlays || [])) {
+    if (ov.visible === false) continue;
+    const sel = SELECTED_BLOCK === ov.id ? 'border:2px dashed #4493f8;' : 'border:1px dashed rgba(68,147,248,.4);';
+    html += `<div class="overlay-handle" style="left:${ov.x||0}px;top:${ov.y||0}px;width:${ov.width||200}px;height:${ov.height||60}px;${sel}" data-overlay="${esc(ov.id)}">
+      ${renderBlocksPreview(ov.children || [])}
+    </div>`;
+  }
+
+  $('canvasContent').innerHTML = html;
+
+  // Make overlays clickable
+  $('canvasContent').querySelectorAll('[data-overlay]').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      if (e.target !== el) return;
+      SELECTED_BLOCK = el.dataset.overlay;
+      renderBlockTree();
+      renderBlockProps();
+      // Drag overlay
+      const ov = findBlock(el.dataset.overlay);
+      if (!ov) return;
+      const startX = e.clientX, startY = e.clientY;
+      const origX = ov.x || 0, origY = ov.y || 0;
+      const scale = ZOOMED ? 1 : 0.5;
+      const onMove = (ev) => {
+        ov.x = Math.max(0, Math.round(origX + (ev.clientX - startX) / scale));
+        ov.y = Math.max(0, Math.round(origY + (ev.clientY - startY) / scale));
+        el.style.left = ov.x + 'px';
+        el.style.top = ov.y + 'px';
+      };
+      const onUp = () => { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); renderBlockProps(); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+}
+
+function renderBlocksPreview(blocks) {
+  if (!Array.isArray(blocks)) return '';
+  return [...blocks].sort((a,b) => (a.sortOrder||0)-(b.sortOrder||0)).filter(b => b.visible !== false).map(b => {
+    switch (b.blockType) {
+      case 'section': {
+        const styles = [];
+        if (b.backgroundColor) styles.push(`background:${b.backgroundColor}`);
+        if (b.padding) {
+          for (const s of ['top','right','bottom','left']) if (b.padding[s]) styles.push(`padding-${s}:${b.padding[s]}px`);
+        }
+        return `<div style="${styles.join(';')}">${renderBlocksPreview(b.children||[])}</div>`;
+      }
+      case 'columns':
+        return `<div style="display:flex;gap:0">${renderBlocksPreview(b.children||[])}</div>`;
+      case 'column': {
+        const w = b.widthPercent ? `flex:0 0 ${b.widthPercent}%` : 'flex:1 1 0';
+        return `<div style="${w}">${renderBlocksPreview(b.children||[])}</div>`;
+      }
+      case 'heading': {
+        const lvl = [1,2,3].includes(b.level) ? b.level : 2;
+        const s = [];
+        if (b.fontSize) s.push(`font-size:${b.fontSize}px`);
+        if (b.fontWeight) s.push(`font-weight:${b.fontWeight}`);
+        if (b.color) s.push(`color:${b.color}`);
+        if (b.textAlign) s.push(`text-align:${b.textAlign}`);
+        s.push('margin:0;padding:0');
+        return `<h${lvl} style="${s.join(';')}">${esc(b.content||'')}</h${lvl}>`;
+      }
+      case 'text': {
+        const s = ['white-space:pre-wrap','margin:0','padding:0'];
+        if (b.fontSize) s.push(`font-size:${b.fontSize}px`);
+        if (b.color) s.push(`color:${b.color}`);
+        if (b.textAlign) s.push(`text-align:${b.textAlign}`);
+        return `<p style="${s.join(';')}">${esc(b.content||'')}</p>`;
+      }
+      case 'image': {
+        const src = b.assetId ? '/api/cms/assets/'+encodeURIComponent(b.assetId)+'/file' : '';
+        const s = ['max-width:100%','object-fit:contain'];
+        if (b.width) s.push(`width:${b.width}px`);
+        if (b.height) s.push(`height:${b.height}px`);
+        return src ? `<img src="${src}" alt="${esc(b.alt||'')}" style="${s.join(';')}" />` : `<div style="width:${b.width||100}px;height:${b.height||60}px;background:#eee;display:flex;align-items:center;justify-content:center;font-size:10px;color:#999">No image</div>`;
+      }
+      case 'divider':
+        return `<hr style="border:none;border-top:${b.thickness||1}px solid ${b.color||'#ccc'};margin:4px 0" />`;
+      case 'spacer':
+        return `<div style="height:${b.height||10}px"></div>`;
+      case 'dynamicField': {
+        const s = [];
+        if (b.fontSize) s.push(`font-size:${b.fontSize}px`);
+        if (b.color) s.push(`color:${b.color}`);
+        return `<span style="background:rgba(68,147,248,.12);border:1px dashed #4493f8;border-radius:3px;padding:1px 6px;${s.join(';')}">{${esc(b.fieldId||'field')}}</span>`;
+      }
+      case 'qr':
+        return `<div style="width:${b.size||100}px;height:${b.size||100}px;background:#f5f5f5;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:9px;color:#999">QR</div>`;
+      default:
+        return `<!-- unknown: ${esc(b.blockType)} -->`;
+    }
+  }).join('\n');
+}
+
+// ── Zoom ────────────────────────────────────────────────────────────
+
+$('zoomBtn').addEventListener('click', () => {
+  ZOOMED = !ZOOMED;
+  $('canvas').classList.toggle('full', ZOOMED);
+  $('zoomBtn').textContent = ZOOMED ? 'Zoom Out (50%)' : 'Toggle Zoom';
+});
+
+// ── Artwork upload (complete A4 design) ─────────────────────────────
+
+$('uploadArtworkBtn').addEventListener('click', wrap(async () => {
+  const file = $('artworkFile').files[0];
+  if (!file) return;
+  if (!['image/png','image/jpeg'].includes(file.type)) throw new Error('Only PNG/JPEG allowed');
+  if (file.size > 5 * 1024 * 1024) throw new Error('File must be under 5MB');
+
+  const data = await fileToBase64(file);
+  const r = await api('POST', '/api/cms/assets', { filename: file.name, mimeType: file.type, data });
+  CONTENT.background = { blockType:'backgroundImage', id:genId(), assetId:r.assetId, fit:'cover' };
+  await loadEditorAssets();
+  renderCanvas();
+}, 'editorError'));
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── Save draft ──────────────────────────────────────────────────────
+
+$('saveDraftBtn').addEventListener('click', wrap(async () => {
+  await api('PUT', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/draft', { content: CONTENT });
+  show(null, 'editorError');
+  $('editorError').textContent = '';
+  const msg = document.createElement('span');
+  msg.style.color = 'var(--ok)';
+  msg.textContent = 'Draft saved.';
+  $('editorError').appendChild(msg);
+  setTimeout(() => { msg.remove(); }, 2000);
+}, 'editorError'));
+
+// ── Workflow actions ────────────────────────────────────────────────
+
+$('submitReviewBtn').addEventListener('click', wrap(async () => {
+  await api('POST', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/submit-review');
+  await openPage(CURRENT_PAGE.pageId);
+}, 'editorError'));
+
+$('approveBtn').addEventListener('click', wrap(async () => {
+  await api('POST', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/approve');
+  await openPage(CURRENT_PAGE.pageId);
+}, 'editorError'));
+
+$('publishBtn').addEventListener('click', wrap(async () => {
+  await api('POST', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/publish');
+  await openPage(CURRENT_PAGE.pageId);
+}, 'editorError'));
+
+$('archiveBtn').addEventListener('click', wrap(async () => {
+  await api('POST', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/archive');
+  await openPage(CURRENT_PAGE.pageId);
+}, 'editorError'));
+
+// ── Preview ─────────────────────────────────────────────────────────
+
+$('previewBtn').addEventListener('click', wrap(async () => {
+  const r = await api('POST', '/api/cms/pages/' + CURRENT_PAGE.pageId + '/preview');
+  // Open preview in new window
+  const w = window.open('', '_blank', 'width=850,height=1200');
+  w.document.write(`<!DOCTYPE html><html><head><title>Preview: ${esc(CURRENT_PAGE.name)}</title>
+    <style>body{margin:20px;background:#f0f0f0;display:flex;justify-content:center}
+    .preview{width:794px;min-height:1123px;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.2);font-family:Poppins,sans-serif;position:relative;overflow:hidden}</style>
+    </head><body><div class="preview">${r.preview || '<p style="padding:20px;color:#999">No preview content.</p>'}</div></body></html>`);
+  w.document.close();
+}, 'editorError'));
+
+// ── Version history ─────────────────────────────────────────────────
+
+async function loadVersions(pageId) {
+  try {
+    const r = await api('GET', '/api/cms/pages/' + pageId + '/versions');
+    if (!r.versions?.length) { $('versionList').innerHTML = '<span class="muted">No versions.</span>'; return; }
+    $('versionList').innerHTML = r.versions.map(v => `
+      <div class="version-row">
+        ${pill(v.status || 'DRAFT')}
+        <span class="muted" style="font-size:10px">${esc(v.versionId)}</span>
+        <span class="muted" style="font-size:10px">${esc(v.createdAt?.slice(0,19) || '')}</span>
+      </div>
+    `).join('');
+  } catch { $('versionList').innerHTML = '<span class="muted">—</span>'; }
+}
+
+// ── Editor assets ───────────────────────────────────────────────────
+
+async function loadEditorAssets() {
+  try {
+    const r = await api('GET', '/api/cms/assets');
+    ASSETS = (r.assets || []).filter(a => a.status === 'ACTIVE');
+  } catch { ASSETS = []; }
+  $('editorAssets').innerHTML = ASSETS.map(a =>
+    `<img class="asset-thumb" src="/api/cms/assets/${encodeURIComponent(a.assetId)}/file" title="${esc(a.filename)}" data-asset="${esc(a.assetId)}" />`
+  ).join('') || '<span class="muted">No assets.</span>';
+
+  // Click to copy asset ID
+  $('editorAssets').querySelectorAll('.asset-thumb').forEach(img => {
+    img.addEventListener('click', () => {
+      const id = img.dataset.asset;
+      // If an image or backgroundImage block is selected, set its assetId
+      const b = SELECTED_BLOCK ? findBlock(SELECTED_BLOCK) : null;
+      if (b && (b.blockType === 'image' || b.blockType === 'backgroundImage')) {
+        b.assetId = id;
+        renderCanvas();
+        renderBlockProps();
+      } else {
+        // Copy to clipboard
+        navigator.clipboard.writeText(id).catch(() => {});
+        img.style.outline = '2px solid var(--ok)';
+        setTimeout(() => { img.style.outline = ''; }, 500);
+      }
+    });
+  });
+}
+
+// ── Campaigns tab ───────────────────────────────────────────────────
+
+async function loadCampaigns() {
+  try {
+    const r = await api('GET', '/api/cms/campaigns');
+    if (!r.campaigns?.length) { $('campaignList').innerHTML = '<span class="muted">No campaigns.</span>'; return; }
+    $('campaignList').innerHTML = r.campaigns.map(c => `
+      <div class="list-item">
+        <div class="row">
+          <span style="font-weight:600">${esc(c.name)}</span>
+          ${pill(c.status || 'INACTIVE')}
+        </div>
+        <div class="muted" style="font-size:11px">ID: ${esc(c.campaignId)}</div>
+        <div class="row" style="margin-top:4px">
+          ${c.status !== 'ACTIVE'
+            ? `<button class="sm" onclick="activateCampaign('${esc(c.campaignId)}')">Activate</button>`
+            : `<button class="sm danger" onclick="deactivateCampaign('${esc(c.campaignId)}')">Deactivate</button>`}
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { $('campaignList').innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+window.activateCampaign = wrap(async (id) => {
+  await api('POST', '/api/cms/campaigns/' + id + '/activate');
+  await loadCampaigns();
+});
+
+window.deactivateCampaign = wrap(async (id) => {
+  await api('POST', '/api/cms/campaigns/' + id + '/deactivate');
+  await loadCampaigns();
+});
+
+$('createCampaignBtn').addEventListener('click', wrap(async () => {
+  const name = $('newCampaignName').value.trim();
+  if (!name) return;
+  await api('POST', '/api/cms/campaigns', { name });
+  $('newCampaignName').value = '';
+  await loadCampaigns();
+}));
+
+// ── Assets tab ──────────────────────────────────────────────────────
+
+async function loadAssets() {
+  try {
+    const r = await api('GET', '/api/cms/assets');
+    if (!r.assets?.length) { $('assetList').innerHTML = '<span class="muted">No assets.</span>'; return; }
+    $('assetList').innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:8px">' +
+      r.assets.map(a => `
+        <div style="text-align:center;width:100px">
+          <img src="/api/cms/assets/${encodeURIComponent(a.assetId)}/file" style="width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--line)" />
+          <div class="muted" style="font-size:10px;word-break:break-all">${esc(a.filename)}</div>
+          <div class="muted" style="font-size:9px">${pill(a.status)}</div>
+        </div>
+      `).join('') + '</div>';
+  } catch (e) { $('assetList').innerHTML = `<span class="err">${esc(e.message)}</span>`; }
+}
+
+$('uploadAssetBtn').addEventListener('click', wrap(async () => {
+  const file = $('assetFile').files[0];
+  if (!file) return;
+  if (!['image/png','image/jpeg'].includes(file.type)) throw new Error('Only PNG/JPEG allowed');
+  if (file.size > 5 * 1024 * 1024) throw new Error('File must be under 5MB');
+  const data = await fileToBase64(file);
+  await api('POST', '/api/cms/assets', { filename: file.name, mimeType: file.type, data });
+  $('assetFile').value = '';
+  await loadAssets();
+}));
+
+// ── Boot ────────────────────────────────────────────────────────────
+
+boot().catch(e => show(e));
+</script>
+</body>
+</html>

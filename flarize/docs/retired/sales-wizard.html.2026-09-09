@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sales Wizard — Flarize</title>
+<!--
+  SALES WIZARD — Phase 2 (2026-09-02).
+
+  Guided 7-step flow for Sales:
+    1. Customer
+    2. Bill & Requirement
+    3. Choose System
+    4. Customize
+    5. Review Plant
+    6. Price & Offer
+    7. Generate Quotation
+
+  This page performs ZERO business calculation. It calls existing server APIs:
+    - /api/sales/customers (search/get/create)
+    - /api/sales/recommend-size
+    - /api/sales/system-options
+    - /api/sales/tier-display-names   (Phase 2 — presentation config only)
+    - /api/packages?approvalStatus=APPROVED&variant=...
+    - /api/sales/preflight
+    - /api/sales/component-alternatives  (panel · inverter · structure_material only)
+    - /api/sales/bom-preview
+    - /api/offers
+    - /api/sales/orchestrate            (single call — internal 15 steps hidden)
+    - /api/quotation/quotations/:id/payload  (EMI + finance fields)
+
+  Sales user never sees: procurement landed cost, cost heads, margin,
+  profitability, provenance ids, snapshot ids, engine names.
+
+  The frozen quotation renderer (/quotation-document.html?id=...) is the
+  authoritative customer-facing output — never redesigned.
+-->
+<style>
+  :root {
+    --bg:#f5f7fa;--panel:#ffffff;--line:#e2e8f0;--fg:#0f172a;--dim:#64748b;
+    --accent:#2563eb;--accent-hover:#1d4ed8;--accent-soft:#eff6ff;
+    --ok:#16a34a;--ok-soft:#f0fdf4;--warn:#d97706;--warn-soft:#fffbeb;
+    --bad:#dc2626;--bad-soft:#fef2f2;--gold:#b45309;--gold-soft:#fef3c7;
+    --radius:12px;--shadow:0 4px 24px rgba(15,23,42,.06);
+    --shadow-hover:0 8px 32px rgba(15,23,42,.10);
+    --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;font-family:var(--font);color:var(--fg);background:var(--bg);}
+  body{min-height:100vh}
+  .sw-container{max-width:920px;margin:0 auto;padding:24px 16px 96px}
+  .sw-stepper{display:flex;gap:6px;margin:20px 0 24px;flex-wrap:wrap;justify-content:center}
+  .sw-step-dot{display:flex;align-items:center;gap:6px;padding:6px 12px;background:var(--panel);
+    border:1px solid var(--line);border-radius:999px;font-size:12px;color:var(--dim);font-weight:500}
+  .sw-step-dot.done{color:var(--ok);border-color:var(--ok);background:var(--ok-soft)}
+  .sw-step-dot.current{color:var(--accent);border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+  .sw-step-dot .sw-num{width:20px;height:20px;border-radius:50%;background:var(--dim);color:#fff;
+    display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+  .sw-step-dot.done .sw-num{background:var(--ok)}
+  .sw-step-dot.current .sw-num{background:var(--accent)}
+  .sw-card{background:var(--panel);border-radius:var(--radius);box-shadow:var(--shadow);
+    padding:32px;margin-bottom:16px;border:1px solid var(--line)}
+  .sw-title{font-size:24px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em}
+  .sw-sub{color:var(--dim);margin:0 0 24px;font-size:14px}
+  .sw-form-row{margin-bottom:16px}
+  .sw-form-row label{display:block;font-size:13px;font-weight:500;color:var(--fg);margin-bottom:6px}
+  .sw-form-row label .req{color:var(--bad);margin-left:2px}
+  .sw-input,.sw-select{width:100%;padding:10px 12px;border:1px solid var(--line);
+    border-radius:8px;font:14px var(--font);color:var(--fg);background:#fff;transition:border-color .15s}
+  .sw-input:focus,.sw-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .sw-input-inline{display:flex;gap:8px;align-items:center}
+  .sw-radio-group{display:flex;gap:16px;flex-wrap:wrap}
+  .sw-radio-group label{display:flex;gap:6px;align-items:center;font-weight:400;cursor:pointer;margin-bottom:0}
+  .sw-btn{padding:10px 20px;border:none;border-radius:8px;font:600 14px var(--font);
+    cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+  .sw-btn-primary{background:var(--accent);color:#fff}
+  .sw-btn-primary:hover:not(:disabled){background:var(--accent-hover)}
+  .sw-btn-primary:disabled{opacity:.4;cursor:not-allowed}
+  .sw-btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--line)}
+  .sw-btn-ghost:hover{color:var(--fg);border-color:var(--dim)}
+  .sw-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:24px}
+  .sw-list{display:grid;gap:8px}
+  .sw-customer-row{display:flex;justify-content:space-between;align-items:center;
+    padding:12px 16px;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .sw-customer-row:hover{border-color:var(--accent);box-shadow:var(--shadow-hover)}
+  .sw-customer-name{font-weight:600;font-size:14px}
+  .sw-customer-meta{color:var(--dim);font-size:12px;margin-top:2px}
+  .sw-plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+  @media (max-width:720px){.sw-plans{grid-template-columns:1fr}}
+  .sw-plan{background:#fff;border:2px solid var(--line);border-radius:var(--radius);
+    padding:20px;cursor:pointer;position:relative;transition:all .15s;text-align:center}
+  .sw-plan:hover:not(.disabled){border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .sw-plan.selected{border-color:var(--accent);background:var(--accent-soft)}
+  .sw-plan.recommended{border-color:var(--gold);background:linear-gradient(180deg,var(--gold-soft) 0%,#fff 50%)}
+  .sw-plan.recommended.selected{border-color:var(--accent);background:linear-gradient(180deg,var(--accent-soft) 0%,#fff 60%)}
+  .sw-plan.disabled{opacity:.6;cursor:not-allowed;background:#f8fafc}
+  .sw-plan-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--gold);color:#fff;font-size:11px;font-weight:700;
+    padding:4px 12px;border-radius:999px;letter-spacing:.02em;white-space:nowrap;text-transform:uppercase}
+  .sw-plan-name{font-size:18px;font-weight:700;margin:8px 0 8px}
+  .sw-plan-desc{color:var(--dim);font-size:12px;margin-bottom:16px;min-height:32px}
+  .sw-plan-blocked{color:var(--warn);font-size:12px;font-style:italic;margin-top:8px}
+  .sw-variant-toggle{margin-top:24px;padding:16px;background:#f8fafc;border-radius:8px;text-align:center}
+  .sw-variant-toggle-label{font-size:12px;color:var(--dim);margin-bottom:8px;font-weight:500;letter-spacing:.04em;text-transform:uppercase}
+  .sw-variant-btns{display:inline-flex;gap:4px;padding:4px;background:#fff;border:1px solid var(--line);border-radius:8px}
+  .sw-variant-btn{padding:8px 20px;border:none;background:transparent;font:500 13px var(--font);
+    color:var(--dim);cursor:pointer;border-radius:6px;transition:all .15s}
+  .sw-variant-btn.active{background:var(--accent);color:#fff}
+  .sw-variant-btn:disabled{opacity:.4;cursor:not-allowed}
+  .sw-reco-card{padding:20px;background:var(--accent-soft);border-radius:10px;border-left:4px solid var(--accent);margin:16px 0}
+  .sw-reco-num{font-size:32px;font-weight:800;color:var(--accent);margin:0 0 4px}
+  .sw-reco-label{font-size:13px;color:var(--fg);margin-bottom:12px}
+  .sw-reco-fact{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;color:var(--dim)}
+  .sw-reco-fact b{color:var(--fg);font-weight:600}
+  .sw-plant-tiles{display:grid;gap:12px}
+  .sw-plant-tile{display:flex;justify-content:space-between;padding:14px 18px;
+    background:#f8fafc;border-radius:8px;font-size:14px}
+  .sw-plant-tile-label{color:var(--dim);font-weight:500}
+  .sw-plant-tile-value{color:var(--fg);font-weight:600;text-align:right}
+  .sw-summary{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;margin:20px 0}
+  .sw-summary-row{display:flex;justify-content:space-between;padding:10px 0;font-size:14px;border-bottom:1px dashed var(--line)}
+  .sw-summary-row:last-of-type{border-bottom:none}
+  .sw-summary-row.total{font-size:20px;font-weight:800;padding:18px 0 6px;border-bottom:none;border-top:2px solid var(--fg);margin-top:10px}
+  .sw-summary-row.deduction{color:var(--ok)}
+  .sw-summary-row.note{color:var(--dim);font-size:12px;font-style:italic;justify-content:flex-start;padding-top:6px;border:none}
+  .sw-blocker{padding:16px;background:var(--warn-soft);border:1px solid var(--warn);
+    border-radius:8px;margin:12px 0;color:var(--fg)}
+  .sw-blocker.bad{background:var(--bad-soft);border-color:var(--bad)}
+  .sw-blocker-title{font-weight:700;font-size:14px;margin-bottom:4px;color:var(--warn)}
+  .sw-blocker.bad .sw-blocker-title{color:var(--bad)}
+  .sw-blocker-msg{font-size:13px;line-height:1.5}
+  .sw-blocker-owner{display:inline-block;padding:2px 8px;border-radius:4px;background:rgba(0,0,0,.06);
+    font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-top:6px}
+  .sw-blocker details{margin-top:10px;font-size:12px}
+  .sw-blocker details summary{cursor:pointer;color:var(--dim);font-weight:500}
+  .sw-blocker details pre{background:#fff;padding:10px;border-radius:6px;overflow:auto;font-size:11px;margin-top:6px}
+  .sw-progress{padding:32px;text-align:center}
+  .sw-spinner{display:inline-block;width:36px;height:36px;border:3px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:sw-spin 1s linear infinite;margin-bottom:16px}
+  @keyframes sw-spin{to{transform:rotate(360deg)}}
+  .sw-progress-msg{font-size:14px;color:var(--dim);font-weight:500}
+  .sw-done{text-align:center;padding:24px}
+  .sw-done-icon{width:64px;height:64px;background:var(--ok);color:#fff;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px}
+  .sw-done-title{font-size:24px;font-weight:800;margin:0 0 6px}
+  .sw-done-sub{color:var(--dim);margin-bottom:24px}
+  .sw-done-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .sw-hint{font-size:12px;color:var(--dim);margin-top:6px}
+  .sw-err{color:var(--bad);font-size:13px;margin-top:6px}
+  .sw-tabs{display:flex;gap:2px;padding:4px;background:#f8fafc;border-radius:8px;margin-bottom:16px}
+  .sw-tab{flex:1;padding:8px;border:none;background:transparent;font:500 13px var(--font);
+    color:var(--dim);cursor:pointer;border-radius:6px;transition:all .15s}
+  .sw-tab.active{background:#fff;color:var(--fg);box-shadow:0 1px 2px rgba(0,0,0,.05)}
+  .sw-hidden{display:none !important}
+</style>
+</head>
+<body>
+<div id="sw-nav-mount"></div>
+<div class="sw-container">
+  <div id="sw-stepper" class="sw-stepper"></div>
+  <div id="sw-card" class="sw-card"></div>
+</div>
+<script src="/lib/nav.js"></script>
+<script src="/lib/sales-wizard-errors.js"></script>
+<script src="/lib/sales-wizard.js"></script>
+</body>
+</html>

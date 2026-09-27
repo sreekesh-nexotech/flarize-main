@@ -1,0 +1,8 @@
+node_modules
+dist
+.git
+.vite
+tests/e2e/shots
+tests/e2e/_shots
+tests/_pdf_out
+*.zip

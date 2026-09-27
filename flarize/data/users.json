@@ -1,0 +1,59 @@
+[
+  {
+    "userId": "admin-001",
+    "username": "admin",
+    "name": "Administrator",
+    "email": "admin@flarize.com",
+    "passwordHash": "2ec07c61df0f86466e27684608cd2d4f:e07f64a9f2657da7f98f2f3eb3bab35191f899290d94c76289ce7b1d998d87cc226f2d8a4032f839d43ed327a790d69a973d151d573b7cde4d5d4c1e4a8cde1f",
+    "role": "ADMIN",
+    "status": "ACTIVE",
+    "createdAt": "2026-09-13T14:00:39.919Z",
+    "createdBy": "SYSTEM"
+  },
+  {
+    "userId": "sales-001",
+    "username": "sales1",
+    "name": "Sales One",
+    "email": "sales1@flarize.com",
+    "passwordHash": "f8dd68dbbec96351b8d576208a014221:051dc40ee526b90d404cafda2594e65b430019c3f40b47fd728bbc79202ce8be6fa57256636f2880b66112e0a5b746eb2ca0e085416eface36e531a0efab3edc",
+    "role": "SALES",
+    "status": "ACTIVE",
+    "createdAt": "2026-09-13T14:00:39.919Z",
+    "createdBy": "SYSTEM",
+    "updatedAt": "2026-09-13T15:49:10.479Z",
+    "updatedBy": "admin-001"
+  },
+  {
+    "userId": "projhead-001",
+    "username": "projhead1",
+    "name": "Project Head One",
+    "email": "projhead1@flarize.com",
+    "passwordHash": "a9748a0ea7405c2b0aa83c178a086530:2e9d1d1ace3eb2de624c811fb80e69040f522c59b179384224b6300b983f13cc040fd0f638b08190b830e419c49c30df7e3050948beff71dd8c9168d027215ad",
+    "role": "PROJECT_HEAD",
+    "status": "ACTIVE",
+    "createdAt": "2026-09-13T14:00:39.919Z",
+    "createdBy": "SYSTEM"
+  },
+  {
+    "userId": "procurement-001",
+    "username": "procurement1",
+    "name": "Procurement One",
+    "email": "procurement1@flarize.com",
+    "passwordHash": "4fa9fb233a83954f387644022acd10ff:c2e55b564cddef6ac0859790950dfd27f8cd4ae6caab6aff771aa538308607e912b311b96b496ee246dd2ff05a78041c119c7b545c7a9d20a4e1d6c9c6f57587",
+    "role": "PROCUREMENT",
+    "status": "ACTIVE",
+    "createdAt": "2026-09-13T14:00:39.919Z",
+    "createdBy": "SYSTEM"
+  },
+  {
+    "userId": "eng-001",
+    "username": "eng1",
+    "name": "Engineer One",
+    "email": "eng1@flarize.com",
+    "passwordHash": "5616e36a247fd857a1e2cf0b4426b1bb:d6f451b88900b339cea78568532bdb6862f631b5d791e32afe65f40f75f624ce18dea634f838b361723c75800768e1f430f7a8b0304511193323738d6c303652",
+    "role": "ENGINEER",
+    "status": "ACTIVE",
+    "createdAt": "2026-09-13T14:00:39.919Z",
+    "createdBy": "SYSTEM"
+  }
+]

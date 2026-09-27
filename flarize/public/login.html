@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flarize — Sign In</title>
+<style>
+:root {
+  --bg: #f8fafc; --panel: #ffffff; --line: #e2e8f0; --fg: #1e293b;
+  --dim: #64748b; --accent: #2563eb; --accent-hover: #1d4ed8;
+  --ok: #16a34a; --warn: #d97706; --bad: #dc2626;
+  --radius: 10px; --shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: linear-gradient(135deg, #f0f4ff 0%, #e8f0fe 50%, #f8fafc 100%);
+       color: var(--fg); min-height: 100vh;
+       display: flex; align-items: center; justify-content: center; }
+.login-container { width: 100%; max-width: 380px; padding: 16px; }
+.brand { text-align: center; margin-bottom: 28px; }
+.brand h1 { font-size: 28px; font-weight: 800; color: var(--accent); letter-spacing: -.02em; }
+.brand p { font-size: 13px; color: var(--dim); margin-top: 4px; }
+.login-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+              padding: 28px 24px; box-shadow: var(--shadow); }
+.login-card h2 { font-size: 17px; font-weight: 700; margin-bottom: 18px; text-align: center; }
+.field-label { display: block; font-size: 12px; font-weight: 600; color: var(--dim);
+               text-transform: uppercase; letter-spacing: .03em; margin-bottom: 4px; }
+.fi { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+      font: inherit; font-size: 14px; margin-bottom: 14px; background: #fff; }
+.fi:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+.btn { width: 100%; padding: 11px; background: var(--accent); color: #fff; border: none;
+       border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; font-size: 15px; }
+.btn:hover { background: var(--accent-hover); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.alert { padding: 10px 14px; border-radius: 6px; margin-bottom: 14px; font-size: 13px; }
+.alert-error { background: #fef2f2; color: var(--bad); border: 1px solid #fecaca; }
+.role-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px;
+              font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+              background: #eff6ff; color: var(--accent); margin-top: 8px; }
+.footer { text-align: center; margin-top: 20px; font-size: 12px; color: var(--dim); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <div class="brand">
+    <h1>Flarize</h1>
+    <p>Golden Ray Renewable Energy</p>
+  </div>
+
+  <div class="login-card">
+    <h2>Sign In</h2>
+    <div id="login-error" class="alert alert-error" hidden></div>
+    <label class="field-label">Username</label>
+    <input class="fi" id="login-user" type="text" placeholder="Username" autocomplete="username" />
+    <label class="field-label">Password</label>
+    <input class="fi" id="login-pw" type="password" placeholder="Password" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()" />
+    <button class="btn" id="login-btn" onclick="doLogin()">Sign In</button>
+  </div>
+
+  <div class="footer">Solar Engineering &amp; Commercial Platform</div>
+</div>
+
+<script>
+const SESSION_KEY = 'gr_session_token';
+const ROLE_KEY = 'gr_user_role';
+const USER_KEY = 'gr_user_name';
+const USERID_KEY = 'gr_user_id';
+
+/**
+ * Role → workspace routing map.
+ * SALES roles → /sales.html
+ * PROJECT_HEAD → /workspace.html
+ * ENGINEERING → /workspace.html (uses same workspace, engineering role view)
+ * PROCUREMENT → /procurement.html
+ * ADMIN → /admin-dashboard.html
+ */
+const ROLE_ROUTES = {
+  ADMIN:       '/admin-dashboard.html',
+  // 2026-09-13: Project Head / Engineering land on kW Packs — the page their nav
+  // actually offers (workspace.html is an Admin-only "Advanced" console).
+  PROJECT_HEAD: '/pack-config.html',
+  ENGINEERING: '/pack-config.html',
+  PROCUREMENT: '/catalog.html',
+  SALES:       '/sales.html',
+  SALES_HEAD:  '/sales.html',
+  SALES_CRS:   '/sales.html',
+  FIELD_SALES: '/sales.html',
+};
+
+// `?next=/page.html?x=y` — set by nav.js when a session died mid-page. Only a
+// same-origin path is honoured (never an absolute URL), so it cannot be used
+// to bounce a user off-site after login.
+function nextPath() {
+  try {
+    const n = new URLSearchParams(location.search).get('next') || '';
+    if (/^\/[^/\\]/.test(n) && !/^\/login\.html/.test(n)) return n;
+  } catch {}
+  return '';
+}
+function landingFor(role) { return nextPath() || ROLE_ROUTES[role] || ''; }
+
+// Check for existing valid session on load
+(async function checkSession() {
+  const token = sessionStorage.getItem(SESSION_KEY);
+  if (!token) return;
+  try {
+    const res = await fetch('/api/auth/session', { headers: { 'Authorization': 'Bearer ' + token } });
+    if (!res.ok) { sessionStorage.removeItem(SESSION_KEY); return; }
+    const d = await res.json();
+    const role = d.user?.role;
+    if (role && ROLE_ROUTES[role]) {
+      // Already logged in — redirect to workspace
+      window.location.href = landingFor(role);
+    }
+  } catch { /* no valid session */ }
+})();
+
+async function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pw').value;
+  const errEl = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+
+  errEl.hidden = true;
+  if (!u || !p) { errEl.textContent = 'Enter username and password'; errEl.hidden = false; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in...';
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p })
+    });
+    const d = await res.json();
+    if (!res.ok) {
+      errEl.textContent = d.error || 'Login failed';
+      errEl.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+      return;
+    }
+
+    // Store session
+    const token = d.token;
+    const role = d.user?.role || '';
+    const name = d.user?.name || d.user?.username || u;
+    const userId = d.user?.userId || '';
+
+    try {
+      sessionStorage.setItem(SESSION_KEY, token);
+      sessionStorage.setItem(ROLE_KEY, role);
+      sessionStorage.setItem(USER_KEY, name);
+      sessionStorage.setItem(USERID_KEY, userId);
+    } catch {}
+
+    // Route to appropriate workspace (or back to the page the session died on)
+    const route = ROLE_ROUTES[role] ? landingFor(role) : '';
+    if (route) {
+      window.location.href = route;
+    } else {
+      errEl.textContent = 'Unknown role: ' + role + '. Contact administrator.';
+      errEl.hidden = false;
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  } catch (e) {
+    errEl.textContent = 'Connection error. Is the server running?';
+    errEl.hidden = false;
+    btn.disabled = false;
+    btn.textContent = 'Sign In';
+  }
+}
+</script>
+</body>
+</html>

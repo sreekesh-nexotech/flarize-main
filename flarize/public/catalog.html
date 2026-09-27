@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Items &amp; Prices · Flarize</title>
+<style>
+:root{--g:#0f7b5f;--g-soft:#e6f4ef;--o:#e8680f;--r:#c0392b;--r-soft:#fbe9e7;--y:#b7791f;--y-soft:#fdf3dc;--b:#2a5db0;--b-soft:#e8effb;--ink:#1c2430;--mut:#66707d;--line:#e3e7ec;--bg:#f4f6f8;--card:#fff;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0}[hidden]{display:none!important}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh}
+button{font:inherit;cursor:pointer}
+main{padding:14px 18px 60px;max-width:1400px;margin:0 auto}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.top h1{margin:0;font-size:20px}.crumb{color:var(--mut);font-size:13px;margin-top:2px}
+.layout{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.cats button{display:flex;justify-content:space-between;width:100%;border:0;background:transparent;padding:8px 10px;border-radius:8px;text-align:left;color:#333}
+.cats button.on{background:var(--g-soft);color:var(--g);font-weight:700}.cats small{color:var(--mut)}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+input[type=text],input[type=number],input[type=search],select{font:inherit;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff;color:var(--ink)}
+input[type=number]{width:110px;text-align:right}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.06em;color:var(--mut);padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.tbl td{padding:8px;border-bottom:1px solid #eef1f4;vertical-align:middle}
+.tbl td.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr.retired td{opacity:.55}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 14px;font-weight:700;color:var(--ink)}.btn.p{background:var(--g);border-color:var(--g);color:#fff}.btn.o{background:var(--o);border-color:var(--o);color:#fff}.btn.sm{padding:5px 10px;font-size:12.5px}.btn.d{color:var(--r)}.btn:disabled{opacity:.45;cursor:not-allowed}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap;display:inline-block}
+.tag.ok{background:var(--g-soft);color:var(--g)}.tag.warn{background:var(--y-soft);color:var(--y)}.tag.bad{background:var(--r-soft);color:var(--r)}.tag.mut{background:#eef1f4;color:#555}
+.tiers label{display:inline-flex;align-items:center;gap:4px;margin-right:8px;font-size:12.5px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.fields label{display:block;font-size:11px;letter-spacing:.05em;font-weight:700;color:var(--mut);margin-bottom:4px}
+.fields input,.fields select{width:100%;text-align:left}
+.hint{font-size:12px;color:var(--mut);margin-top:4px}
+.toast{position:fixed;right:18px;bottom:18px;background:#1c2430;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;max-width:460px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:none;z-index:50}.toast.bad{background:var(--r)}.toast.ok{background:var(--g)}
+.wrap{overflow-x:auto}
+@media (max-width:900px){.layout{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><h1>Items &amp; Prices</h1><div class="crumb">Add panels, inverters and every other item; set the reference price, tiers, DCR and warranty. Sales never sees prices — they only see the approved items the Project Head opens in kW Packs.</div></div>
+    <div class="row"><input type="search" id="q" placeholder="Search name / brand / id…" style="width:260px"><button class="btn p" id="btnAdd">+ Add item</button></div>
+  </div>
+  <div class="layout">
+    <aside class="card cats" id="cats"></aside>
+    <section>
+      <div class="card" id="addCard" hidden></div>
+      <div class="card"><div id="list"></div></div>
+    </section>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script src="/lib/nav.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.flarizeNav&&flarizeNav.init({current:"catalog"}));</script>
+<script type="module" src="/lib/catalog.js"></script>
+</body>
+</html>

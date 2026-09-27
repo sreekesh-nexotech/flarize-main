@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sales Quotation Wizard — Flarize</title>
+<!--
+  SALES QUOTATION WIZARD — Final Production.
+
+  8-step flow for salespeople:
+    Step 1: Customer
+    Step 2: Electricity Bill
+    Step 3: Recommended System
+    Step 4: Approved Package (Base / Value / Premium)
+    Step 5: Approved Options (panel/inverter alternatives)
+    Step 6: Offer
+    Step 7: Final Price Preview
+    Step 8: Generate Quotation
+
+  This page performs NO business calculation. It calls server APIs for:
+    - Customer CRUD (/api/sales/customers)
+    - System recommendation (/api/sales/recommend-size)
+    - System options (/api/sales/system-options)
+    - BOM preview (/api/sales/bom-preview)
+    - Component alternatives (/api/sales/component-alternatives)
+    - Active offers (/api/offers)
+    - Price preview, pack formula (/api/sales/price-preview)      [2026-09-08]
+    - Quotation orchestration (/api/sales/orchestrate)
+    2026-09-08 fast-quotation build: sizes / future-ready / battery / roof / km /
+    subsidy come from the APPROVED pack configuration; Sales may change only the
+    slots the Project Head opened; every figure is computed server-side.
+
+  Authentication uses the shared credential.
+  RBAC is enforced server-side; this page is presentation only.
+  Sales never sees: procurement costs, landed costs, cost heads,
+  margins, internal BOM details, or engineering calculations.
+-->
+<style>
+:root {
+  --bg: #f8fafc; --panel: #ffffff; --line: #e2e8f0; --fg: #1e293b;
+  --dim: #64748b; --accent: #2563eb; --accent-hover: #1d4ed8;
+  --ok: #16a34a; --warn: #d97706; --bad: #dc2626;
+  --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: var(--bg); color: var(--fg); min-height: 100vh; }
+
+/* Layout */
+.app { max-width: 840px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
+header h1 { font-size: 18px; font-weight: 700; }
+header .user-info { margin-left: auto; font-size: 13px; color: var(--dim); }
+
+/* Login */
+.login-box { max-width: 360px; margin: 80px auto; background: var(--panel); border: 1px solid var(--line);
+             border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); text-align: center; }
+.login-box h2 { margin-bottom: 20px; font-size: 20px; }
+.login-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+                   font: inherit; margin-bottom: 12px; }
+.login-box button { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none;
+                    border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; }
+.login-box button:hover { background: var(--accent-hover); }
+
+/* Stepper */
+.stepper { display: flex; gap: 3px; margin-bottom: 24px; overflow-x: auto; }
+.step-pill { flex: 1; text-align: center; padding: 7px 2px; font-size: 11px; font-weight: 600;
+             border-radius: 6px; background: var(--line); color: var(--dim); transition: all .2s;
+             white-space: nowrap; min-width: 0; }
+.step-pill.active { background: var(--accent); color: #fff; }
+.step-pill.done { background: var(--ok); color: #fff; }
+
+/* Cards */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+        padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card h2 { font-size: 16px; margin-bottom: 14px; color: var(--fg); }
+.card h3 { font-size: 14px; margin: 12px 0 8px; color: var(--dim); text-transform: uppercase;
+           letter-spacing: .04em; }
+
+/* Forms */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-row.full { grid-template-columns: 1fr; }
+label.field { display: block; font-size: 12px; font-weight: 600; color: var(--dim);
+              margin-bottom: 4px; text-transform: uppercase; letter-spacing: .03em; }
+input.fi, select.fi, textarea.fi { width: 100%; padding: 9px 12px; border: 1px solid var(--line);
+  border-radius: 6px; font: inherit; font-size: 14px; background: #fff; }
+input.fi:focus, select.fi:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(37,99,235,.15); }
+
+/* Buttons */
+.btn { padding: 10px 20px; border: none; border-radius: 6px; font: inherit; font-weight: 600;
+       cursor: pointer; transition: all .15s; font-size: 14px; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+.btn-outline { background: transparent; border: 1px solid var(--line); color: var(--fg); }
+.btn-outline:hover { background: var(--bg); }
+.btn-success { background: var(--ok); color: #fff; }
+.btn-success:hover { opacity: .9; }
+.btn-danger { background: var(--bad); color: #fff; }
+.nav-row { display: flex; gap: 10px; justify-content: space-between; margin-top: 20px; }
+
+/* Option cards */
+.option-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+.option-card { border: 2px solid var(--line); border-radius: 8px; padding: 14px; cursor: pointer;
+               text-align: center; transition: all .15s; }
+.option-card:hover { border-color: var(--accent); background: #f1f5f9; }
+.option-card.selected { border-color: var(--accent); background: #eff6ff; }
+.option-card .title { font-weight: 700; font-size: 15px; }
+.option-card .sub { font-size: 12px; color: var(--dim); margin-top: 2px; }
+
+/* Tier cards */
+.tier-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.tier-card { border: 2px solid var(--line); border-radius: 10px; padding: 18px; cursor: pointer;
+             text-align: center; transition: all .15s; position: relative; }
+.tier-card:hover { border-color: var(--accent); }
+.tier-card.selected { border-color: var(--accent); background: #eff6ff; }
+.tier-card .tier-name { font-size: 18px; font-weight: 700; text-transform: capitalize; }
+.tier-card .tier-desc { font-size: 13px; color: var(--dim); margin: 6px 0; }
+.tier-card .tier-detail { font-size: 12px; color: var(--dim); }
+.tier-card .badge { position: absolute; top: -10px; right: 10px; background: var(--accent); color: #fff;
+                    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+                    text-transform: uppercase; letter-spacing: .05em; }
+
+/* Recommendation highlight */
+.recommend-box { background: linear-gradient(135deg, #eff6ff, #dbeafe); border: 2px solid var(--accent);
+                 border-radius: 12px; padding: 20px 24px; text-align: center; margin-bottom: 16px; }
+.recommend-box .rec-size { font-size: 36px; font-weight: 800; color: var(--accent); }
+.recommend-box .rec-label { font-size: 14px; color: var(--dim); margin-top: 4px; }
+.recommend-box .rec-detail { font-size: 13px; color: var(--fg); margin-top: 8px; }
+
+/* Options inline cards */
+.opt-group { margin-bottom: 16px; }
+.opt-group .opt-label { font-size: 13px; font-weight: 700; color: var(--dim); text-transform: uppercase;
+                        letter-spacing: .04em; margin-bottom: 8px; }
+.opt-item { border: 2px solid var(--line); border-radius: 8px; padding: 12px 16px; margin-bottom: 6px;
+            cursor: pointer; transition: all .15s; display: flex; justify-content: space-between; align-items: center; }
+.opt-item:hover { border-color: var(--accent); background: #f8fafc; }
+.opt-item.selected { border-color: var(--accent); background: #eff6ff; }
+.opt-item .opt-name { font-weight: 600; font-size: 14px; }
+.opt-item .opt-detail { font-size: 12px; color: var(--dim); margin-top: 2px; }
+.opt-item .opt-badge { font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px;
+                       text-transform: uppercase; white-space: nowrap; }
+.opt-badge.recommended { background: #d1fae5; color: #065f46; }
+.opt-badge.current { background: #e0e7ff; color: #3730a3; }
+
+/* Offer cards */
+.offer-card { border: 2px solid var(--line); border-radius: 10px; padding: 16px 20px; margin-bottom: 10px;
+              cursor: pointer; transition: all .15s; }
+.offer-card:hover { border-color: var(--accent); }
+.offer-card.selected { border-color: var(--ok); background: #f0fdf4; }
+.offer-card .offer-name { font-weight: 700; font-size: 15px; }
+.offer-card .offer-detail { font-size: 13px; color: var(--dim); margin-top: 4px; }
+.offer-card .offer-value { font-size: 14px; font-weight: 700; color: var(--ok); margin-top: 6px; }
+
+/* Price display */
+.price-display { text-align: center; padding: 24px; }
+.price-display .price-label { font-size: 13px; color: var(--dim); text-transform: uppercase;
+                               letter-spacing: .05em; }
+.price-display .price-amount { font-size: 36px; font-weight: 800; color: var(--accent); margin: 8px 0; }
+.price-display .price-detail { font-size: 13px; color: var(--dim); }
+.price-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; max-width: 360px;
+                   margin: 16px auto 0; font-size: 13px; }
+.price-breakdown dt { color: var(--dim); }
+.price-breakdown dd { text-align: right; font-weight: 600; }
+
+/* BOM table */
+table.bom { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.bom th { text-align: left; padding: 6px 8px; border-bottom: 2px solid var(--line);
+               font-size: 11px; text-transform: uppercase; color: var(--dim); }
+table.bom td { padding: 6px 8px; border-bottom: 1px solid var(--line); }
+table.bom .amt { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Customer list */
+.cust-list { max-height: 250px; overflow-y: auto; }
+.cust-item { padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 6px;
+             cursor: pointer; transition: all .15s; display: flex; justify-content: space-between; }
+.cust-item:hover { background: #f1f5f9; border-color: var(--accent); }
+.cust-item.selected { background: #eff6ff; border-color: var(--accent); }
+.cust-item .cname { font-weight: 600; }
+.cust-item .cdetail { font-size: 12px; color: var(--dim); }
+
+/* History table */
+table.history { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.history th { text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--line);
+                   font-size: 11px; text-transform: uppercase; color: var(--dim); }
+table.history td { padding: 8px 10px; border-bottom: 1px solid var(--line); }
+table.history tr:hover { background: #f8fafc; }
+.pill { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 4px; }
+.pill.DRAFT { background: #fef3c7; color: #92400e; }
+.pill.ISSUED { background: #d1fae5; color: #065f46; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--line); margin-bottom: 16px; }
+.tab { padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent;
+       margin-bottom: -2px; color: var(--dim); }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover { color: var(--fg); }
+
+/* Alerts */
+.alert { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; }
+.alert-error { background: #fef2f2; color: var(--bad); border: 1px solid #fecaca; }
+.alert-success { background: #f0fdf4; color: var(--ok); border: 1px solid #bbf7d0; }
+.alert-info { background: #eff6ff; color: var(--accent); border: 1px solid #bfdbfe; }
+.alert-warn { background: #fffbeb; color: var(--warn); border: 1px solid #fde68a; }
+
+/* Review section */
+.review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+.review-grid dt { font-size: 12px; color: var(--dim); text-transform: uppercase; }
+.review-grid dd { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+
+/* Loading */
+.spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--line);
+           border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-overlay { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 40px;
+                   color: var(--dim); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .tier-grid { grid-template-columns: 1fr; }
+  .option-grid { grid-template-columns: 1fr 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+  .price-breakdown { grid-template-columns: 1fr 1fr; }
+}
+
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<div class="app">
+  <!-- LOGIN -->
+  <div id="login-view">
+    <div class="login-box">
+      <h2>Flarize Sales</h2>
+      <div id="login-error" class="alert alert-error" hidden></div>
+      <input id="login-user" type="text" placeholder="Username" autocomplete="username" />
+      <input id="login-pw" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()" />
+      <button onclick="doLogin()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="main-view" hidden>
+    <header>
+      <h1>New quotation</h1>
+      <div class="user-info">
+        <span id="user-name"></span> · <span id="user-role"></span>
+        <!-- Logout lives in the shared top bar (nav.js); a second button here was clutter (2026-09-10). -->
+        <button class="btn btn-outline" style="margin-left:8px;padding:4px 10px;font-size:12px" onclick="doLogout()" hidden>Logout</button>
+      </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('wizard')">New Quotation</div>
+      <div class="tab" onclick="switchTab('history')">Quotation History</div>
+    </div>
+
+    <!-- WIZARD VIEW -->
+    <div id="wizard-view">
+      <div class="stepper" id="stepper"></div>
+      <div id="alert-area"></div>
+
+      <!-- Step 1: Customer -->
+      <div id="step-1" class="card">
+        <h2>Step 1 — Customer</h2>
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn btn-outline" onclick="showCustomerMode('new')" id="btn-new-cust">New Customer</button>
+          <button class="btn btn-outline" onclick="showCustomerMode('find')" id="btn-find-cust">Find Existing</button>
+        </div>
+        <div id="cust-new-form" hidden>
+          <div class="form-row">
+            <div><label class="field">Customer Name *</label><input class="fi" id="c-name" placeholder="Full name" /></div>
+            <div><label class="field">Phone *</label><input class="fi" id="c-phone" placeholder="10-digit mobile" /></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field">Address</label><input class="fi" id="c-address" placeholder="Street address" /></div>
+            <div><label class="field">Pincode</label><input class="fi" id="c-pincode" placeholder="6-digit pincode" /></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field">District</label>
+              <select class="fi" id="c-district"><option value="">— select district —</option></select></div>
+          </div>
+          <div class="form-row">
+            <div><label class="field">Email</label><input class="fi" id="c-email" placeholder="email@example.com" type="email" /></div>
+            <div></div>
+          </div>
+          <button class="btn btn-primary" onclick="createCustomer()">Save Customer</button>
+        </div>
+        <div id="cust-find-form" hidden>
+          <div class="form-row full">
+            <div><label class="field">Search by name or phone</label>
+            <input class="fi" id="c-search" placeholder="Type to search..." oninput="searchCustomers()" /></div>
+          </div>
+          <div class="cust-list" id="cust-results"></div>
+        </div>
+        <div id="cust-selected" hidden>
+          <div class="alert alert-success">
+            Customer selected: <strong id="sel-cust-name"></strong> — <span id="sel-cust-phone"></span>
+            <button class="btn btn-outline" style="margin-left:10px;padding:2px 10px;font-size:12px" onclick="clearCustomer()">Change</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Electricity Bill -->
+      <div id="step-2" class="card" hidden>
+        <h2>Step 2 — Electricity Bill</h2>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px">Enter the customer's current electricity bill to get a system recommendation.</p>
+        <div class="form-row">
+          <div><label class="field">Current Electricity Bill (₹) *</label>
+            <input class="fi" id="bill-amount" type="number" placeholder="e.g. 3500" /></div>
+          <div><label class="field">Bill Cycle *</label>
+            <select class="fi" id="bill-cycle">
+              <option value="bimonthly" selected>Bi-Monthly (every 2 months) — KSEB default</option>
+              <option value="monthly">Monthly</option>
+            </select></div>
+        </div>
+        <div class="form-row">
+          <div><label class="field">Quotation language *</label>
+            <div class="option-grid" id="lang-grid">
+              <div class="option-card selected" id="lang-en" onclick="selectLanguage('en')"><div class="title">English</div><div class="sub">all pages in English</div></div>
+              <div class="option-card" id="lang-ml" onclick="selectLanguage('ml')"><div class="title">മലയാളം</div><div class="sub">Malayalam edition</div></div>
+            </div></div>
+        </div>
+        <div class="form-row">
+          <div><label class="field">Phase</label>
+            <select class="fi" id="bill-phase">
+              <option value="single" selected>Single Phase</option>
+              <option value="three">Three Phase</option>
+            </select></div>
+          <div><label class="field">System Type</label>
+            <select class="fi" id="bill-sys-type">
+              <option value="ongrid" selected>On-Grid</option>
+              <option value="hybrid">Hybrid</option>
+            </select></div>
+        </div>
+      </div>
+
+      <!-- Step 3: Recommended System -->
+      <div id="step-3" class="card" hidden>
+        <h2>Step 3 — Recommended System</h2>
+        <div id="rec-loading" class="loading-overlay"><div class="spinner"></div> Analyzing bill...</div>
+        <div id="rec-content" hidden>
+          <div id="rec-result"></div>
+          <div style="margin-top:16px">
+            <h3>Confirm System Size</h3>
+            <div class="option-grid" id="rec-size-grid"></div>
+          </div>
+          <div style="margin-top:16px" id="appliance-wrap" hidden>
+            <h3>Daily appliance usage <span style="font-weight:500;font-size:12px;color:var(--dim)">— printed on page 3; defaults set by Project Head for this kW</span></h3>
+            <div id="appliance-list"></div>
+            <div id="appliance-total" style="margin-top:8px;font-size:13px"></div>
+          </div>
+          <div style="margin-top:14px" id="rec-battery-wrap" hidden>
+            <h3>Battery</h3>
+            <div class="option-grid" id="rec-battery-grid"></div>
+          </div>
+          <div style="margin-top:14px">
+            <h3>Roof Type</h3>
+            <div class="option-grid" id="rec-roof-grid"></div>
+          </div>
+          <div style="margin-top:14px">
+            <h3>Site Distance</h3>
+            <div class="form-row">
+              <div><label class="field">Distance from warehouse (one-way km) *</label>
+                <input class="fi" id="site-km" type="number" min="0" step="1" placeholder="e.g. 40" oninput="selectedDistanceKm=this.value===''?null:Number(this.value)" /></div>
+              <div id="site-vehicle-wrap" hidden><label class="field">Vehicle</label>
+                <div class="option-grid" id="site-vehicle-grid"></div></div>
+            </div>
+            <div id="site-km-note" style="font-size:12px;color:var(--dim);margin-top:4px"></div>
+          </div>
+          <div style="margin-top:14px">
+            <h3>Subsidy</h3>
+            <div class="option-grid" id="rec-subsidy-grid"></div>
+            <div style="font-size:12px;color:var(--dim);margin-top:4px">Subsidy applies only with DCR panels. Choosing a non-DCR panel in Options forfeits it (shown in the price).</div>
+          </div>
+          <div style="margin-top:14px">
+            <h3>Quotation Source</h3>
+            <div class="form-row">
+              <div>
+                <select class="fi" id="src-select" onchange="onSourceChange(this.value)">
+                  <option value="DIRECT" selected>Direct</option>
+                  <option value="AFFILIATE">Affiliate</option>
+                  <option value="DISTRICT">District</option>
+                </select>
+              </div>
+            </div>
+            <div id="src-district-row" hidden style="margin-top:8px">
+              <label class="field">District</label>
+              <select class="fi" id="src-district" onchange="selectedDistrict=this.value"><option value="">— select district —</option></select>
+            </div>
+            <div id="src-affiliate-row" hidden style="margin-top:8px">
+              <label class="field">Affiliate ID</label>
+              <input class="fi" id="src-affiliate" placeholder="Affiliate identifier" oninput="selectedAffiliateId=this.value.trim()" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Approved Package -->
+      <div id="step-4" class="card" hidden>
+        <h2>Step 4 — Select Package</h2>
+        <div id="pkg-loading" class="loading-overlay"><div class="spinner"></div> Loading packages...</div>
+        <div id="pkg-content" hidden>
+          <div class="tier-grid" id="tier-grid"></div>
+        </div>
+      </div>
+
+      <!-- Step 5: Approved Options -->
+      <div id="step-5" class="card" hidden>
+        <h2>Step 5 — Configuration Options</h2>
+        <p style="font-size:13px;color:var(--dim);margin-bottom:14px">Review your configuration. You can change approved alternatives where available.</p>
+        <div id="options-content"></div>
+      </div>
+
+      <!-- Step 6: Offer -->
+      <div id="step-6" class="card" hidden>
+        <h2>Step 6 — Available Offers</h2>
+        <div id="offer-loading" class="loading-overlay" hidden><div class="spinner"></div> Loading offers...</div>
+        <div id="offer-content"></div>
+      </div>
+
+      <!-- Step 7: Final Price -->
+      <div id="step-7" class="card" hidden>
+        <h2>Step 7 — Final Price</h2>
+        <div id="price-loading" class="loading-overlay"><div class="spinner"></div> Checking price...</div>
+        <div id="price-content" hidden></div>
+      </div>
+
+      <!-- Step 8: Generate -->
+      <div id="step-8" class="card" hidden>
+        <h2>Step 8 — Generate Quotation</h2>
+        <div id="gen-content"></div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="nav-row" id="nav-row">
+        <button class="btn btn-outline" id="btn-prev" onclick="prevStep()" hidden>← Back</button>
+        <div style="flex:1"></div>
+        <button class="btn btn-primary" id="btn-next" onclick="nextStep()">Next →</button>
+      </div>
+    </div>
+
+    <!-- HISTORY VIEW -->
+    <div id="history-view" hidden>
+      <div class="card">
+        <h2>Quotation History</h2>
+        <div class="form-row" style="margin-bottom:14px">
+          <div><input class="fi" id="hist-search" placeholder="Search by number, customer, phone..." oninput="loadHistory()" /></div>
+          <div><select class="fi" id="hist-status" onchange="loadHistory()">
+            <option value="">All Status</option>
+            <option value="DRAFT">Draft</option>
+            <option value="ISSUED">Issued</option>
+          </select></div>
+          <div><select class="fi" id="hist-source" onchange="loadHistory()">
+            <option value="">All Sources</option>
+            <option value="DIRECT">Direct</option>
+            <option value="AFFILIATE">Affiliate</option>
+            <option value="DISTRICT">District</option>
+          </select></div>
+        </div>
+        <div id="hist-content"></div>
+        <div style="margin-top:12px;text-align:right">
+          <a href="/quotation-history.html" style="font-size:13px;color:var(--accent)">View Full History →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =========================================================================
+// STATE
+// =========================================================================
+const SESSION_KEY = 'gr_session_token';
+const USER_KEY = 'gr_sales_user';
+let TOKEN = '';
+let USER = '';
+let USER_ROLE = '';
+let USER_ID = null;
+let currentStep = 1;
+let sysOptions = null;
+
+// Customer
+let selectedCustomer = null;
+
+// Bill / recommendation
+let billRecommendation = null;
+
+// System selection
+let selectedSystemType = null;
+let selectedSize = null;
+let selectedPhase = null;
+let selectedRoof = null;              // FLAT | SHEET | ELEVATED (approved installation matrix)
+let selectedFutureSystemSize = null;  // Future Ready: panels at selectedSize, system at this size
+let selectedBatteryQty = null;        // hybrid 0 / 1 / 2 (PH-configured options)
+let selectedDistanceKm = null;        // one-way km — transport beyond the included km is a customer extra
+let selectedVehicleType = null;       // from the Project Head transport table (auto when only one)
+let selectedSubsidyType = 'residential';
+let selectedLanguage = 'en';          // 'en' | 'ml' — printed edition of the quotation (P1 2026-09-13)
+let applianceDefaults = null;         // /api/quotation-content/appliances/defaults for the selected kW
+let applianceRows = [];               // [{ id, qty, hours }] — Sales-confirmed rows for page 3
+let selectedSource = 'DIRECT';
+let selectedDistrict = '';
+let selectedAffiliateId = '';
+
+// Package
+let selectedTier = null;
+let allTierBoms = null;
+let tierSelections = { base: {}, value: {}, premium: {} };
+
+// Options / alternatives
+let availableAlternatives = {};
+
+// Offer
+let activeOffers = [];
+let selectedOffer = null;
+
+// Upgrade paths (from authoritative config)
+let upgradePaths = [];
+
+// Generation
+let generating = false;
+let lastPricePreview = null;
+
+const $ = id => document.getElementById(id);
+const money = v => v == null ? '—' : '₹' + Number(v).toLocaleString('en-IN');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// =========================================================================
+// AUTH
+// =========================================================================
+function getStoredToken() { try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; } }
+function getStoredUser() { try { return localStorage.getItem(USER_KEY) || ''; } catch { return ''; } }
+
+async function doLogin() {
+  const username = $('login-user').value.trim();
+  const pw = $('login-pw').value;
+  if (!username) { showLoginError('Please enter your username'); return; }
+  if (!pw) { showLoginError('Please enter your password'); return; }
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password: pw })
+    });
+    const data = await res.json();
+    if (!res.ok) { showLoginError(data.error || 'Login failed'); return; }
+    TOKEN = data.token;
+    USER = data.user ? data.user.name || data.user.username : username;
+    USER_ROLE = data.user ? data.user.role : 'SALES';
+    USER_ID = data.user ? data.user.userId : null;
+    try { sessionStorage.setItem(SESSION_KEY, TOKEN); sessionStorage.setItem('gr_user_role', USER_ROLE); sessionStorage.setItem('gr_user_name', USER); } catch {}
+    try { localStorage.setItem(USER_KEY, USER); } catch {}
+    showApp();
+  } catch (e) { showLoginError('Connection error'); }
+}
+
+async function doLogout() {
+  try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); } catch {}
+  TOKEN = ''; USER_ROLE = ''; USER_ID = null;
+  try { sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem('gr_user_role'); sessionStorage.removeItem('gr_user_name'); } catch {}
+  window.location.href = '/login.html';
+}
+
+function showLoginError(msg) {
+  $('login-error').textContent = msg;
+  $('login-error').hidden = false;
+}
+
+// Kerala's 14 districts — the customer / quotation-source district list (owner request 2026-09-09).
+const KERALA_DISTRICTS = ['Alappuzha', 'Ernakulam', 'Idukki', 'Kannur', 'Kasaragod', 'Kollam', 'Kottayam', 'Kozhikode', 'Malappuram', 'Palakkad', 'Pathanamthitta', 'Thiruvananthapuram', 'Thrissur', 'Wayanad'];
+function fillDistrictSelects() {
+  for (const id of ['c-district', 'src-district']) {
+    const sel = $(id); if (!sel || sel.options.length > 1) continue;
+    for (const d of KERALA_DISTRICTS) { const o = document.createElement('option'); o.value = d; o.textContent = d; sel.appendChild(o); }
+  }
+}
+
+const ROLE_LABELS = { ADMIN: 'Administrator', SALES_HEAD: 'Sales Head', SALES_CRS: 'Sales CRS',
+  FIELD_SALES: 'Field Sales', SALES: 'Sales', PROJECT_HEAD: 'Project Head',
+  ENGINEERING: 'Engineering', PROCUREMENT: 'Procurement' };
+
+async function showApp() {
+  flarizeNav.init({ current: 'sales' });
+  $('login-view').hidden = true;
+  $('main-view').hidden = false;
+  $('user-name').textContent = USER;
+  $('user-role').textContent = ROLE_LABELS[USER_ROLE] || USER_ROLE || 'Sales';
+  fillDistrictSelects();
+  await loadSystemOptions();
+  renderStepper();
+  showStep(1);
+}
+
+// =========================================================================
+// API HELPERS
+// =========================================================================
+function headers() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN };
+}
+
+async function api(method, url, body) {
+  const opts = { method, headers: headers() };
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) { doLogout(); throw new Error('Session expired'); }
+  if (!res.ok) throw Object.assign(new Error(data.error || `HTTP ${res.status}`), data);
+  return data;
+}
+
+// =========================================================================
+// TABS
+// =========================================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === (tab === 'wizard' ? 0 : 1)));
+  $('wizard-view').hidden = tab !== 'wizard';
+  $('history-view').hidden = tab !== 'history';
+  if (tab === 'history') loadHistory();
+}
+
+// =========================================================================
+// STEPPER
+// =========================================================================
+const STEPS = ['Customer', 'Bill', 'System', 'Package', 'Options', 'Offer', 'Price', 'Generate'];
+const TOTAL_STEPS = STEPS.length;
+
+function renderStepper() {
+  $('stepper').innerHTML = STEPS.map((s, i) => {
+    const num = i + 1;
+    const cls = num < currentStep ? 'done' : num === currentStep ? 'active' : '';
+    return `<div class="step-pill ${cls}">${num}. ${s}</div>`;
+  }).join('');
+}
+
+function showStep(n) {
+  currentStep = n;
+  renderStepper();
+  for (let i = 1; i <= TOTAL_STEPS; i++) { const el = $(`step-${i}`); if (el) el.hidden = i !== n; }
+  $('btn-prev').hidden = n <= 1;
+  $('btn-next').hidden = n >= TOTAL_STEPS;
+  if (n === 7) {
+    $('btn-next').textContent = 'Generate Quotation →';
+    $('btn-next').className = 'btn btn-success';
+  } else {
+    $('btn-next').textContent = 'Next →';
+    $('btn-next').className = 'btn btn-primary';
+  }
+  $('nav-row').hidden = n >= TOTAL_STEPS;
+  clearAlert();
+
+  // Step entry actions
+  if (n === 3) loadRecommendation();
+  if (n === 4 && selectedSystemType && selectedSize) loadBomPreview();
+  if (n === 5) renderOptions();
+  if (n === 6) loadOffers();
+  if (n === 7) loadPricePreview();
+}
+
+function nextStep() {
+  if (!validateStep(currentStep)) return;
+  if (currentStep === 7) { generateQuotation(); return; }
+  showStep(currentStep + 1);
+}
+
+function prevStep() {
+  if (currentStep > 1) showStep(currentStep - 1);
+}
+
+function validateStep(n) {
+  if (n === 1 && !selectedCustomer) { showAlert('Please select or create a customer.', 'error'); return false; }
+  if (n === 2) {
+    const bill = $('bill-amount').value;
+    if (!bill || Number(bill) <= 0) { showAlert('Please enter the electricity bill amount.', 'error'); return false; }
+  }
+  if (n === 3 && !selectedSize) { showAlert('Please confirm a system size.', 'error'); return false; }
+  if (n === 3 && !selectedRoof) { showAlert('Please select the roof type.', 'error'); return false; }
+  if (n === 3 && (selectedDistanceKm == null || !Number.isFinite(selectedDistanceKm) || selectedDistanceKm < 0)) { showAlert('Please enter the one-way distance from the warehouse to the site (km).', 'error'); return false; }
+  if (n === 3 && (sysOptions?.siteOptions?.vehicleTypes || []).length > 1 && !selectedVehicleType) { showAlert('Please select the vehicle.', 'error'); return false; }
+  if (n === 4 && !selectedTier) { showAlert('Please select a package.', 'error'); return false; }
+  return true;
+}
+
+function showAlert(msg, type = 'info') {
+  $('alert-area').innerHTML = `<div class="alert alert-${type}">${esc(msg)}</div>`;
+}
+function clearAlert() { $('alert-area').innerHTML = ''; }
+
+// =========================================================================
+// STEP 1: CUSTOMER — Simple info only, bill moved to Step 2
+// =========================================================================
+function showCustomerMode(mode) {
+  $('cust-new-form').hidden = mode !== 'new';
+  $('cust-find-form').hidden = mode !== 'find';
+  $('btn-new-cust').className = 'btn ' + (mode === 'new' ? 'btn-primary' : 'btn-outline');
+  $('btn-find-cust').className = 'btn ' + (mode === 'find' ? 'btn-primary' : 'btn-outline');
+  if (mode === 'find') searchCustomers();
+}
+
+async function createCustomer() {
+  const name = $('c-name').value.trim();
+  const phone = $('c-phone').value.trim();
+  if (!name) { showAlert('Customer name is required.', 'error'); return; }
+  if (!phone) { showAlert('Phone number is required.', 'error'); return; }
+  try {
+    const c = await api('POST', '/api/sales/customers', {
+      name, phone,
+      address: $('c-address').value.trim() || null,
+      pincode: $('c-pincode').value.trim() || null,
+      district: $('c-district').value || null,
+      email: $('c-email').value.trim() || null,
+    });
+    selectCustomer(c);
+    showAlert('Customer created.', 'success');
+  } catch (e) {
+    if (e.code === 'CUSTOMER_DUPLICATE' && e.existingCustomer) {
+      selectCustomer(e.existingCustomer);
+      showAlert('Customer already exists — selected.', 'info');
+    } else {
+      showAlert(e.message || 'Failed to create customer.', 'error');
+    }
+  }
+}
+
+async function searchCustomers() {
+  const q = $('c-search').value.trim();
+  try {
+    const data = await api('GET', '/api/sales/customers' + (q ? `?q=${encodeURIComponent(q)}` : ''));
+    const custs = data.customers || [];
+    $('cust-results').innerHTML = custs.length === 0
+      ? '<div style="padding:14px;color:var(--dim);text-align:center">No customers found.</div>'
+      : custs.map(c => `
+          <div class="cust-item" onclick="selectCustomerById('${esc(c.customerId)}')">
+            <div><div class="cname">${esc(c.name)}</div><div class="cdetail">${esc(c.phone)} · ${esc(c.address || '—')}</div></div>
+            <div class="cdetail">${esc(c.pincode || '')}</div>
+          </div>`).join('');
+  } catch (e) {
+    $('cust-results').innerHTML = `<div class="alert alert-error">${esc(e.message)}</div>`;
+  }
+}
+
+async function selectCustomerById(id) {
+  try {
+    const c = await api('GET', `/api/sales/customers/${id}`);
+    selectCustomer(c);
+  } catch (e) { showAlert(e.message, 'error'); }
+}
+
+function selectCustomer(c) {
+  selectedCustomer = c;
+  $('sel-cust-name').textContent = c.name;
+  $('sel-cust-phone').textContent = c.phone;
+  $('cust-selected').hidden = false;
+  $('cust-new-form').hidden = true;
+  $('cust-find-form').hidden = true;
+  // Pre-fill bill if customer has one
+  if (c.currentBill && $('bill-amount')) $('bill-amount').value = c.currentBill;
+  if (c.billCycle && $('bill-cycle')) $('bill-cycle').value = c.billCycle === 'BIMONTHLY' ? 'bimonthly' : 'monthly';
+}
+
+function clearCustomer() {
+  selectedCustomer = null;
+  $('cust-selected').hidden = true;
+  showCustomerMode('find');
+}
+
+// =========================================================================
+// STEP 2: ELECTRICITY BILL — just collects data, analysis on step 3
+// =========================================================================
+// No special logic needed — form is in HTML, validation in validateStep
+
+// =========================================================================
+// STEP 3: RECOMMENDED SYSTEM — call energy engine, show recommendation
+// =========================================================================
+async function loadSystemOptions() {
+  try {
+    sysOptions = await api('GET', '/api/sales/system-options');
+  } catch (e) {
+    showAlert('Failed to load system options: ' + e.message, 'error');
+  }
+}
+
+async function loadRecommendation() {
+  const billAmount = Number($('bill-amount').value);
+  const billingCycle = $('bill-cycle').value;
+  const phase = $('bill-phase').value;
+  selectedSystemType = $('bill-sys-type').value;
+
+  $('rec-loading').hidden = false;
+  $('rec-content').hidden = true;
+
+  try {
+    const rec = await api('GET', `/api/sales/recommend-size?billAmount=${billAmount}&billingCycle=${billingCycle}&phase=${phase}`);
+    billRecommendation = rec;
+
+    // Auto-select recommended size
+    const recKw = rec.recommendedSystemSizeKw;
+    // Find closest available size
+    const availSizes = sysOptions?.options?.[selectedSystemType]?.sizes || [];
+
+    // Build recommendation display
+    let recHtml = `<div class="recommend-box">
+      <div class="rec-label">Based on ₹${billAmount.toLocaleString('en-IN')} ${billingCycle} bill</div>
+      <div class="rec-size">${recKw} kW</div>
+      <div class="rec-label">Recommended System Size</div>`;
+    if (rec.monthlyConsumption) {
+      recHtml += `<div class="rec-detail">Estimated monthly consumption: ${Math.round(rec.monthlyConsumption)} units</div>`;
+    }
+    if (rec.monthlyGeneration) {
+      recHtml += `<div class="rec-detail">Expected monthly generation: ${Math.round(rec.monthlyGeneration)} units</div>`;
+    }
+    if (rec.estimatedMonthlySavings) {
+      recHtml += `<div class="rec-detail" style="color:var(--ok);font-weight:600">Estimated monthly savings: ${money(Math.round(rec.estimatedMonthlySavings))}</div>`;
+    }
+    recHtml += '</div>';
+    $('rec-result').innerHTML = recHtml;
+
+    // Auto-select the recommended size
+    autoSelectSize(recKw);
+
+    // Render size options for override
+    renderSizeOptions();
+    renderRoofOptions();
+
+    $('rec-loading').hidden = true;
+    $('rec-content').hidden = false;
+  } catch (e) {
+    // If recommendation fails, fall back to manual selection
+    $('rec-result').innerHTML = `<div class="alert alert-warn">Could not analyze bill: ${esc(e.message)}. Please select a system size manually.</div>`;
+    billRecommendation = null;
+    renderSizeOptions();
+    renderRoofOptions();
+    $('rec-loading').hidden = true;
+    $('rec-content').hidden = false;
+  }
+}
+
+function autoSelectSize(recKw) {
+  if (!sysOptions || !selectedSystemType) return;
+  const sizes = sysOptions.options[selectedSystemType]?.sizes || [];
+  // Find exact match or closest
+  let best = sizes[0];
+  let bestDiff = Infinity;
+  for (const s of sizes) {
+    const sKw = parseFloat(s.label) || parseFloat(s.key);
+    const diff = Math.abs(sKw - recKw);
+    if (diff < bestDiff) { bestDiff = diff; best = s; }
+  }
+  if (best) {
+    selectedSize = best.key;
+    selectedPhase = best.isThreePhase ? '3P' : '1P';
+    selectedFutureSystemSize = null;
+  }
+}
+
+function renderSizeOptions() {
+  if (!sysOptions || !selectedSystemType) return;
+  const sizes = sysOptions.options[selectedSystemType]?.sizes || [];
+  const recKw = billRecommendation?.recommendedSystemSizeKw;
+
+  // Sizes and future-ready packs come from the APPROVED pack configuration
+  // (Project Head authored, Admin approved). A new kW appears here the moment
+  // its configuration version is approved — nothing is hard-coded.
+  const cards = [];
+  // KSEB service rule (owner, 2026-09-13): single-phase supply carries at most
+  // 5 kW; anything above 5 kW needs a three-phase connection, and 3 kW is a
+  // single-phase pack. The phase entered in Step 2 filters the sizes offered.
+  const billPhase = $('bill-phase').value;
+  const kwOf = (x) => parseFloat(String(x.key).replace(/[^0-9.]/g, '')) || parseFloat(x.label) || 0;
+  const offered = sizes.filter(x => billPhase === 'three' ? kwOf(x) >= 5 : kwOf(x) <= 5);
+  if (selectedSize && !offered.some(x => x.key === selectedSize)) { selectedSize = null; selectedFutureSystemSize = null; }
+  if (!selectedSize && offered.length) { const f = offered.find(x => recKw && kwOf(x) >= recKw) || offered[offered.length - 1]; selectedSize = f.key; selectedPhase = f.isThreePhase ? '3P' : '1P'; }
+  if (!offered.length) cards.push(`<div class="alert alert-warn">No ${billPhase === 'three' ? 'three-phase (5 kW and above)' : 'single-phase (up to 5 kW)'} pack is published for ${esc(selectedSystemType)}. Change the phase in Step 2 or ask the Project Head to publish one.</div>`);
+  for (const s of offered) {
+    const isRec = recKw && (parseFloat(s.label) === recKw || parseFloat(s.key) === recKw);
+    const sel = selectedSize === s.key && !selectedFutureSystemSize;
+    cards.push(`<div class="option-card ${sel ? 'selected' : ''}" onclick="selectSize('${esc(s.key)}', null)">
+      <div class="title">${esc(s.label)}</div>
+      <div class="sub">${esc(s.phase)}</div>
+      ${isRec ? '<div style="font-size:10px;font-weight:700;color:var(--ok);margin-top:4px">★ RECOMMENDED</div>' : ''}
+    </div>`);
+    for (const fr of (s.futureReady || [])) {
+      const selFr = selectedSize === s.key && selectedFutureSystemSize === fr.systemSize;
+      const sysLabel = sizes.find(x => x.key === fr.systemSize)?.label || fr.systemSize;
+      cards.push(`<div class="option-card ${selFr ? 'selected' : ''}" onclick="selectSize('${esc(s.key)}', '${esc(fr.systemSize)}')">
+        <div class="title">${esc(s.label)} <span style="font-weight:500">→ ${esc(sysLabel)}</span></div>
+        <div class="sub">${esc(s.phase)} · Future Ready</div>
+        <div style="font-size:10px;color:var(--acc);margin-top:4px">${esc(s.label)} panels now · ${esc(sysLabel)} inverter &amp; structure — add panels later</div>
+      </div>`);
+    }
+  }
+  $('rec-size-grid').innerHTML = cards.join('');
+  renderBatteryOptions();
+  loadApplianceDefaults();
+}
+
+// ---- P1 (2026-09-13): quotation language + appliance rows for page 3 ----
+function selectLanguage(l) {
+  selectedLanguage = l === 'ml' ? 'ml' : 'en';
+  $('lang-en').classList.toggle('selected', selectedLanguage === 'en');
+  $('lang-ml').classList.toggle('selected', selectedLanguage === 'ml');
+}
+let _applianceKw = null;
+async function loadApplianceDefaults() {
+  const kw = parseFloat(String(selectedSize || '').replace(/[^0-9.]/g, ''));
+  if (!(kw > 0)) { $('appliance-wrap').hidden = true; return; }
+  if (_applianceKw === kw && applianceDefaults) { renderAppliances(); return; }
+  try {
+    // Optional appliances the customer told us about (EV, pump, heater…) survive
+    // a size change; the base profile rows follow the new kW.
+    const prevMaster = applianceDefaults?.master || [];
+    const extras = applianceRows.filter(r => prevMaster.find(m => m.id === r.id)?.optional);
+    applianceDefaults = await api('GET', `/api/quotation-content/appliances/defaults?kw=${kw}&lang=en`);
+    _applianceKw = kw;
+    applianceRows = applianceDefaults.rows.map(r => ({ id: r.id, qty: r.qty, hours: r.hours }));
+    for (const x of extras) if (!applianceRows.some(r => r.id === x.id)) applianceRows.push({ ...x });
+    renderAppliances();
+    $('appliance-wrap').hidden = false;
+  } catch (e) {
+    applianceDefaults = null; applianceRows = []; $('appliance-wrap').hidden = true;
+  }
+}
+function applianceUnits(r) {
+  const m = (applianceDefaults?.master || []).find(x => x.id === r.id); if (!m) return 0;
+  return Math.round(r.qty * m.watts * r.hours / 1000 * 10) / 10;
+}
+function applianceTotal() { return Math.round(applianceRows.reduce((s, r) => s + applianceUnits(r), 0) * 10) / 10; }
+function renderAppliances() {
+  if (!applianceDefaults) return;
+  const master = applianceDefaults.master || [];
+  const inRows = new Set(applianceRows.map(r => r.id));
+  const rowHtml = (r) => { const m = master.find(x => x.id === r.id); if (!m) return ''; return `
+    <div style="display:grid;grid-template-columns:1.6fr 90px 90px 80px 60px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #eef1f2;font-size:13px">
+      <div>${esc(m.icon || '')} ${esc(m.name)} <span style="color:var(--dim);font-size:11px">${m.watts} W</span></div>
+      <input class="fi" type="number" min="0" max="50" step="1" value="${r.qty}" oninput="setAppliance('${esc(r.id)}','qty',this.value)" title="quantity">
+      <input class="fi" type="number" min="0" max="24" step="0.5" value="${r.hours}" oninput="setAppliance('${esc(r.id)}','hours',this.value)" title="hours per day">
+      <div style="font-weight:600;color:#1f5fbf">${applianceUnits(r)} units</div>
+      <button class="btn btn-outline" style="padding:2px 8px;font-size:11px" onclick="removeAppliance('${esc(r.id)}')">✕</button>
+    </div>`; };
+  const addable = master.filter(m => !inRows.has(m.id));
+  $('appliance-list').innerHTML = `
+    <div style="display:grid;grid-template-columns:1.6fr 90px 90px 80px 60px;gap:8px;font-size:11px;color:var(--dim);padding:4px 0"><div>Appliance</div><div>Qty</div><div>Hours/day</div><div>Units/day</div><div></div></div>
+    ${applianceRows.map(rowHtml).join('')}
+    ${addable.length ? `<div style="margin-top:8px;font-size:12px">Customer also has:
+      ${addable.map(m => `<button class="btn btn-outline" style="padding:3px 10px;font-size:12px;margin:2px" onclick="addAppliance('${esc(m.id)}')">+ ${esc(m.icon || '')} ${esc(m.name)}</button>`).join('')}</div>` : ''}`;
+  const total = applianceTotal(); const gen = applianceDefaults.dailyGeneration;
+  const over = gen && total > gen;
+  $('appliance-total').innerHTML = `<b>Total ${total} units/day</b> · this ${applianceDefaults.kw} kW system generates about <b>${gen} units/day</b>` +
+    (over ? `<div class="alert alert-warn" style="margin-top:6px">Usage exceeds what ${applianceDefaults.kw} kW produces — consider the next size, or reduce hours.</div>` : `<span style="color:var(--ok);font-weight:600"> — fits</span>`);
+}
+function setAppliance(id, k, v) { const r = applianceRows.find(x => x.id === id); if (!r) return; r[k] = Math.max(0, Number(v) || 0); renderAppliances(); }
+function addAppliance(id) { const m = (applianceDefaults?.master || []).find(x => x.id === id); if (!m || applianceRows.some(r => r.id === id)) return; applianceRows.push({ id, qty: 1, hours: m.defaultHours }); renderAppliances(); }
+function removeAppliance(id) { applianceRows = applianceRows.filter(r => r.id !== id); renderAppliances(); }
+
+function selectSize(sizeKey, futureSystemSize) {
+  selectedSize = sizeKey;
+  selectedFutureSystemSize = futureSystemSize || null;
+  const sizeInfo = sysOptions?.options?.[selectedSystemType]?.sizes?.find(s => s.key === sizeKey);
+  selectedPhase = sizeInfo?.isThreePhase ? '3P' : '1P';
+  selectedTier = null;
+  allTierBoms = null;
+  tierSelections = { base: {}, value: {}, premium: {} };
+  renderSizeOptions();
+}
+
+// Hybrid: battery count is a pack fact (0 = no battery / future ready, 1, 2).
+// No battery → no battery, MCCB or extra meter in the pack (server template).
+function renderBatteryOptions() {
+  const opts = sysOptions?.options?.[selectedSystemType]?.batteryOptions || [0];
+  const show = selectedSystemType === 'hybrid' && opts.length > 1;
+  $('rec-battery-wrap').hidden = !show;
+  if (!show) { selectedBatteryQty = null; return; }
+  if (selectedBatteryQty == null || !opts.includes(selectedBatteryQty)) selectedBatteryQty = opts.includes(1) ? 1 : opts[0];
+  const labels = { 0: ['No battery', 'future ready — add later'], 1: ['1 battery', 'with MCCB & battery meter'], 2: ['2 batteries', 'with MCCB & battery meter'] };
+  $('rec-battery-grid').innerHTML = opts.map(b => `<div class="option-card ${selectedBatteryQty === b ? 'selected' : ''}" onclick="selectBattery(${Number(b)})">
+      <div class="title">${esc(labels[b]?.[0] || b + ' batteries')}</div><div class="sub">${esc(labels[b]?.[1] || '')}</div></div>`).join('');
+}
+function selectBattery(b) { selectedBatteryQty = b; selectedTier = null; allTierBoms = null; tierSelections = { base: {}, value: {}, premium: {} }; renderBatteryOptions(); }
+
+const ROOF_LABELS = { FLAT: ['Flat roof', 'RCC / concrete'], SHEET: ['Sheet roof', 'metal / tin sheet'], ELEVATED: ['Elevated structure', 'raised / high-rise'], RCC: ['Flat roof', 'RCC'], GROUND: ['Ground mount', ''] };
+function renderRoofOptions() {
+  // Roof types = the ones the Project Head priced in the installation matrix.
+  const roofs = sysOptions?.siteOptions?.roofTypes?.length ? sysOptions.siteOptions.roofTypes : (sysOptions?.availableRoofTypes || []);
+  if (!roofs.includes(selectedRoof)) selectedRoof = roofs.includes('FLAT') ? 'FLAT' : (roofs[0] || null);
+  $('rec-roof-grid').innerHTML = roofs.length ? roofs.map(r =>
+    `<div class="option-card ${selectedRoof === r ? 'selected' : ''}" onclick="selectRoof('${esc(r)}')">
+      <div class="title">${esc(ROOF_LABELS[r]?.[0] || r)}</div><div class="sub">${esc(ROOF_LABELS[r]?.[1] || '')}</div>
+    </div>`
+  ).join('') : '<div class="alert alert-warn">No roof type is priced yet — Project Head must set the installation matrix.</div>';
+  renderSiteOptions();
+  renderSubsidyOptions();
+}
+
+function selectRoof(r) {
+  selectedRoof = r;
+  renderRoofOptions();
+}
+
+function renderSiteOptions() {
+  const so = sysOptions?.siteOptions || {};
+  const vehicles = so.vehicleTypes || [];
+  if (vehicles.length === 1) selectedVehicleType = vehicles[0].vehicleType;
+  $('site-vehicle-wrap').hidden = vehicles.length <= 1;
+  if (vehicles.length > 1) {
+    if (!vehicles.some(v => v.vehicleType === selectedVehicleType)) selectedVehicleType = null;
+    $('site-vehicle-grid').innerHTML = vehicles.map(v => `<div class="option-card ${selectedVehicleType === v.vehicleType ? 'selected' : ''}" onclick="selectedVehicleType='${esc(v.vehicleType)}';renderSiteOptions()"><div class="title">${esc(v.vehicleName || v.vehicleType)}</div></div>`).join('');
+  }
+  const inc = so.transport?.includedKm;
+  $('site-km-note').textContent = inc != null ? `First ${inc} km one-way is included in every pack. Distance beyond that is shown to the customer as a separate transport extra — not part of the system price.` : '';
+  if (selectedDistanceKm != null) $('site-km').value = selectedDistanceKm;
+}
+
+function renderSubsidyOptions() {
+  const types = sysOptions?.siteOptions?.subsidyTypes || [{ key: 'residential', label: 'Residential (PM Surya Ghar)' }, { key: 'none', label: 'No subsidy' }];
+  if (!types.some(t => t.key === selectedSubsidyType)) selectedSubsidyType = types[0].key;
+  $('rec-subsidy-grid').innerHTML = types.map(t => `<div class="option-card ${selectedSubsidyType === t.key ? 'selected' : ''}" onclick="selectedSubsidyType='${esc(t.key)}';renderSubsidyOptions()"><div class="title">${esc(t.label)}</div></div>`).join('');
+}
+
+function onSourceChange(v) {
+  selectedSource = v;
+  selectedDistrict = '';
+  selectedAffiliateId = '';
+  if ($('src-district')) $('src-district').value = '';
+  if ($('src-affiliate')) $('src-affiliate').value = '';
+  $('src-district-row').hidden = v !== 'DISTRICT';
+  $('src-affiliate-row').hidden = v !== 'AFFILIATE';
+}
+
+// =========================================================================
+// STEP 4: APPROVED PACKAGES — tier selection without price exposure
+// =========================================================================
+// Every server call carries the same pack facts (owner model): panel size,
+// future-ready system size, roof, battery count, distance and vehicle.
+function packBody(extra = {}) {
+  return {
+    systemType: selectedSystemType, size: selectedSize, phase: selectedPhase,
+    futureSystemSize: selectedFutureSystemSize || null,
+    batteryQuantity: selectedSystemType === 'hybrid' ? selectedBatteryQty : undefined,
+    roofType: selectedRoof,
+    ...extra,
+  };
+}
+
+async function loadBomPreview() {
+  $('pkg-loading').hidden = false;
+  $('pkg-content').hidden = true;
+  try {
+    const data = await api('POST', '/api/sales/bom-preview', packBody({ tierSelections }));
+    allTierBoms = data.boms;
+    renderTierCards();
+    $('pkg-loading').hidden = true;
+    $('pkg-content').hidden = false;
+  } catch (e) {
+    $('pkg-loading').innerHTML = `<div class="alert alert-error">Failed to load packages: ${esc(e.message)}</div>`;
+  }
+}
+
+function renderTierCards() {
+  if (!allTierBoms) return;
+  const tiers = ['base', 'value', 'premium'];
+  const labels = { base: 'Base', value: 'Value', premium: 'Premium' };
+  const descs = {
+    base: 'Essential configuration',
+    value: 'Best balance of performance and value',
+    premium: 'High-end performance configuration'
+  };
+  const badges = { value: '★ Recommended' };
+
+  $('tier-grid').innerHTML = tiers.map(t => {
+    const bom = allTierBoms[t];
+    if (!bom) return '';
+    const profile = bom.profile || {};
+    const details = [];
+    if (profile.structureType) details.push(profile.structureType === 'GP' ? 'GP Structure' : 'GI Structure');
+    const sc = bom.systemConfig || {};
+    if (selectedSystemType === 'hybrid') details.push(sc.batteryQuantity > 0 ? `${sc.batteryQuantity} battery` : 'No battery (future ready)');
+    if (profile.inverterType === 'micro') details.push('Micro inverter');
+    if (sc.futureReady) details.push(`Future Ready → ${esc(sc.systemSize)}`);
+    const keyLines = (bom.lines || []).filter(l => ['panel', 'inverter', 'battery'].includes(l.category)).map(l => `${esc(l.name)} × ${l.qty}`);
+    if (keyLines.length) details.push(keyLines.join(' · '));
+
+    return `<div class="tier-card ${selectedTier === t ? 'selected' : ''}" onclick="selectTier('${t}')">
+      ${badges[t] ? `<div class="badge">${badges[t]}</div>` : ''}
+      <div class="tier-name">${labels[t]}</div>
+      <div class="tier-desc">${descs[t]}</div>
+      <div class="tier-detail">${details.join(' · ') || '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function selectTier(t) {
+  selectedTier = t;
+  renderTierCards();
+}
+
+// =========================================================================
+// STEP 5: APPROVED OPTIONS — alternatives for selectable components
+// =========================================================================
+async function renderOptions() {
+  if (!selectedTier || !allTierBoms) return;
+  const bom = allTierBoms[selectedTier];
+  if (!bom) return;
+
+  const categoryLabels = { panel: 'Solar Panel', inverter: 'Inverter', acdb: 'AC Distribution Box', dcdb: 'DC Distribution Box', earth_cable: 'Earthing Cable', cb_rod: 'Earthing Rod', isolator: 'Isolator', meter: 'Meter', dc_cable: 'DC Cable', ac_cable: 'AC Cable', la_cable: 'LA Cable' };
+  let html = '';
+
+  // Your configuration — the pack as the Project Head approved it (no prices).
+  const keyComponents = (bom.lines || []).filter(l => l.isVariable);
+  const structure = bom.structure?.lines || [];
+  if (keyComponents.length) {
+    html += `<div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:16px">
+      <h3>Your Configuration</h3>
+      <table class="bom"><thead><tr><th>Component</th><th>Brand / Model</th><th class="amt">Qty</th><th></th></tr></thead><tbody>`;
+    for (const l of keyComponents) {
+      html += `<tr><td>${esc(l.label || l.category)}</td><td style="font-size:12px;color:var(--dim)">${esc(l.name || '')}</td><td class="amt">${l.qty}</td><td style="font-size:11px;color:var(--dim)">${l.salesSwap ? 'changeable below' : 'fixed by Project Head'}</td></tr>`;
+    }
+    if (structure.length) html += `<tr><td>Structure</td><td style="font-size:12px;color:var(--dim)">${esc(ROOF_LABELS[selectedRoof]?.[0] || selectedRoof)} pack · ${structure.length} items</td><td class="amt">—</td><td style="font-size:11px;color:var(--dim)">follows roof type</td></tr>`;
+    html += '</tbody></table></div>';
+  }
+
+  // Approved alternatives — ONE server call; the server returns only the slots
+  // the Project Head opened for Sales and only the approved items.
+  try {
+    const params = new URLSearchParams({ systemType: selectedSystemType, size: selectedSize, tier: selectedTier, phase: selectedPhase || '' });
+    if (selectedFutureSystemSize) params.set('futureSystemSize', selectedFutureSystemSize);
+    if (selectedSystemType === 'hybrid' && selectedBatteryQty != null) params.set('batteryQuantity', String(selectedBatteryQty));
+    const data = await api('GET', `/api/sales/component-alternatives?${params}`);
+    availableAlternatives = data.alternatives || {};
+    const groups = Object.entries(availableAlternatives).filter(([, alts]) => alts && alts.length > 1);
+    if (groups.length) {
+      html += `<div class="card" style="box-shadow:none;border:1px solid var(--line)"><h3>Change approved components</h3>
+        <p style="font-size:12px;color:var(--dim);margin:0 0 10px">Only the items the Project Head opened for Sales. Choosing a different item adjusts the price automatically.</p>`;
+      for (const [cat, alts] of groups) {
+        const bomLine = (bom.lines || []).find(l => l.category === cat && l.isVariable);
+        const currentId = tierSelections[selectedTier]?.[cat] || bomLine?.componentId || data.defaultSelections?.[cat] || null;
+        const optionLabel = (item) => {
+          const details = [];
+          if (item.watt) details.push(item.watt + 'W');
+          if (item.kw) details.push(item.kw + ' kW');
+          if (item.phase) details.push(item.phase);
+          if (cat === 'panel') details.push(item.dcr ? 'DCR' : 'Non-DCR');
+          if (item.warranty) details.push(item.warranty + (typeof item.warranty === 'number' ? ' yr' : ''));
+          return `${item.name}${details.length ? ' — ' + details.join(' · ') : ''}${item.isDefault ? ' (pack default)' : ''}`;
+        };
+        html += `<div class="form-row" style="margin-bottom:10px"><div style="grid-column:1 / -1"><label class="field">${esc(categoryLabels[cat] || cat)}</label>
+          <select class="fi" onchange="selectOption('${esc(cat)}', this.value)">
+            ${alts.map(item => `<option value="${esc(item.id)}" ${item.id === currentId ? 'selected' : ''}>${esc(optionLabel(item))}</option>`).join('')}
+          </select>
+          ${cat === 'panel' ? '<div style="font-size:11px;color:var(--dim);margin-top:4px">DCR panels qualify for the PM Surya Ghar subsidy; Non-DCR panels do not.</div>' : ''}
+        </div></div>`;
+      }
+      html += '</div>';
+    }
+  } catch (e) {
+    html += `<div class="alert alert-warn">Alternatives unavailable: ${esc(e.message)}</div>`;
+  }
+
+  if (!html) html = '<div style="padding:20px;text-align:center;color:var(--dim)">No alternative options available for this configuration. Proceeding with default selections.</div>';
+  $('options-content').innerHTML = html;
+}
+
+async function selectOption(category, componentId) {
+  tierSelections[selectedTier] = tierSelections[selectedTier] || {};
+  const prev = tierSelections[selectedTier][category];
+  tierSelections[selectedTier][category] = componentId;
+
+  showAlert('Updating configuration...', 'info');
+  try {
+    const data = await api('POST', '/api/sales/bom-preview', packBody({ tierSelections }));
+    allTierBoms = data.boms;
+    clearAlert();
+    renderOptions();
+  } catch (e) {
+    if (prev) tierSelections[selectedTier][category] = prev; else delete tierSelections[selectedTier][category];
+    showAlert('Selection not allowed: ' + e.message, 'error');
+    try {
+      const data = await api('POST', '/api/sales/bom-preview', packBody({ tierSelections }));
+      allTierBoms = data.boms;
+    } catch (e2) { /* keep existing */ }
+    renderOptions();
+  }
+}
+
+// =========================================================================
+// STEP 6: OFFERS — show applicable active offers
+// =========================================================================
+async function loadOffers() {
+  $('offer-loading').hidden = false;
+  try {
+    const data = await api('GET', '/api/offers');
+    activeOffers = (data.offers || []).filter(o => {
+      // Filter applicable: check systemType + tier
+      if (o.appliesTo && o.appliesTo !== 'all' && o.appliesTo !== selectedSystemType) return false;
+      if (o.appliesToTier && o.appliesToTier !== 'all' && o.appliesToTier !== selectedTier) return false;
+      return true;
+    });
+    renderOffers();
+  } catch (e) {
+    activeOffers = [];
+    renderOffers();
+  }
+  $('offer-loading').hidden = true;
+}
+
+function renderOffers() {
+  if (activeOffers.length === 0) {
+    $('offer-content').innerHTML = `
+      <div style="padding:20px;text-align:center;color:var(--dim)">
+        No offers currently available for this configuration.
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="btn btn-outline" onclick="selectedOffer=null;nextStep()">Continue without offer →</button>
+      </div>`;
+    selectedOffer = null;
+    return;
+  }
+
+  let html = '<p style="font-size:13px;color:var(--dim);margin-bottom:12px">Select an offer to apply, or continue without one.</p>';
+
+  for (const o of activeOffers) {
+    const isSelected = selectedOffer?.id === o.id;
+    const valueStr = o.type === 'percentage' ? `${o.value}% off` : money(o.value) + ' off';
+    const validStr = o.endDate ? `Valid until ${new Date(o.endDate).toLocaleDateString('en-IN')}` : 'No expiry';
+
+    html += `<div class="offer-card ${isSelected ? 'selected' : ''}" onclick="selectOffer('${esc(o.id)}')">
+      <div class="offer-name">${esc(o.name)}</div>
+      <div class="offer-detail">${validStr}</div>
+      <div class="offer-value">${valueStr}</div>
+      ${isSelected ? '<div style="font-size:11px;font-weight:700;color:var(--ok);margin-top:4px">✓ Applied</div>' : ''}
+    </div>`;
+  }
+
+  html += `<div style="text-align:center;margin-top:12px">
+    <button class="btn btn-outline" style="font-size:12px" onclick="clearOffer()">Continue without offer</button>
+  </div>`;
+
+  $('offer-content').innerHTML = html;
+}
+
+function selectOffer(offerId) {
+  selectedOffer = activeOffers.find(o => o.id === offerId) || null;
+  renderOffers();
+}
+
+function clearOffer() {
+  selectedOffer = null;
+  renderOffers();
+}
+
+// =========================================================================
+// STEP 7: FINAL PRICE PREVIEW — preflight + price display (no internals)
+// =========================================================================
+async function loadPricePreview() {
+  $('price-loading').hidden = false;
+  $('price-content').hidden = true;
+  lastPricePreview = null;
+
+  const sysLabel = sysOptions?.options?.[selectedSystemType]?.label || selectedSystemType;
+  const sizes = sysOptions?.options?.[selectedSystemType]?.sizes || [];
+  const sizeLabel = sizes.find(s => s.key === selectedSize)?.label || selectedSize;
+  const frLabel = selectedFutureSystemSize ? ` → ${sizes.find(s => s.key === selectedFutureSystemSize)?.label || selectedFutureSystemSize} (Future Ready)` : '';
+  const summary = `
+      <div class="card" style="box-shadow:none;border:1px solid var(--line);margin-bottom:14px">
+        <h3>Order Summary</h3>
+        <dl class="review-grid">
+          <dt>Customer</dt><dd>${esc(selectedCustomer.name)}</dd>
+          <dt>Phone</dt><dd>${esc(selectedCustomer.phone)}</dd>
+          <dt>System</dt><dd>${esc(sysLabel)} — ${esc(sizeLabel)}${esc(frLabel)}</dd>
+          <dt>Package</dt><dd style="text-transform:capitalize">${esc(selectedTier)}</dd>
+          ${selectedSystemType === 'hybrid' ? `<dt>Battery</dt><dd>${selectedBatteryQty > 0 ? selectedBatteryQty : 'None (future ready)'}</dd>` : ''}
+          <dt>Roof Type</dt><dd>${esc(ROOF_LABELS[selectedRoof]?.[0] || selectedRoof)}</dd>
+          <dt>Distance</dt><dd>${esc(selectedDistanceKm)} km one-way${selectedVehicleType ? ' · ' + esc(selectedVehicleType) : ''}</dd>
+          ${selectedOffer ? `<dt>Offer</dt><dd style="color:var(--ok)">${esc(selectedOffer.name)}</dd>` : ''}
+        </dl>
+      </div>`;
+
+  try {
+    // Server-side price (owner formula): pack market rate + approved swaps +
+    // roof add-on, GST 70/30 composite, transport beyond the included km as a
+    // separate customer extra, subsidy from the DCR status of the chosen panel.
+    const price = await api('POST', '/api/sales/price-preview', packBody({
+      tier: selectedTier, distanceKm: selectedDistanceKm, vehicleType: selectedVehicleType || undefined,
+      selections: tierSelections[selectedTier] || {}, subsidyType: selectedSubsidyType,
+    }));
+    lastPricePreview = price;
+    const c = price.customer;
+    const sub = price.subsidy;
+    const subsidyRow = sub?.available && sub.totalSubsidy > 0
+      ? `<dt>Subsidy (${esc(sub.schemeName || sub.subsidyType)})</dt><dd style="color:var(--ok)">− ${money(sub.totalSubsidy)}</dd>`
+      : (sub?.eligibilityStatus === 'GIVE_IT_UP' ? `<dt>Subsidy</dt><dd style="color:var(--warn)">Forfeited — non-DCR panel selected</dd>`
+        : (selectedSubsidyType !== 'none' && sub?.reason ? `<dt>Subsidy</dt><dd style="color:var(--dim)">${esc(sub.reason)}</dd>` : ''));
+    const validity = price.validity?.validityDays ? `Valid for ${price.validity.validityDays} days` : 'Validity not configured — Admin / Project Head must set the quotation validity policy';
+    $('price-content').innerHTML = summary + `
+      <div class="price-display">
+        <div class="price-label">Customer Price (incl. GST)</div>
+        <div class="price-amount">${money(c.sellingPriceIncludingGST)}</div>
+        <dl class="price-breakdown">
+          <dt>System Price</dt><dd>${money(c.sellingPriceBeforeGST)}</dd>
+          <dt>GST (${esc(price.gst?.ratePct)}% composite)</dt><dd>${money(c.gstAmount)}</dd>
+          ${c.transportExtra > 0 ? `<dt>Transport extra (${c.transportExtraDetail.extraKm} km beyond ${c.transportExtraDetail.includedKm} km)</dt><dd>+ ${money(c.transportExtra)} <span style="font-size:11px;color:var(--dim)">shown separately, not in the system price</span></dd>` : `<dt>Transport</dt><dd>Included (within ${esc(c.transportExtraDetail?.includedKm)} km)</dd>`}
+          ${subsidyRow}
+          <dt style="font-weight:700">Net payable after subsidy</dt><dd style="font-weight:800">${money(c.netPayableAfterSubsidy)}</dd>
+        </dl>
+        <div style="font-size:12px;color:var(--dim);margin-top:8px">${esc(validity)}${price.swaps?.length ? ' · Includes your component changes (' + esc(price.swaps.map(w => w.selectedName).join(', ')) + ')' : ''}</div>
+      </div>
+      <div class="alert alert-success" style="text-align:center;font-size:14px;margin-top:12px">
+        <strong>Ready to generate quotation</strong><br>Click "Generate Quotation" to issue it and open the document.
+      </div>`;
+    $('price-loading').hidden = true;
+    $('price-content').hidden = false;
+    $('btn-next').hidden = false;
+  } catch (e) {
+    const errs = (e.detail && Array.isArray(e.detail.errors)) ? e.detail.errors : [{ code: e.code || 'ERROR', message: e.message }];
+    const owner = e.detail?.owner || 'Project Head';
+    $('price-content').innerHTML = summary + `
+      <div class="alert alert-error" style="margin-bottom:0">
+        <strong>Cannot price this pack yet.</strong> The following must be completed by the ${esc(owner)}:
+        ${errs.map(b => `<div style="margin-top:6px;padding:8px 12px;background:#fff5f5;border-radius:6px;font-size:13px"><strong>${esc(b.code)}</strong>: ${esc(b.message)}</div>`).join('')}
+      </div>`;
+    $('price-loading').hidden = true;
+    $('price-content').hidden = false;
+    $('btn-next').hidden = true;
+  }
+}
+
+// =========================================================================
+// STEP 8: GENERATE QUOTATION — via Sales Orchestrator
+//
+// Delegates ENTIRELY to POST /api/sales/orchestrate.
+// NEVER creates BOM snapshots, commercial snapshots, or quotation records.
+// The orchestrator enforces: approved package → BOM → engineering →
+// cost → pricing → commercial snapshot → quotation. No bypass possible.
+// =========================================================================
+async function generateQuotation() {
+  if (generating) return;
+  generating = true;
+  showStep(8);
+  $('gen-content').innerHTML = '<div class="loading-overlay"><div class="spinner"></div> Generating quotation...</div>';
+  $('nav-row').hidden = true;
+
+  try {
+    // Server-generated quotation number. Validity is resolved server-side from
+    // the Admin / Project Head policy — never a UI constant.
+    const qnResult = await api('POST', '/api/sales/quotation-number');
+
+    // Build bill data from Step 2
+    const billAmount = Number($('bill-amount').value) || null;
+    const billCycle = $('bill-cycle').value || null;
+
+    // Single orchestrator call
+    const result = await api('POST', '/api/sales/orchestrate', {
+      customer: {
+        customerId: selectedCustomer.customerId,
+        customerName: selectedCustomer.name,
+        name: selectedCustomer.name,
+        phone: selectedCustomer.phone,
+        address: selectedCustomer.address || null,
+        pincode: selectedCustomer.pincode || null,
+        email: selectedCustomer.email || null,
+        district: selectedCustomer.district || null,
+        currentBillAmount: billAmount,
+        currentBillCycle: billCycle,
+      },
+      systemType: selectedSystemType,
+      size: selectedSize,
+      tier: selectedTier,
+      phase: selectedPhase,
+      roofType: selectedRoof,
+      installationType: selectedRoof,
+      distanceKm: selectedDistanceKm,
+      vehicleType: selectedVehicleType || undefined,
+      futureSystemSize: selectedFutureSystemSize || null,
+      batteryQuantity: selectedSystemType === 'hybrid' ? selectedBatteryQty : undefined,
+      quotationNumber: qnResult.quotationNumber,
+      quotationDate: qnResult.quotationDate,
+      quotationSource: selectedSource,
+      district: selectedSource === 'DISTRICT' ? selectedDistrict : null,
+      affiliateId: selectedSource === 'AFFILIATE' ? selectedAffiliateId : null,
+      // Subsidy: engine decides from the panel's DCR status (owner rule); 'none' = not quoted.
+      subsidyType: selectedSubsidyType,
+      proposalBy: USER,
+      offerId: selectedOffer?.id || null,
+      tierSelections: tierSelections[selectedTier] || {},
+      // P1 (2026-09-13): printed edition + the appliance rows confirmed in Step 3.
+      quotationLanguage: selectedLanguage,
+      applianceRows: applianceRows.filter(r => r.qty > 0),
+    });
+    const validUntil = result.quotation?.validUntil || null;
+    const pdfName = pdfFileName(result);
+
+    // Open quotation document (its title = the PDF file name, so "Save as PDF" names the file).
+    const docUrl = `/quotation-document.html?id=${encodeURIComponent(result.quotationId)}`;
+    window.open(docUrl, '_blank');
+
+    // Display result — NO internal data (margin, cost, etc.)
+    const pr = result.pricing || null;
+    const sub = result.subsidy;
+    // Which of the three options (base / value / premium) made it into the
+    // document, and — in plain words — why a missing one is missing. Codes only
+    // reach Sales; the text below is the owner-facing meaning of each code.
+    const TIER_REASON = {
+      ALTERNATIVE_TIER_UNAPPROVED: 'not published for this kW — Project Head must add and publish this pack in kW Packs',
+      ALTERNATIVE_TIER_PRICING_REJECTED: 'no customer price — Project Head must enter the market rate for this pack (kW Packs → Market rates)',
+      ALTERNATIVE_TIER_ENGINEERING_BLOCKED: 'engineering check failed for this pack — Project Head must fix the pack configuration',
+      ALTERNATIVE_TIER_COST_INCOMPLETE: 'cost data incomplete — Procurement must complete item prices',
+    };
+    const inDoc = new Set((result.tierResults || []).map(t => t.tier));
+    const missing = result.unavailableTiers || [];
+    const tierRow = ['value', 'base', 'premium'].map(t => {
+      const u = missing.find(m => m.tier === t);
+      const ok = inDoc.has(t) || (!u && t === selectedTier);
+      return `<div style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--line)">
+        <span style="min-width:74px;font-weight:700;text-transform:capitalize">${esc(t)}${t === selectedTier ? ' <span style="font-size:10px;color:var(--dim)">(recommended)</span>' : ''}</span>
+        ${ok ? '<span style="color:var(--ok);font-weight:600">✓ in the quotation</span>' : `<span style="color:var(--warn)">✗ not in the quotation — ${esc(TIER_REASON[u?.code] || 'could not be prepared')}</span>`}
+      </div>`;
+    }).join('');
+    const tiersHtml = `<div style="margin-top:18px;text-align:left"><div style="font-size:12px;font-weight:700;color:var(--dim);letter-spacing:.05em;margin-bottom:4px">OPTIONS IN THIS QUOTATION</div>${tierRow}
+      ${missing.length ? '<div style="font-size:12px;color:var(--dim);margin-top:6px">The customer sees only the options listed with ✓. Missing options need data from the Project Head / Procurement — nothing is ever guessed.</div>' : ''}</div>`;
+    $('gen-content').innerHTML = `
+      <div class="alert alert-success" style="font-size:15px;text-align:center">
+        Quotation generated successfully!${missing.length ? ` <span style="font-weight:500;font-size:13px">(${3 - missing.length} of 3 options)</span>` : ' (all 3 options)'}
+      </div>
+      <div class="price-display">
+        <div class="price-label">Customer Price (incl. GST)</div>
+        <div class="price-amount">${pr ? money(pr.customerPrice) : '—'}</div>
+        ${pr ? `
+        <dl class="price-breakdown">
+          <dt>System Price</dt><dd>${money(pr.listPrice)}</dd>
+          <dt>GST</dt><dd>${money(pr.gstAmount)}</dd>
+          ${pr.transportExtra > 0 ? `<dt>Transport extra (${pr.transportExtraDetail?.extraKm} km beyond ${pr.transportExtraDetail?.includedKm} km)</dt><dd>+ ${money(pr.transportExtra)} <span style="font-size:11px;color:var(--dim)">separate</span></dd>` : ''}
+          ${sub?.available && sub.totalSubsidy > 0 ? `<dt>Subsidy (${esc(sub.schemeName || sub.subsidyType)})</dt><dd style="color:var(--ok)">− ${money(sub.totalSubsidy)}</dd>` : (sub?.eligibilityStatus === 'GIVE_IT_UP' ? '<dt>Subsidy</dt><dd style="color:var(--warn)">Forfeited (non-DCR panel)</dd>' : '')}
+          ${result.offer?.available && result.offer?.value?.offerAmount ? `<dt>Offer Discount</dt><dd style="color:var(--ok)">-${money(result.offer.value.offerAmount)}</dd>` : ''}
+        </dl>` : ''}
+      </div>
+      ${tiersHtml}
+      <dl class="review-grid" style="margin-top:20px">
+        <dt>Quotation Number</dt><dd style="font-size:16px;font-weight:800">${esc(qnResult.quotationNumber)}</dd>
+        <dt>Date</dt><dd>${new Date(qnResult.quotationDate).toLocaleDateString('en-IN')}</dd>
+        <dt>Valid Until</dt><dd>${validUntil ? new Date(validUntil).toLocaleDateString('en-IN') : '<span style="color:var(--warn)">not set — validity policy not configured</span>'}</dd>
+        <dt>Customer</dt><dd>${esc(selectedCustomer.name)}</dd>
+        <dt>System</dt><dd>${esc(selectedSystemType)} ${esc(selectedSize)} kW${selectedFutureSystemSize ? ' → ' + esc(selectedFutureSystemSize) + ' (Future Ready)' : ''} · <span style="text-transform:capitalize">${esc(selectedTier)}</span></dd>
+        <dt>PDF file name</dt><dd style="font-family:monospace;font-size:12px">${esc(pdfName)}</dd>
+      </dl>
+      <div class="nav-row" style="margin-top:24px;justify-content:center">
+        <button class="btn btn-primary" onclick="window.open('${docUrl}','_blank')">View Quotation</button>
+        <button class="btn btn-success" onclick="window.open('${docUrl}&download=1','_blank')">Download PDF</button>
+        <button class="btn btn-outline" onclick="window.open('${docUrl}&pages=accounts&download=1','_blank')" title="Cover, price, technical specification and bank details only">Accounts copy (4 pages)</button>
+        <button class="btn btn-outline" onclick="resetWizard()">New Quotation</button>
+      </div>`;
+
+  } catch (e) {
+    let errorHtml = `<div class="alert alert-error">${esc(e.message)}</div>`;
+    const detail = e.detail || {};
+
+    if (e.code === 'NO_APPROVED_PACKAGE') {
+      errorHtml = `<div class="alert alert-error">
+        <strong>No approved package available</strong><br>
+        ${esc(e.message)}<br>
+        <span style="font-size:12px;display:block;margin-top:4px">Engineering/Project Head must approve this configuration before quotations can be generated.</span>
+      </div>`;
+    } else if (e.code === 'COST_INCOMPLETE') {
+      errorHtml = `<div class="alert alert-error">
+        <strong>Cost calculation incomplete</strong><br>
+        ${esc(e.message)}<br>
+        <span style="font-size:12px;display:block;margin-top:4px">Procurement must enter landed costs. Project Head must configure rates.</span>
+      </div>`;
+    } else if (e.code === 'ENGINEERING_BLOCKED') {
+      errorHtml = `<div class="alert alert-error">
+        <strong>Engineering validation blocked</strong><br>
+        ${esc(e.message)}<br>
+        <span style="font-size:12px;display:block;margin-top:4px">Engineering must resolve compatibility issues.</span>
+      </div>`;
+    } else if (e.code === 'PRICING_REJECTED') {
+      errorHtml = `<div class="alert alert-error">
+        <strong>Pricing calculation failed</strong><br>
+        ${esc(e.message)}<br>
+        <span style="font-size:12px;display:block;margin-top:4px">Admin must configure margin and GST settings.</span>
+      </div>`;
+    }
+
+    $('gen-content').innerHTML = errorHtml + `
+      <div class="nav-row" style="margin-top:14px">
+        <button class="btn btn-outline" onclick="showStep(7)">← Back to Price</button>
+      </div>`;
+  } finally {
+    generating = false;
+  }
+}
+
+// {CustomerName}_{OnGrid|Hybrid}_{kW}kW_{QuotationNo}.pdf — owner Q9. The same
+// rule lives in quotation-document.html (document.title), which is what the
+// browser uses as the default "Save as PDF" file name.
+function pdfFileName(result) {
+  const clean = (v) => String(v ?? '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const sys = selectedSystemType === 'hybrid' ? 'Hybrid' : 'OnGrid';
+  const kw = String(selectedSize).replace(/[^0-9.]/g, '');
+  return `${clean(selectedCustomer?.name)}_${sys}_${kw}kW_${clean(result.quotation?.quotationNumber || '')}.pdf`;
+}
+
+function resetWizard() {
+  selectedCustomer = null;
+  selectedSystemType = null;
+  selectedSize = null;
+  selectedPhase = null;
+  selectedRoof = null;
+  selectedFutureSystemSize = null;
+  selectedBatteryQty = null;
+  selectedDistanceKm = null;
+  selectedVehicleType = null;
+  selectedSubsidyType = 'residential';
+  $('site-km').value = '';
+  selectedTier = null;
+  allTierBoms = null;
+  tierSelections = { base: {}, value: {}, premium: {} };
+  selectedOffer = null;
+  activeOffers = [];
+  billRecommendation = null;
+  lastPricePreview = null;
+  $('cust-selected').hidden = true;
+  $('c-name').value = '';
+  $('c-phone').value = '';
+  $('c-address').value = '';
+  $('c-pincode').value = '';
+  $('c-district').value = '';
+  $('c-email').value = '';
+  $('bill-amount').value = '';
+  showStep(1);
+  showCustomerMode('find');
+}
+
+// =========================================================================
+// HISTORY
+// =========================================================================
+async function loadHistory() {
+  const search = $('hist-search').value.trim();
+  const status = $('hist-status').value;
+  const source = $('hist-source').value;
+  try {
+    let url = '/api/sales/quotation-history?';
+    if (search) url += `q=${encodeURIComponent(search)}&`;
+    if (status) url += `status=${status}&`;
+    if (source) url += `source=${source}&`;
+    const data = await api('GET', url);
+    const qs = data.quotations || [];
+    if (qs.length === 0) {
+      $('hist-content').innerHTML = '<div style="padding:30px;text-align:center;color:var(--dim)">No quotations found.</div>';
+      return;
+    }
+    $('hist-content').innerHTML = `
+      <div style="overflow-x:auto">
+      <table class="history">
+        <thead><tr>
+          <th>Number</th><th>Customer</th><th>System</th><th>Source</th><th>Date</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>
+          ${qs.map(q => `<tr>
+            <td style="font-weight:600;white-space:nowrap">${esc(q.quotationNumber || q.quotationId)}</td>
+            <td>${esc(q.customer?.name || '—')}<br><span style="font-size:11px;color:var(--dim)">${esc(q.customer?.phone || '')}</span></td>
+            <td>${esc(q.system?.systemType || '—')} ${esc(q.system?.systemSizeKw || '')} kW<br>
+                <span style="font-size:11px;color:var(--dim);text-transform:capitalize">${esc(q.system?.packageTier || '')}</span></td>
+            <td><span style="font-size:11px;text-transform:capitalize">${esc(q.quotationSource || 'DIRECT')}</span></td>
+            <td style="white-space:nowrap">${q.quotationDate ? new Date(q.quotationDate).toLocaleDateString('en-IN') : '—'}</td>
+            <td><span class="pill ${esc(q.status)}">${esc(q.status)}</span></td>
+            <td><button class="btn btn-outline" style="padding:3px 10px;font-size:11px" onclick="viewQuotation('${esc(q.quotationId)}')">View</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+      </div>`;
+  } catch (e) {
+    $('hist-content').innerHTML = `<div class="alert alert-error">${esc(e.message)}</div>`;
+  }
+}
+
+function viewQuotation(id) {
+  window.open(`/quotation-document.html?id=${id}`, '_blank');
+}
+
+// =========================================================================
+// BOOT
+// =========================================================================
+(async function boot() {
+  TOKEN = getStoredToken();
+  USER = getStoredUser();
+  if (TOKEN) {
+    try {
+      const res = await fetch('/api/auth/session', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        USER = data.user.name || data.user.username || USER;
+        USER_ROLE = data.user.role || '';
+        USER_ID = data.user.userId || null;
+        showApp();
+      } else {
+        TOKEN = ''; try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+        $('login-view').hidden = false;
+        $('main-view').hidden = true;
+      }
+    } catch {
+      if (USER) showApp();
+    }
+  } else {
+    $('login-view').hidden = false;
+    $('main-view').hidden = true;
+    if (USER) $('login-user').value = USER;
+  }
+})();
+</script>
+</body>
+</html>

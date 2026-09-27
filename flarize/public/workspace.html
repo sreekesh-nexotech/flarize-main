@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Project Head Workspace — Flarize / Golden Ray</title>
+<!--
+  PROJECT HEAD WORKSPACE UI.  (Phase 3, PART C/D/E/G)
+
+  This page implements NO engineering rule and NO commercial formula. It renders
+  exactly what /api/workspace/* returns. Specifically:
+    * VALID / WARNING / BLOCKED comes from the Engineering Checker.
+    * Lock permission comes from the lock policy, never from the button state.
+    * A cost head with no configured value renders "NOT CONFIGURED", never 0.
+    * Margin, GST and customer price come from the Pricing Engine.
+  If a number is missing here, it is missing in the configuration.
+-->
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e6e9ef; --dim:#8b93a5;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --acc:#4493f8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  header { padding:12px 18px; border-bottom:1px solid var(--line); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; font-weight:600; letter-spacing:.2px; }
+  main { display:grid; grid-template-columns:300px 1fr; gap:0; min-height:calc(100vh - 52px); }
+  aside { border-right:1px solid var(--line); padding:14px; }
+  section { padding:16px 20px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:16px; }
+  .panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--dim); margin:0 0 10px; }
+  label { display:block; font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; margin:8px 0 3px; }
+  input, select, button, textarea { font:inherit; background:#0d1017; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+  button { cursor:pointer; background:#1f2733; }
+  button:hover { border-color:var(--acc); }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--dim); font-weight:600; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.4px; }
+  .VALID,.COMPLETE,.OK { background:rgba(63,185,80,.15); color:var(--ok); }
+  .WARNING,.INCOMPLETE { background:rgba(210,153,34,.15); color:var(--warn); }
+  .BLOCKED,.UNAVAILABLE,.REJECTED { background:rgba(248,81,73,.15); color:var(--bad); }
+  .muted { color:var(--dim); }
+  .notconf { color:var(--bad); font-style:italic; }
+  .finding { border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:8px; cursor:pointer; }
+  .finding.open { border-color:var(--acc); }
+  .finding dl { margin:8px 0 0; display:grid; grid-template-columns:120px 1fr; gap:4px 10px; font-size:13px; }
+  .finding dt { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .err { color:var(--bad); white-space:pre-wrap; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--dim); }
+  /* Modal */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:10000; display:flex; align-items:center; justify-content:center; }
+  .modal { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:20px 24px; min-width:380px; max-width:520px; max-height:80vh; overflow-y:auto; }
+  .modal h3 { margin:0 0 14px; font-size:14px; color:var(--fg); }
+  .modal .comp-list { list-style:none; margin:0 0 14px; padding:0; }
+  .modal .comp-list li { padding:8px 10px; border:1px solid var(--line); border-radius:6px; margin-bottom:6px; cursor:pointer; font-size:13px; }
+  .modal .comp-list li:hover { border-color:var(--acc); background:rgba(68,147,248,.08); }
+  .modal .comp-list li.selected { border-color:var(--acc); background:rgba(68,147,248,.15); }
+  .modal .comp-list li .comp-status { font-size:11px; margin-left:6px; }
+  .modal .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+  .modal .modal-actions button { padding:6px 16px; }
+  .modal .btn-primary { background:var(--acc); color:#fff; border-color:var(--acc); }
+  .modal .btn-primary:hover { background:#3381d8; }
+  .modal .btn-primary[disabled] { opacity:.45; }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+<header>
+  <h1>Project Head Workspace</h1>
+  <span class="muted">Flarize / Golden Ray</span>
+  <span style="flex:1"></span>
+  <!-- 2026-09-09: the role comes from the login session (server-side RBAC); the
+       old "acting role" switcher is kept hidden only so existing script hooks resolve. -->
+  <label style="margin:0" hidden>Acting role</label>
+  <select id="role" hidden></select>
+  <input id="user" type="hidden" value="" />
+  <span id="ver" class="muted"></span>
+</header>
+<div style="margin:12px 16px 0;padding:10px 14px;border:1px solid #2b3a4a;border-radius:8px;background:#141c26;font-size:13px;line-height:1.5;color:#c9d3dd">
+  <b>Advanced engineering console — one project at a time.</b> Everyday work does not need this page: Sales quotes from the approved <a href="/pack-config.html" style="color:#7fb3ff">kW Packs</a>, and prices/items live in <a href="/catalog.html" style="color:#7fb3ff">Items &amp; Prices</a>.
+  Use this page when a single project needs its own BOM: <b>1</b> create or open the project → <b>2</b> save the system configuration → <b>3</b> pick an approved package → <b>4</b> run the engineering check → <b>5</b> lock the BOM → <b>6</b> enter site inputs and compute cost &amp; price.
+</div>
+<main>
+  <aside>
+    <div class="panel">
+      <h2>1 · Project</h2>
+      <div class="row">
+        <select id="projectList" style="flex:1"></select>
+        <button id="openBtn">Open</button>
+      </div>
+      <label>New project id</label>
+      <div class="row">
+        <input id="newId" placeholder="PRJ-001" style="flex:1" />
+        <button id="createBtn">Create</button>
+      </div>
+      <label>Customer</label>
+      <input id="customer" style="width:100%" />
+    </div>
+    <div class="panel">
+      <h2>2 · System configuration</h2>
+      <label>Architecture</label>
+      <select id="architecture"><option value="">—</option><option>DEYE</option><option>ENPHASE</option></select>
+      <label>System type</label>
+      <select id="sysType"><option value="">—</option><option>ongrid</option><option>hybrid</option><option>upgrade</option></select>
+      <label>Size (kW)</label>
+      <input id="sizeKw" type="number" step="0.1" />
+      <label>Phase</label>
+      <select id="phase"><option value="">—</option><option>1P</option><option>3P</option></select>
+      <label>Tier</label>
+      <select id="tier"><option value="">—</option><option>base</option><option>value</option><option>premium</option></select>
+      <div style="margin-top:10px"><button id="saveCfg">Save configuration</button></div>
+    </div>
+    <div class="panel">
+      <h2>3 · Approved package</h2>
+      <button id="loadPkgs">Show approved packages for this configuration</button>
+      <div id="pkgs" style="margin-top:8px"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div id="error" class="err"></div>
+
+    <div class="panel">
+      <h2>4 · Project BOM</h2>
+      <div id="bom" class="muted">No package selected.</div>
+    </div>
+
+    <div class="panel">
+      <h2>5 · Engineering check</h2>
+      <div class="row">
+        <button id="checkBtn">Run engineering check</button>
+        <span id="checkStatus"></span>
+      </div>
+      <div id="findings" style="margin-top:10px" class="muted">Not run.</div>
+    </div>
+
+    <div class="panel">
+      <h2>6 · Lock &amp; snapshot</h2>
+      <div class="row">
+        <button id="lockBtn">Lock BOM</button>
+        <span id="lockMsg" class="muted"></span>
+      </div>
+      <div id="snapshot" style="margin-top:10px"></div>
+    </div>
+
+    <div class="panel">
+      <h2>7 · Cost &amp; pricing (site inputs)</h2>
+      <div class="row">
+        <label style="margin:0">Distance km</label><input id="distanceKm" size="6" />
+        <label style="margin:0">Vehicle</label><input id="vehicleType" size="10" />
+        <label style="margin:0">Install type</label><input id="installationType" size="10" />
+        <label style="margin:0">Structure ₹</label><input id="structureMaterialCost" size="8" />
+        <button id="saveInputs">Save inputs</button>
+        <button id="costBtn">Compute cost &amp; price</button>
+      </div>
+      <div id="cost" style="margin-top:12px" class="muted">Not computed.</div>
+      <div id="pricing" style="margin-top:12px"></div>
+    </div>
+
+    <div class="panel">
+      <h2>8 · Rate &amp; charge history (who changed what)</h2>
+      <div class="row">
+        <select id="configType"></select>
+        <input id="recordId" placeholder="record id" />
+        <button id="histBtn">Show current + history</button>
+      </div>
+      <div id="history" style="margin-top:10px" class="muted">Select a configuration.</div>
+    </div>
+  </section>
+</main>
+
+<script>
+flarizeNav.init({ current: 'workspace' });
+// ---------------------------------------------------------------- transport
+const $ = (id) => document.getElementById(id);
+let PROJECT = null, CAPS = [];
+
+// Shared auth — read Bearer token from application session (set by BOM login).
+const SESSION_KEY = 'gr_session_token';
+function getToken() {
+  try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+}
+if (!getToken()) { location.href = '/login.html'; }
+// Populate actor identity from login session (replaces hardcoded 'operator')
+try { const u = sessionStorage.getItem('gr_user_name'); if (u) $('user').value = u; } catch {}
+
+// The engines are deterministic and refuse to read a clock, so the CALLER
+// supplies the timestamp with every operation. That caller is this page.
+const now = () => new Date().toISOString();
+
+async function api(method, url, body) {
+  const token = getToken();
+  if (!token) { location.href = '/login.html'; throw new Error('Session expired'); }
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+      'X-Actor-Role': $('role').value,
+      'X-Actor-User': $('user').value,
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok && res.status !== 409) throw new Error((data.code ? data.code + ': ' : '') + (data.error || res.statusText));
+  return data;
+}
+const show = (e) => { $('error').textContent = e ? String(e.message || e) : ''; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const pill = (s) => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+// ₹ formatting. A null amount is NOT money — it is an unconfigured value and
+// must never be rendered as 0.
+const money = (v) => v == null ? '<span class="notconf">NOT CONFIGURED</span>'
+  : '₹' + Number(v).toLocaleString('en-IN');
+
+const wrapP = (fn) => wrap(fn, { needsProject: true });
+// Every action except Open / Create needs an open project; say so plainly instead
+// of throwing "PROJECT is null" (2026-09-09 usability review).
+const wrap = (fn, { needsProject = false } = {}) => async (...a) => {
+  try {
+    show(null);
+    if (needsProject && !PROJECT) { show(new Error('Open a project first (top-left: pick a project and click Open, or create one).')); return; }
+    await fn(...a);
+  } catch (e) { show(e); }
+};
+
+// ---------------------------------------------------------------- session
+async function boot() {
+  const s = await api('GET', '/api/workspace/session');
+  const userRole = (function() { try { return sessionStorage.getItem('gr_user_role') || ''; } catch { return ''; } })();
+  const defaultRole = s.roles.includes(userRole) ? userRole : (s.roles.includes('PROJECT_HEAD') ? 'PROJECT_HEAD' : s.roles[0]);
+  $('role').innerHTML = s.roles.map(r => `<option${r === defaultRole ? ' selected' : ''}>${r}</option>`).join('');
+  // Update page title for role
+  const titleMap = { PROJECT_HEAD: 'Project Head Workspace', ENGINEERING: 'Engineering Workspace' };
+  document.querySelector('header h1').textContent = titleMap[defaultRole] || 'Workspace';
+  $('ver').textContent = `${s.workspaceVersion} · ${s.rbacVersion}`;
+  $('ver').title = s.identityNote;
+  const t = await api('GET', '/api/workspace/commercial/types');
+  $('configType').innerHTML = t.types.map(x => `<option value="${x.configType}">${x.configType} (${x.owner})</option>`).join('');
+  await refreshProjects();
+}
+
+async function refreshProjects() {
+  const r = await api('GET', '/api/workspace/projects');
+  $('projectList').innerHTML = r.projects.map(p => `<option>${p.projectId}</option>`).join('')
+    || '<option value="">(none)</option>';
+}
+
+// ---------------------------------------------------------------- project
+$('createBtn').onclick = wrap(async () => {
+  const p = await api('POST', '/api/workspace/projects',
+    { projectId: $('newId').value.trim(), customer: $('customer').value || null, at: now() });
+  await refreshProjects();
+  $('projectList').value = p.projectId;
+  await openProject(p.projectId);
+});
+
+$('openBtn').onclick = wrap(() => openProject($('projectList').value));
+
+async function openProject(id) {
+  if (!id) return;
+  PROJECT = await api('GET', '/api/workspace/projects/' + encodeURIComponent(id));
+  CAPS = PROJECT.capabilities || [];
+  for (const k of ['customer', 'architecture', 'sysType', 'sizeKw', 'phase', 'tier'])
+    if ($(k)) $(k).value = PROJECT[k] ?? '';
+  applyCapabilities();
+  if (PROJECT.hasBom) await loadBom();
+  else $('bom').innerHTML = '<span class="muted">No package selected.</span>';
+  await loadValidation();
+  await loadSnapshot();
+}
+
+/** RBAC in the UI is presentation only. The server enforces it regardless. */
+function applyCapabilities() {
+  const need = { saveCfg:'PROJECT_CONFIGURE', loadPkgs:'PACKAGE_SELECT', checkBtn:'BOM_RUN_CHECKER',
+                 lockBtn:'BOM_LOCK', costBtn:'COST_VIEW', saveInputs:'COST_INPUT_EDIT',
+                 createBtn:'PROJECT_CREATE', histBtn:'COMMERCIAL_HISTORY_VIEW' };
+  for (const [id, cap] of Object.entries(need)) {
+    const el = $(id);
+    el.disabled = !CAPS.includes(cap);
+    el.title = el.disabled ? `Role ${$('role').value} lacks ${cap}` : '';
+  }
+}
+
+$('role').onchange = wrap(async () => { if (PROJECT) await openProject(PROJECT.projectId); else await boot(); });
+
+$('saveCfg').onclick = wrapP(async () => {
+  const body = { at: now(), customer: $('customer').value || null,
+    architecture: $('architecture').value || null, sysType: $('sysType').value || null,
+    sizeKw: $('sizeKw').value === '' ? null : Number($('sizeKw').value),
+    phase: $('phase').value || null, tier: $('tier').value || null };
+  PROJECT = await api('PATCH', '/api/workspace/projects/' + encodeURIComponent(PROJECT.projectId), body);
+});
+
+// ---------------------------------------------------------------- packages
+$('loadPkgs').onclick = wrapP(async () => {
+  const q = new URLSearchParams();
+  for (const k of ['sysType', 'phase', 'tier']) if ($(k).value) q.set(k, $(k).value);
+  if ($('sizeKw').value) q.set('sizeKw', $('sizeKw').value);
+  const r = await api('GET', '/api/workspace/packages?' + q);
+  $('pkgs').innerHTML = r.packages.length ? r.packages.map(p => `
+    <div class="row" style="margin-bottom:6px">
+      <button data-pkg="${esc(p.packageId)}">Select</button>
+      <span>${esc(p.packageId)}</span>
+      ${pill(p.approvalStatus === 'APPROVED' ? 'VALID' : 'WARNING')}
+      <span class="muted">${esc(p.approvalStatus)} · ${p.componentsApproved}/${p.componentCount} components approved</span>
+    </div>`).join('') : '<span class="muted">No matching package.</span>';
+  $('pkgs').querySelectorAll('button[data-pkg]').forEach(b =>
+    b.onclick = wrap(async () => {
+      await api('POST', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/package`,
+        { packageId: b.dataset.pkg, at: now() });
+      await openProject(PROJECT.projectId);
+    }));
+});
+
+// ---------------------------------------------------------------- BOM
+async function loadBom() {
+  const b = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/bom`);
+  $('bom').innerHTML = `
+    <div class="muted" style="margin-bottom:8px">${esc(b.packageId)} · ${esc(b.status)}
+      ${b.locked ? '· <b>LOCKED</b> (edits refused by the project BOM authority)' : ''}</div>
+    <table><thead><tr><th>Role</th><th>Component</th><th class="num">Qty</th><th>Source</th><th></th></tr></thead><tbody>
+    ${b.lines.map(l => `<tr>
+      <td>${esc(l.role)}</td>
+      <td>${esc(l.componentName || l.componentId || '—')}<br><code>${esc(l.componentId || '')}</code></td>
+      <td class="num">${l.quantity == null ? '<span class="notconf">NOT SET</span>' : l.quantity}</td>
+      <td class="muted">${esc(l.selectionMethod)}${l.selectedBy ? ' · ' + esc(l.selectedBy) : ''}</td>
+      <td>${!b.locked && l.editable ? `<button data-edit="${esc(l.role)}">Edit</button>
+           <button data-del="${esc(l.role)}">Remove</button>` : ''}</td>
+    </tr>`).join('')}
+    </tbody></table>
+    ${b.locked ? '' : `<div class="row" style="margin-top:10px">
+      <select id="addRole">${b.editableRoles.map(r => `<option>${r}</option>`).join('')}</select>
+      <button id="addBtn">Add / change role</button></div>`}`;
+  $('bom').querySelectorAll('button[data-edit]').forEach(x => x.onclick = wrap(() => editRole(x.dataset.edit)));
+  $('bom').querySelectorAll('button[data-del]').forEach(x => x.onclick = wrap(async () => {
+    const delRole = x.dataset.del;
+    const m = showModal(`
+      <h3>Remove ${esc(delRole)}</h3>
+      <label>Reason for removal</label>
+      <input id="modal-reason" type="text" placeholder="Optional" style="width:100%" />
+      <div class="modal-actions">
+        <button id="modal-cancel">Cancel</button>
+        <button id="modal-ok" class="btn-primary">Remove</button>
+      </div>`);
+    m.el.querySelector('#modal-cancel').onclick = () => m.close();
+    m.el.querySelector('#modal-ok').onclick = wrap(async () => {
+      const reason = m.el.querySelector('#modal-reason').value || '';
+      m.close();
+      await api('DELETE', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/bom/${delRole}`
+        + `?at=${encodeURIComponent(now())}&reason=${encodeURIComponent(reason)}`);
+      await loadBom(); await loadValidation();
+    });
+  }));
+  if ($('addBtn')) $('addBtn').onclick = wrap(() => editRole($('addRole').value));
+}
+
+// Modal helper
+function showModal(html) {
+  const ov = document.createElement('div');
+  ov.className = 'modal-overlay';
+  ov.innerHTML = `<div class="modal">${html}</div>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
+  return { el: ov, close() { ov.remove(); } };
+}
+
+async function editRole(role) {
+  const r = await api('GET', '/api/workspace/components?role=' + encodeURIComponent(role));
+  if (!r.components.length) { show({ message: 'No selectable component in the catalog for role ' + role + '.' }); return; }
+  const m = showModal(`
+    <h3>Select component for ${esc(role)}</h3>
+    <ul class="comp-list">${r.components.map(c => `
+      <li data-cid="${esc(c.componentId)}">
+        <strong>${esc(c.componentId)}</strong> — ${esc(c.name)}
+        ${c.engineeringStatus && c.engineeringStatus !== 'APPROVED' ? `<span class="comp-status pill ${esc(c.engineeringStatus)}">${esc(c.engineeringStatus)}</span>` : ''}
+      </li>`).join('')}
+    </ul>
+    <label>Quantity</label>
+    <input id="modal-qty" type="number" min="1" value="1" style="width:100%" />
+    <div class="modal-actions">
+      <button id="modal-cancel">Cancel</button>
+      <button id="modal-ok" class="btn-primary" disabled>Confirm</button>
+    </div>`);
+  let selectedId = null;
+  m.el.querySelectorAll('.comp-list li').forEach(li => li.onclick = () => {
+    m.el.querySelectorAll('.comp-list li').forEach(x => x.classList.remove('selected'));
+    li.classList.add('selected');
+    selectedId = li.dataset.cid;
+    m.el.querySelector('#modal-ok').disabled = false;
+  });
+  m.el.querySelector('#modal-cancel').onclick = () => m.close();
+  m.el.querySelector('#modal-ok').onclick = wrap(async () => {
+    const qty = m.el.querySelector('#modal-qty').value;
+    if (!selectedId || !qty) return;
+    m.close();
+    await api('PUT', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/bom/line`,
+      { role, componentId: selectedId, quantity: Number(qty), at: now(), reason: 'Project Head selection' });
+    await loadBom(); await loadValidation();
+  });
+}
+
+// ---------------------------------------------------------------- checker
+$('checkBtn').onclick = wrapP(async () => {
+  const v = await api('POST', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/check`, { at: now() });
+  renderValidation(v);
+});
+
+async function loadValidation() {
+  const v = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/check`);
+  renderValidation(v && v.status ? v : null);
+}
+
+function renderValidation(v) {
+  if (!v) { $('checkStatus').innerHTML = ''; $('findings').innerHTML = '<span class="muted">Not run.</span>'; return; }
+  $('checkStatus').innerHTML = pill(v.status) +
+    ` <span class="muted">${v.counts.blocked} blocked · ${v.counts.warning} warning · ${v.counts.checksRun} checks · rules ${esc(v.rulesVersion)}</span>`;
+  $('findings').innerHTML = v.findings.length ? v.findings.map((f, i) => `
+    <div class="finding" data-i="${i}">
+      <div class="row">${pill(f.severity)} <b>${esc(f.ruleId)}</b>
+        <span>${esc(f.message)}</span>
+        ${f.requiresAcknowledgement ? '<span class="muted">· acknowledgement required to lock</span>' : ''}</div>
+      <dl hidden>
+        <dt>Rule</dt><dd>${esc(f.rule || f.ruleId)}</dd>
+        <dt>Category</dt><dd>${esc(f.category)}</dd>
+        <dt>Severity</dt><dd>${esc(f.severity)}</dd>
+        <dt>Component</dt><dd>${f.components.length ? f.components.map(c => esc((c.name || '') + ' (' + c.componentId + ')')).join('<br>') : '<span class="muted">—</span>'}</dd>
+        <dt>Reason</dt><dd>${esc(f.reason)}</dd>
+        <dt>Source</dt><dd>${esc(f.source)}</dd>
+        <dt>Inputs</dt><dd><code>${esc(JSON.stringify(f.inputs))}</code></dd>
+      </dl>
+    </div>`).join('') : '<span class="muted">No findings.</span>';
+  $('findings').querySelectorAll('.finding').forEach(el => el.onclick = () => {
+    el.classList.toggle('open');
+    el.querySelector('dl').hidden = !el.classList.contains('open');
+  });
+}
+
+// ---------------------------------------------------------------- lock
+$('lockBtn').onclick = wrapP(async () => {
+  const v = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/check`);
+  const warningFindings = (v.findings || []).filter(f => f.requiresAcknowledgement);
+  const acks = [];
+  for (const f of warningFindings) {
+    const reason = await new Promise(resolve => {
+      const m = showModal(`
+        <h3>Acknowledge Warning</h3>
+        <p style="margin:0 0 8px"><strong>${esc(f.ruleId)}</strong></p>
+        <p style="margin:0 0 12px; color:var(--dim)">${esc(f.message)}</p>
+        <label>Reason for acknowledgement</label>
+        <input id="modal-reason" type="text" style="width:100%" />
+        <div class="modal-actions">
+          <button id="modal-skip">Skip</button>
+          <button id="modal-ok" class="btn-primary">Acknowledge</button>
+        </div>`);
+      m.el.querySelector('#modal-skip').onclick = () => { m.close(); resolve(null); };
+      m.el.querySelector('#modal-ok').onclick = () => { const r = m.el.querySelector('#modal-reason').value; m.close(); resolve(r || null); };
+    });
+    if (reason) acks.push({ ruleId: f.ruleId, reason });
+  }
+  const r = await api('POST', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/lock`,
+    { at: now(), acknowledgements: acks });
+  $('lockMsg').innerHTML = pill(r.locked ? 'VALID' : 'BLOCKED') + ' ' + esc(r.reason);
+  if (r.validation) renderValidation(r.validation);
+  await loadBom(); await loadSnapshot();
+});
+
+async function loadSnapshot() {
+  const s = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/snapshot`);
+  $('snapshot').innerHTML = (s && s.projectId) ? `
+    <div class="muted">Locked by ${esc(s.lockedBy)} at ${esc(s.lockedAt)} · rules ${esc(s.rulesVersion)}
+      · validation ${esc(s.validationStatus)} · immutable: ${s.immutable}</div>
+    <table><thead><tr><th>Role</th><th>Component</th><th class="num">Qty</th></tr></thead><tbody>
+    ${s.lines.map(l => `<tr><td>${esc(l.role)}</td><td><code>${esc(l.componentId)}</code></td><td class="num">${l.qty}</td></tr>`).join('')}
+    </tbody></table>` : '<span class="muted">No snapshot — the BOM is not locked.</span>';
+}
+
+// ---------------------------------------------------------------- cost/price
+$('saveInputs').onclick = wrapP(async () => {
+  const num = (id) => $(id).value === '' ? null : Number($(id).value);
+  await api('PUT', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/cost-inputs`,
+    { at: now(), inputs: { distanceKm: num('distanceKm'), vehicleType: $('vehicleType').value || null,
+      installationType: $('installationType').value || null, structureMaterialCost: num('structureMaterialCost') } });
+});
+
+$('costBtn').onclick = wrapP(async () => {
+  const t = now();
+  const c = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/cost?at=${encodeURIComponent(t)}`);
+  $('cost').innerHTML = !c.available
+    ? `${pill('BLOCKED')} <span class="muted">${esc(c.blockingReason)}</span>`
+    : `<div class="row">${pill(c.status)} <span class="muted">engine ${esc(c.costEngineVersion)} · config ${esc(c.costConfigVersion)}</span></div>
+       <table><thead><tr><th>Cost head</th><th>Owner</th><th class="num">Amount</th><th>Basis</th></tr></thead><tbody>
+       ${c.heads.map(h => `<tr>
+         <td>${esc(h.head)}</td><td class="muted">${esc(h.owner)}</td>
+         <td class="num">${money(h.amount)}</td>
+         <td class="muted"><code>${esc(h.formula || '')}</code>${h.blocked ? ' ' + pill('BLOCKED') : ''}</td></tr>`).join('')}
+       <tr><th>DIRECT PROJECT COST</th><td></td><td class="num">${money(c.directProjectCost)}</td><td></td></tr>
+       <tr><th>TOTAL ACTUAL PROJECT COST</th><td></td><td class="num"><b>${money(c.totalActualProjectCost)}</b></td><td></td></tr>
+       </tbody></table>
+       ${c.errors.length ? '<div class="err" style="margin-top:8px">' + c.errors.map(e => esc(e.code + ' [' + (e.head || '-') + '] ' + e.message)).join('<br>') + '</div>' : ''}`;
+
+  const p = await api('GET', `/api/workspace/projects/${encodeURIComponent(PROJECT.projectId)}/pricing?at=${encodeURIComponent(t)}`);
+  $('pricing').innerHTML = p.blocked
+    ? `${pill('BLOCKED')} <span class="muted">${esc(p.blockingReason || '')}</span>
+       ${(p.errors || []).length ? '<div class="err" style="margin-top:6px">' + p.errors.map(e => esc(e.code + ': ' + e.message)).join('<br>') + '</div>' : ''}`
+    : `<table><tbody>
+       <tr><th>Total actual project cost</th><td class="num">${money(p.totalActualProjectCost)}</td></tr>
+       <tr><th>Tier / margin type</th><td class="num">${esc(p.tier || '—')} · ${esc(p.marginType)}</td></tr>
+       <tr><th>Target margin</th><td class="num">${p.targetMarginPct}%</td></tr>
+       <tr><th>Minimum margin</th><td class="num">${p.minimumMarginPct == null ? '<span class="notconf">NOT CONFIGURED</span>' : p.minimumMarginPct + '%'}</td></tr>
+       <tr><th>List price (before GST)</th><td class="num">${money(p.listPrice)}</td></tr>
+       <tr><th>Discount</th><td class="num">${money(p.discountAmount)}</td></tr>
+       <tr><th>Selling price before GST</th><td class="num">${money(p.sellingPriceBeforeGST)}</td></tr>
+       <tr><th>Actual margin</th><td class="num">${p.actualGrossMarginPct}%</td></tr>
+       <tr><th>Approval</th><td class="num">${pill(p.approvalRequired ? 'WARNING' : 'VALID')} ${esc(p.approval)}</td></tr>
+       ${p.gstComponents.map(g => `<tr><th class="muted">GST ${esc(g.label)} · ${g.valuationPct}% @ ${g.ratePct}%</th><td class="num">${money(g.taxAmount)}</td></tr>`).join('')}
+       <tr><th>GST total (${esc(p.gstRegime)} · ${p.gstRatePct}%)</th><td class="num">${money(p.gstAmount)}</td></tr>
+       <tr><th>CUSTOMER PRICE (incl. GST)</th><td class="num"><b>${money(p.customerPrice)}</b></td></tr>
+       </tbody></table>
+       ${p.approvalReason ? '<div class="muted" style="margin-top:6px">' + esc(p.approvalReason) + '</div>' : ''}`;
+});
+
+// ---------------------------------------------------------------- history
+$('histBtn').onclick = wrap(async () => {
+  const h = await api('GET', '/api/workspace/commercial/history?configType='
+    + encodeURIComponent($('configType').value) + '&recordId=' + encodeURIComponent($('recordId').value));
+  if (!h.available) { $('history').innerHTML = '<span class="muted">No commercial history store is configured yet.</span>'; return; }
+  $('history').innerHTML = `
+    <div class="muted">Owner: ${esc(h.owner || '—')}</div>
+    <h3 style="font-size:12px;margin:10px 0 4px">CURRENT</h3>
+    ${h.current ? `<code>${esc(JSON.stringify(h.current.value))}</code>
+      <div class="muted">version ${esc(h.current.versionId)} · effective ${esc(h.current.effectiveFrom)} · by ${esc(h.current.changedBy)}</div>`
+      : '<span class="muted">No active version.</span>'}
+    <h3 style="font-size:12px;margin:14px 0 4px">HISTORY</h3>
+    ${h.history.length ? `<table><thead><tr><th>Version</th><th>Who</th><th>When</th><th>Why</th><th>Old</th><th>New</th><th>Effective</th></tr></thead><tbody>
+      ${h.history.map(v => `<tr>
+        <td>${esc(v.versionId)}</td><td>${esc(v.changedBy)}</td><td>${esc(v.changedAt)}</td>
+        <td>${esc(v.changeReason)}</td>
+        <td><code>${esc(v.oldValue == null ? '—' : JSON.stringify(v.oldValue))}</code></td>
+        <td><code>${esc(JSON.stringify(v.newValue))}</code></td>
+        <td>${esc(v.effectiveFrom)}</td></tr>`).join('')}
+      </tbody></table>` : '<span class="muted">No recorded change.</span>'}`;
+});
+
+boot().catch(show);
+</script>
+</body>
+</html>

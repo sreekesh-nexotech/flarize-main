@@ -1,0 +1,7 @@
+node_modules/
+tests/e2e/_shots/
+tests/_pdf_out/
+dist/
+.vite/
+data/backups/
+data/.session-secret

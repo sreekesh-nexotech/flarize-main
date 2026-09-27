@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Flarize Solar Quotation</title>
+<!--
+  CUSTOMER-FACING QUOTATION DOCUMENT.  (Phase 3, PART H — hybrid Step 1)
+
+  This is the CUSTOMER quotation, built from the approved artwork supplied as
+  `Flarize Solar Quotation.html`. It is NOT the internal workspace viewer —
+  that is /quotation.html and the two stay separate. There is no gate, no
+  engineering panel, no version list, no RBAC UI and no internal cost or margin
+  anywhere on this page.
+
+  HYBRID: the supplied artwork is reused unmodified wherever it carries no
+  customer data. Only the regions the forensic report identified as customer
+  data are rebuilt as HTML so the approved payload can bind to them.
+  For page 1: the salutation and the "YOUR PROPOSAL DETAILS" block.
+
+  Steps 1–2 implement DOCUMENT-ORDER PAGE 1 and PAGE 7. Pages 2-6, 8-12
+  follow in later steps and are deliberately absent rather than mocked.
+
+  This page calculates nothing. Every value comes from
+  GET /api/quotation/quotations/:id/payload. A value the payload does not
+  supply renders the contract's blocked treatment with its named dependency —
+  never ₹0, never a blank, never the example value from the original artwork.
+
+  C6 / C7 / C13 / C14 remain undecided: no tier display name, no legal entity,
+  no page number and no variant rule is supplied here.
+-->
+<!-- P0.4 (2026-09-13): no external font CDN. Poppins + Noto Sans Malayalam are
+     vendored under /assets/quotation/fonts and declared via @font-face inside
+     the renderer's own stylesheet, so screen and headless-PDF metrics are
+     identical and the render never waits on an external font host. -->
+<style id="q-doc-styles">
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:210mm; min-width:210mm; }
+  body { background:#e9edf0; font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif; padding:8mm 0; }
+  #q-error { max-width:210mm; margin:0 auto 6mm; padding:10px 14px; border-radius:8px;
+             background:#fdecec; color:#8c1d18; font-size:13px; white-space:pre-wrap; display:none; }
+  #q-toolbar { max-width:210mm; margin:0 auto 6mm; display:flex; gap:8px; align-items:center;
+               font-size:12px; color:#4a5560; }
+  #q-toolbar input, #q-toolbar select, #q-toolbar button {
+    font:inherit; padding:5px 8px; border:1px solid #c9d1d8; border-radius:6px; background:#fff; }
+  @media print {
+    #q-toolbar, #q-error { display:none !important; }
+    html, body { width:210mm; min-width:210mm; margin:0 !important; padding:0 !important; background:#fff !important; }
+    #q-document { width:210mm; margin:0; padding:0; }
+    #q-document > .page { width:210mm; height:297mm; min-height:297mm; max-height:297mm; margin:0 !important; box-shadow:none !important; break-inside:avoid; page-break-inside:avoid; break-after:page; page-break-after:always; }
+    #q-document > .page:last-child { break-after:auto; page-break-after:auto; }
+  }
+</style>
+<style id="q-page-styles"><!-- injected from quotationDocument.PAGE_ONE_STYLES --></style>
+<style id="q-zoom-fallback">
+  /* Firefox has no CSS `zoom`: scale the 1000×1414 design canvas with a
+     transform instead (the .q-canvas box is already A4-sized and clipped, so
+     pagination is unaffected). Applied only when zoom is unsupported. */
+  html.q-no-zoom .q-inner { zoom:1 !important; transform:scale(0.79374); transform-origin:0 0; }
+</style>
+<script>
+  try { if (!(window.CSS && CSS.supports && CSS.supports('zoom', '1'))) document.documentElement.classList.add('q-no-zoom'); } catch (_) {}
+</script>
+</head>
+<body>
+
+<div id="q-toolbar">
+  <label for="qid">Quotation</label><select id="qid"></select>
+  <select id="role" style="display:none"></select>
+  <input id="user" type="hidden" value="operator">
+  <button id="reload">Load</button>
+  <button id="print">Print / PDF</button>
+</div>
+<div id="q-error"></div>
+<main id="q-document"></main>
+
+<script type="module">
+import { renderPage1, PAGE_ONE_STYLES, blockedFields,
+         renderPage2, PAGE_TWO_STYLES, blockedFieldsPage2,
+         renderPage3, PAGE_THREE_STYLES, blockedFieldsPage3,
+         renderPage4,
+         renderPage5, PAGE_FIVE_STYLES, blockedFieldsPage5,
+         renderPage6Testimonials,
+         renderPage7, PAGE_SEVEN_STYLES, blockedFieldsPage7,
+         renderPage8, PAGE_EIGHT_STYLES, blockedFieldsPage8,
+         renderPage9Timeline,
+         renderPage10Terms,
+         renderPage11Terms,
+         renderPage12, PAGE_TWELVE_STYLES, blockedFieldsPage12,
+         PAGE_A4_CONTRACT_STYLES,
+         FULL_DOCUMENT_STYLES, CONTENT_PAGE_STYLES } from './lib/quotationDocument.js';
+
+// V4 Phase 2B — the shared A4 physical / design-canvas contract is loaded
+// FIRST so every page inherits the same @page A4 portrait, 210×297mm .page
+// dimensions and the .q-canvas scaling mechanism.
+document.getElementById('q-page-styles').textContent =
+  PAGE_A4_CONTRACT_STYLES + PAGE_ONE_STYLES + PAGE_TWO_STYLES + PAGE_THREE_STYLES +
+  PAGE_FIVE_STYLES + PAGE_SEVEN_STYLES + PAGE_EIGHT_STYLES + PAGE_TWELVE_STYLES +
+  FULL_DOCUMENT_STYLES + CONTENT_PAGE_STYLES;
+
+const $ = (id) => document.getElementById(id);
+const showError = (e) => {
+  const el = $('q-error');
+  if (!e) { el.style.display = 'none'; el.textContent = ''; return; }
+  el.style.display = 'block';
+  el.textContent = (e.code ? e.code + ': ' : '') + (e.error || e.message || String(e));
+};
+
+// Shared auth — read Bearer token from application session (set by BOM login).
+const SESSION_KEY = 'gr_session_token';
+function getToken() {
+  try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+}
+
+async function api(method, url) {
+  const token = getToken();
+  const res = await fetch(url, {
+    method,
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token, 'X-Actor-Role': $('role').value, 'X-Actor-User': $('user').value },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const err = new Error(data.error || res.statusText); Object.assign(err, data); throw err; }
+  return data;
+}
+
+async function boot() {
+  const session = await api('GET', '/api/quotation/session');
+  $('role').innerHTML = session.roles.map(r => `<option${r === 'SALES' ? ' selected' : ''}>${r}</option>`).join('');
+  const { quotations } = await api('GET', '/api/quotation/quotations');
+  $('qid').innerHTML = quotations.map(q => `<option value="${q.quotationId}">${q.quotationId}</option>`).join('');
+  // Auto-select quotation from URL parameter ?id=...
+  const urlId = new URLSearchParams(location.search).get('id');
+  if (urlId) { $('qid').value = urlId; }
+  if ($('qid').value) await load();
+}
+
+// V4 Phase 2B — before print / PDF export, ensure all fonts and images
+// have loaded so the rendered PDF matches the on-screen layout deterministically.
+async function waitForRenderReady() {
+  // Force-load approved fonts. document.fonts.ready alone is not enough —
+  // Chrome lazily fetches @font-face fonts only when a glyph is needed, which
+  // means the PDF export can trigger the download AFTER layout has been
+  // measured, causing metric drift. Explicitly load each declared face with
+  // a representative glyph so all metrics are stable before print/PDF.
+  try {
+    const targets = [
+      ['400 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['500 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['600 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['700 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['800 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['400 16px "Poppins"', 'Poppins'],
+      ['500 16px "Poppins"', 'Poppins'],
+      ['600 16px "Poppins"', 'Poppins'],
+      ['700 16px "Poppins"', 'Poppins'],
+      ['800 16px "Poppins"', 'Poppins'],
+    ];
+    await Promise.all(targets.map(([shorthand, text]) =>
+      document.fonts.load(shorthand, text).catch(() => null)
+    ));
+    await document.fonts.ready;
+  } catch (_) {}
+  const imgs = Array.from(document.images || []);
+  await Promise.all(imgs.map(img => {
+    // P0.4 (2026-09-13): a broken image that has ALREADY failed has complete=true
+    // and naturalWidth=0 — the old check fell through and attached load/error
+    // listeners that would never fire, so __quotationReady was never set and the
+    // server PDF route timed out (501) on any missing CMS asset. A finished
+    // image, good or bad, is "ready" for layout purposes.
+    if (img.complete) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => { img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
+      img.addEventListener('load', done, { once:true });
+      img.addEventListener('error', done, { once:true });
+    });
+  }));
+  // Expose a hook for headless PDF renderers (playwright etc.) to wait on.
+  window.__quotationReady = true;
+}
+
+async function load() {
+  const id = $('qid').value;
+  if (!id) return;
+  window.__quotationReady = false;
+  const { payload } = await api('GET', `/api/quotation/quotations/${encodeURIComponent(id)}/payload`);
+  // Document title = PDF file name (owner Q9): {CustomerName}_{OnGrid|Hybrid}_{kW}kW_{QuotationNo}.
+  // Browsers use the title as the default "Save as PDF" file name. Copied from the payload only.
+  document.title = pdfBaseName(payload) || 'Flarize Solar Quotation';
+  // Render only. Nothing on this page derives, totals or re-checks a value.
+  $('q-document').innerHTML =
+    renderPage1(payload) +          // 1: Cover + Proposal Details
+    renderPage2(payload) +          // 2: Campaign (conditional on CMS content)
+    renderPage3(payload) +          // 3: Daily Solar Generation + Appliance Usage
+    renderPage4(payload) +          // 4: Why Choose Flarize + Installation Gallery
+    renderPage5(payload) +          // 5: Three-Option Pricing
+    renderPage6Testimonials(payload) + // 6: Testimonials / Social Proof
+    renderPage7(payload) +          // 7: Technical Specifications
+    renderPage8(payload) +          // 8: Savings Over Time + Payment Details (DETAILED)
+    renderPage9Timeline(payload) +  // 9: Installation Timeline + Scope Split
+    renderPage10Terms(payload) +    // 10: Terms & Conditions 1/2
+    renderPage11Terms(payload) +    // 11: Terms & Conditions 2/2
+    renderPage12(payload);          // 12: Investment Summary + Refer & Earn (DETAILED)
+  // P2 (2026-09-13, owner spec "Accounts / Documentation version"): ?pages=accounts
+  // keeps only cover (1), price (5), technical specification (7) and bank
+  // details (8); ?pages=1,5,7 keeps an explicit list. The full document is the
+  // default. Filtering happens AFTER the complete render so nothing is
+  // computed differently — pages are simply not printed.
+  const pagesParam = pageSubset();
+  if (pagesParam) {
+    for (const sec of Array.from($('q-document').querySelectorAll('section.page'))) {
+      if (!pagesParam.has(Number(sec.getAttribute('data-document-order')))) sec.remove();
+    }
+    if (pagesParam.size) document.title = document.title.replace(/\.pdf$/i, '') + (pagesParam.has(1) && pagesParam.size <= 4 ? '_Accounts' : '_Pages');
+  }
+  const blocked = [...blockedFields(payload), ...blockedFieldsPage2(payload), ...blockedFieldsPage3(payload), ...blockedFieldsPage5(payload), ...blockedFieldsPage7(payload), ...blockedFieldsPage8(payload), ...blockedFieldsPage12(payload)];
+  if (blocked.length) console.info('[quotation] blocked fields:', blocked);
+  await waitForRenderReady();
+  // ?print=1 (Sales "Download PDF") — open the print / save-as-PDF dialog once the render is ready.
+  if (new URLSearchParams(location.search).get('print') === '1' && !window.__printedOnce) { window.__printedOnce = true; window.print(); }
+  // ?download=1 — fetch the server-rendered PDF (identical on every browser); falls back to the print dialog.
+  if (new URLSearchParams(location.search).get('download') === '1' && !window.__downloadedOnce) { window.__downloadedOnce = true; downloadPdf(id).catch(() => window.print()); }
+}
+
+/** ?pages= → Set of document orders, or null for the full document. 'accounts' = 1,5,7,8. */
+function pageSubset() {
+  const raw = (new URLSearchParams(location.search).get('pages') || '').trim().toLowerCase();
+  if (!raw) return null;
+  if (raw === 'accounts') return new Set([1, 5, 7, 8]);
+  const nums = raw.split(',').map(n => Number(n)).filter(n => Number.isInteger(n) && n >= 1 && n <= 12);
+  return nums.length ? new Set(nums) : null;
+}
+async function downloadPdf(id) {
+  const token = getToken();
+  const pages = (new URLSearchParams(location.search).get('pages') || '').trim();
+  const res = await fetch(`/api/quotation/quotations/${encodeURIComponent(id)}/pdf${pages ? `?pages=${encodeURIComponent(pages)}` : ''}`, { headers: { 'Authorization': 'Bearer ' + token } });
+  if (!res.ok) throw new Error('pdf ' + res.status);
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.title || 'Flarize_Solar_Quotation') + '.pdf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+}
+
+function pdfBaseName(payload) {
+  const clean = (v) => String(v ?? '').replace(/[^A-Za-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  const name = clean(payload?.customer?.name || payload?.customer?.customerName);
+  const sysType = payload?.system?.systemType;
+  const sys = sysType === 'hybrid' ? 'Hybrid' : sysType === 'ongrid' ? 'OnGrid' : clean(sysType);
+  const kw = payload?.system?.systemSizeKw;
+  const qno = clean(payload?.quotation?.quotationNumber);
+  if (!name || !sys || kw == null || !qno) return null;
+  return `${name}_${sys}_${kw}kW_${qno}`;
+}
+
+const wrap = (fn) => async () => { try { showError(null); await fn(); } catch (e) { showError(e); } };
+$('reload').onclick = wrap(load);
+$('qid').onchange = wrap(load);
+$('role').onchange = wrap(load);
+$('print').onclick = async () => { await waitForRenderReady(); try { await downloadPdf($('qid').value); } catch (_) { window.print(); } };
+
+boot().catch(showError);
+</script>
+</body>
+</html>

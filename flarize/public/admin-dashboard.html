@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Profitability Dashboard — Flarize</title>
+<style>
+:root {
+  --bg: #f8fafc; --panel: #ffffff; --line: #e2e8f0; --fg: #1e293b;
+  --dim: #64748b; --accent: #2563eb; --accent-hover: #1d4ed8;
+  --ok: #16a34a; --warn: #d97706; --bad: #dc2626;
+  --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font: 15px/1.6 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+       background: var(--bg); color: var(--fg); min-height: 100vh; }
+.app { max-width: 1100px; margin: 0 auto; padding: 16px; }
+header { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 20px; flex-wrap: wrap; }
+header h1 { font-size: 18px; font-weight: 700; }
+header .sub { color: var(--dim); font-size: 13px; }
+header .right { margin-left: auto; display: flex; gap: 12px; align-items: center; }
+.login-box { max-width: 360px; margin: 80px auto; background: var(--panel); border: 1px solid var(--line);
+             border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow); text-align: center; }
+.login-box h2 { margin-bottom: 20px; font-size: 20px; }
+.login-box input { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px;
+                   font: inherit; margin-bottom: 12px; }
+.login-box button { width: 100%; padding: 10px; background: var(--accent); color: #fff; border: none;
+                    border-radius: 6px; font: inherit; font-weight: 600; cursor: pointer; }
+.login-box button:hover { background: var(--accent-hover); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+        padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow); }
+.card h2 { font-size: 15px; margin-bottom: 14px; color: var(--fg); display: flex; align-items: center; gap: 8px; }
+.card h2 .count { font-size: 12px; background: var(--line); color: var(--dim); padding: 1px 8px; border-radius: 10px; font-weight: 600; }
+.stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px,1fr)); gap: 12px; margin-bottom: 16px; }
+.stat { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px; text-align: center; }
+.stat .val { font-size: 28px; font-weight: 800; }
+.stat .lbl { font-size: 11px; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; font-weight: 600; }
+.stat.ok .val { color: var(--ok); }
+.stat.bad .val { color: var(--bad); }
+.stat.warn .val { color: var(--warn); }
+.stat.accent .val { color: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 600; color: var(--dim); text-transform: uppercase; letter-spacing: .04em; font-size: 11px; padding: 8px 10px; border-bottom: 2px solid var(--line); }
+td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.pill { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+.pill-ok { background: #dcfce7; color: #166534; }
+.pill-bad { background: #fee2e2; color: #991b1b; }
+.pill-warn { background: #fef3c7; color: #92400e; }
+.pill-neutral { background: #e2e8f0; color: #475569; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.blocker-list { list-style: none; padding: 0; }
+.blocker-list li { padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; margin-bottom: 8px;
+                   display: flex; gap: 10px; align-items: flex-start; background: #fff; }
+.blocker-list .code { font-size: 11px; font-weight: 700; color: var(--bad); white-space: nowrap; }
+.blocker-list .owner { font-size: 11px; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.blocker-list .msg { font-size: 13px; color: var(--fg); flex: 1; }
+.alert { padding: 10px 16px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+.alert-error { background: #fee2e2; color: #991b1b; }
+.alert-ok { background: #dcfce7; color: #166534; }
+.loading { color: var(--dim); font-style: italic; padding: 20px 0; text-align: center; }
+.btn-link { background: none; border: none; color: var(--accent); cursor: pointer; font: inherit; font-size: 13px; font-weight: 600; text-decoration: underline; }
+.overflow-x { overflow-x: auto; }
+.ready { background: #dcfce7; color: #166534; font-weight: 700; text-align: center; }
+.blocked { background: #fee2e2; color: #991b1b; font-weight: 700; text-align: center; }
+@media (max-width: 700px) { .grid2 { grid-template-columns: 1fr; } .stats { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<div id="login-view">
+  <div class="login-box">
+    <h2>Admin Dashboard</h2>
+    <p style="color:var(--dim);font-size:13px;margin-bottom:16px;">Flarize / Golden Ray</p>
+    <div id="login-error" class="alert alert-error" hidden></div>
+    <input id="login-user" type="text" placeholder="Username" autocomplete="username" />
+    <input id="login-pw" type="password" placeholder="Password" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')doLogin()" />
+    <button onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<div id="main-view" hidden>
+<div class="app">
+  <header>
+    <h1>Admin Profitability Dashboard</h1>
+    <span class="sub">Flarize / Golden Ray</span>
+    <div class="right">
+      <span id="user-info" style="font-size:13px;color:var(--dim)"></span>
+      <button class="btn-link" onclick="doLogout()">Logout</button>
+    </div>
+  </header>
+
+  <div id="dash-error"></div>
+  <div id="dash-loading" class="loading">Loading dashboard data...</div>
+  <div id="dash-content" hidden>
+
+    <!-- Row 1: Summary stats -->
+    <div id="summary-stats" class="stats"></div>
+
+    <!-- 2026-09-08 fast-quotation build — Admin controls that gate a Sales quotation -->
+    <div class="card" id="controls-card">
+      <h2>Quotation Controls <span class="count">Admin</span></h2>
+      <div class="grid2">
+        <div>
+          <div style="font-weight:700;margin-bottom:6px">Quotation validity (days)</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="validity-days" type="number" min="1" step="1" style="width:110px;padding:8px;border:1px solid var(--line);border-radius:6px;font:inherit" placeholder="e.g. 15" />
+            <button class="btn-small" id="validity-save" style="padding:8px 14px;background:var(--accent);color:#fff;border:0;border-radius:6px;font:inherit;font-weight:600;cursor:pointer">Save default</button>
+            <span id="validity-status" style="font-size:12px;color:var(--dim)"></span>
+          </div>
+          <div style="font-size:12px;color:var(--dim);margin-top:6px">Every new quotation freezes this validity (or an effective-period policy) at issue. Without it the document shows no "Valid until" date.</div>
+        </div>
+        <div>
+          <div style="font-weight:700;margin-bottom:6px">kW packs (pricing)</div>
+          <div id="pack-status" style="font-size:13px">Loading…</div>
+          <div style="font-size:12px;color:var(--dim);margin-top:6px"><a href="/pack-config.html">Open kW Packs</a> — Project Head edits, Admin approves; Sales quotes only from the approved version.</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;font-size:13px" id="bank-status"></div>
+    </div>
+
+    <div class="grid2">
+      <!-- Package Approval -->
+      <div class="card">
+        <h2>Package Approval Status</h2>
+        <div id="pkg-stats" class="stats"></div>
+      </div>
+      <!-- Quotation Pipeline -->
+      <div class="card">
+        <h2>Quotation Pipeline</h2>
+        <div id="quot-stats" class="stats"></div>
+        <div id="quot-recent"></div>
+      </div>
+    </div>
+
+    <!-- System Readiness Matrix -->
+    <div class="card">
+      <h2>System Readiness Matrix <span id="readiness-count" class="count"></span></h2>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:12px;">Can Sales generate a quotation for each system type / size / tier?</p>
+      <div class="overflow-x"><div id="readiness-matrix"></div></div>
+    </div>
+
+    <!-- Data Blockers -->
+    <div class="card">
+      <h2>Action Required — Data Blockers <span id="blocker-count" class="count"></span></h2>
+      <div id="blockers-section"></div>
+    </div>
+
+    <!-- Active Offers -->
+    <div class="card">
+      <h2>Active Offers <span id="offer-count" class="count"></span></h2>
+      <div id="offers-section"><p class="loading">Loading...</p></div>
+    </div>
+
+    <!-- Cost Config -->
+    <div class="card">
+      <h2>Cost Configuration Status</h2>
+      <div class="overflow-x"><table id="cost-table"><thead><tr><th>Cost Head</th><th>Owner</th><th>Status</th><th>Version</th></tr></thead><tbody id="cost-tbody"></tbody></table></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+const SESSION_KEY = 'gr_session_token';
+let TOKEN = '', USER = '', USER_ROLE = '';
+
+function $(id) { return document.getElementById(id); }
+function h() { return { 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN }; }
+
+async function api(method, url) {
+  const res = await fetch(url, { method, headers: h() });
+  if (res.status === 401) { doLogout(); throw new Error('Session expired'); }
+  if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.error || 'API error '+res.status); }
+  return res.json();
+}
+
+async function doLogin() {
+  const u = $('login-user').value.trim(), p = $('login-pw').value;
+  if (!u || !p) { showErr('login-error','Enter username and password'); return; }
+  try {
+    const res = await fetch('/api/auth/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:u,password:p}) });
+    const d = await res.json();
+    if (!res.ok) { showErr('login-error', d.error||'Login failed'); return; }
+    TOKEN = d.token; USER = d.user?.name||d.user?.username||u; USER_ROLE = d.user?.role||'';
+    try { sessionStorage.setItem(SESSION_KEY, TOKEN); sessionStorage.setItem('gr_user_role', USER_ROLE); sessionStorage.setItem('gr_user_name', USER); } catch {}
+    showApp();
+  } catch(e) { showErr('login-error','Connection error'); }
+}
+
+function doLogout() {
+  fetch('/api/auth/logout',{method:'POST',headers:{'Authorization':'Bearer '+TOKEN}}).catch(()=>{});
+  TOKEN=''; USER_ROLE='';
+  try { sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem('gr_user_role'); sessionStorage.removeItem('gr_user_name'); } catch {}
+  window.location.href = '/login.html';
+}
+
+function showErr(id, msg) { const el=$(id); el.textContent=msg; el.hidden=false; el.classList.add('alert-error'); }
+
+async function showApp() {
+  flarizeNav.init({ current: 'admin-dashboard' });
+  $('login-view').hidden = true; $('main-view').hidden = false;
+  $('user-info').textContent = USER + (USER_ROLE ? ' ('+USER_ROLE+')' : '');
+  $('dash-loading').hidden = false; $('dash-content').hidden = true; $('dash-error').innerHTML = '';
+  try { await loadDashboard(); } catch(e) { $('dash-error').innerHTML = '<div class="alert alert-error">'+esc(e.message)+'</div>'; }
+  $('dash-loading').hidden = true; $('dash-content').hidden = false;
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+async function loadDashboard() {
+  const [preflight, pkgSummary, quotHistory, offersData] = await Promise.all([
+    api('GET','/api/sales/preflight-all').catch(e => ({error:e.message})),
+    api('GET','/api/packages/approval-summary').catch(e => ({error:e.message})),
+    api('GET','/api/sales/quotation-history').catch(e => ({error:e.message})),
+    api('GET','/api/admin/offers').catch(e => ({error:e.message})),
+  ]);
+  renderPreflight(preflight);
+  renderPackages(pkgSummary);
+  renderQuotations(quotHistory);
+  // (cost configuration table is rendered from the preflight blockers inside renderPreflight)
+  renderOffers(offersData);
+  loadControls().catch(e => { $('pack-status').textContent = 'Controls unavailable: ' + e.message; });
+}
+
+/* ---- Quotation controls (validity policy · pack config · bank details) ---- */
+async function apiBody(method, url, body) {
+  const res = await fetch(url, { method, headers: h(), body: JSON.stringify(body) });
+  const d = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(d.error || 'API error ' + res.status);
+  return d;
+}
+async function loadControls() {
+  const at = new Date().toISOString();
+  const [policy, pack, company] = await Promise.all([
+    api('GET', '/api/quotation/policy?at=' + encodeURIComponent(at)).catch(e => ({ error: e.message })),
+    api('GET', '/api/pack-config').catch(e => ({ error: e.message })),
+    api('GET', '/api/admin/company-profile').catch(e => ({ error: e.message })),
+  ]);
+  // validity
+  const days = policy?.validity?.defaultDays ?? policy?.defaultDays ?? null;
+  const active = policy?.activeNow || null;
+  $('validity-days').value = days ?? '';
+  $('validity-status').textContent = policy?.error ? policy.error
+    : active ? `Effective policy ${active.policyId || ''}: ${active.validityDays} days (overrides the default)`
+    : days ? `Default ${days} days in force` : 'NOT CONFIGURED — Sales quotations issue without a validity date';
+  $('validity-status').style.color = (active || days) ? 'var(--ok)' : 'var(--bad)';
+  $('validity-save').onclick = async () => {
+    const v = Number($('validity-days').value);
+    if (!Number.isInteger(v) || v <= 0) { $('validity-status').textContent = 'Enter a whole number of days ≥ 1'; return; }
+    try { await apiBody('PUT', '/api/quotation/policy/default', { defaultDays: v, at: new Date().toISOString() }); await loadControls(); }
+    catch (e) { $('validity-status').textContent = 'Save failed: ' + e.message; $('validity-status').style.color = 'var(--bad)'; }
+  };
+  // pack config
+  if (pack?.error) $('pack-status').textContent = pack.error;
+  else {
+    const d = pack.draft || {}, a = pack.approved || {};
+    $('pack-status').innerHTML = `Approved <b>v${esc(String(a.version))}</b> (${esc(a.approvedBy || '—')}) · Draft v${esc(String(d.version))} <span class="pill ${d.status === 'SUBMITTED' ? 'pill-warn' : 'pill-neutral'}">${esc(d.status || '')}</span>`
+      + (d.status === 'SUBMITTED' ? ` — <a href="/pack-config.html">awaiting your approval</a>` : '')
+      + ((d.changedSections || []).length ? `<div style="font-size:12px;color:var(--dim)">Draft changes: ${esc((d.changedSections || []).join(', '))}</div>` : '');
+  }
+  // bank details (printed on the quotation)
+  const c = company?.profile || company?.value || company || {};
+  const bankOk = !!(c.bankName && c.bankAccountNumber && c.bankIfsc);
+  $('bank-status').innerHTML = `<b>Bank details on quotation:</b> ${bankOk ? `<span class="pill pill-ok">SET</span> ${esc(c.bankName)} · A/c ${esc(String(c.bankAccountNumber).replace(/.(?=.{4})/g, '•'))}` : `<span class="pill pill-bad">NOT SET</span> the "Book now" payment block is left off the quotation until bank name, account number and IFSC are saved in <a href="/company-profile.html">Company profile</a>`}${c.upiId ? ` · UPI ${esc(c.upiId)}` : ''}${c.sealImageUri || c.signatureImageUri ? ' · seal/signature set' : ' · <span style="color:var(--dim)">no seal/signature image</span>'}`;
+}
+
+/* ---- Preflight / Readiness Matrix ---- */
+function renderPreflight(data) {
+  if (data.error) { $('readiness-matrix').innerHTML='<p class="alert alert-error">'+esc(data.error)+'</p>'; return; }
+  const results = data.results || {};
+  let totalCombos=0, readyCombos=0, allBlockers=[];
+
+  // Build matrix tables per system type
+  let html = '';
+  for (const [sysType, sizes] of Object.entries(results)) {
+    const sizeKeys = Object.keys(sizes);
+    if (!sizeKeys.length) continue;
+    const tiers = Object.keys(sizes[sizeKeys[0]] || {});
+    html += '<h3 style="margin:12px 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--dim)">'+esc(sysType)+'</h3>';
+    html += '<table><thead><tr><th>Size (kW)</th>';
+    tiers.forEach(t => html += '<th style="text-align:center">'+esc(t)+'</th>');
+    html += '</tr></thead><tbody>';
+    for (const size of sizeKeys) {
+      html += '<tr><td style="font-weight:600">'+esc(size)+'</td>';
+      for (const tier of tiers) {
+        totalCombos++;
+        const cell = sizes[size]?.[tier];
+        if (cell?.canProceed) {
+          readyCombos++;
+          html += '<td class="ready">READY</td>';
+        } else {
+          const bc = cell?.blockers?.length || 0;
+          html += '<td class="blocked">'+bc+' blocker'+(bc!==1?'s':'')+'</td>';
+          (cell?.blockers||[]).forEach(b => allBlockers.push({...b, context: sysType+' '+size+'kW '+tier}));
+        }
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table>';
+  }
+  $('readiness-matrix').innerHTML = html || '<p class="loading">No system types configured</p>';
+  $('readiness-count').textContent = readyCombos+'/'+totalCombos+' ready';
+
+  // Summary stats
+  $('summary-stats').innerHTML =
+    statCard(readyCombos,'Ready Combos', readyCombos===totalCombos?'ok':'warn') +
+    statCard(totalCombos-readyCombos,'Blocked Combos', totalCombos-readyCombos>0?'bad':'ok') +
+    statCard(totalCombos,'Total Combos','accent');
+
+  // Blockers aggregation
+  renderBlockers(allBlockers);
+  renderCostFromBlockers(allBlockers);
+}
+
+function renderBlockers(allBlockers) {
+  if (!allBlockers.length) {
+    $('blockers-section').innerHTML = '<div class="alert alert-ok">No blockers. All system/tier combinations are ready for quotation.</div>';
+    $('blocker-count').textContent = '0';
+    return;
+  }
+  // Deduplicate by code+owner
+  const unique = new Map();
+  for (const b of allBlockers) {
+    const key = b.code+'|'+b.owner;
+    if (!unique.has(key)) unique.set(key, {...b, contexts: []});
+    unique.get(key).contexts.push(b.context);
+  }
+  $('blocker-count').textContent = unique.size + ' unique';
+  let html = '<ul class="blocker-list">';
+  for (const [,b] of unique) {
+    html += '<li><span class="code">'+esc(b.code)+'</span><span class="msg">'+esc(b.message)+
+      '<br><span style="font-size:11px;color:var(--dim)">Affects: '+esc(b.contexts.slice(0,5).join(', '))+(b.contexts.length>5?' +' +(b.contexts.length-5)+' more':'')+'</span></span>'+
+      '<span class="owner">'+esc(b.owner)+'</span></li>';
+  }
+  html += '</ul>';
+  $('blockers-section').innerHTML = html;
+}
+
+/* ---- Cost Config from blocker codes ---- */
+function renderCostFromBlockers(allBlockers) {
+  const costHeads = [
+    { head:'Procurement (Landed Costs)', owner:'PROCUREMENT', code:'PROCUREMENT_NOT_CONFIGURED' },
+    { head:'Margin Configuration', owner:'ADMIN', code:'MARGIN_NOT_CONFIGURED' },
+    { head:'Transportation', owner:'PROJECT_HEAD', code:'TRANSPORTATION_NOT_CONFIGURED' },
+    { head:'Package Approval', owner:'PROJECT_HEAD', code:'NO_APPROVED_PACKAGE' },
+  ];
+  const blockerCodes = new Set(allBlockers.map(b => b.code));
+  let rows = '';
+  for (const c of costHeads) {
+    const ok = !blockerCodes.has(c.code);
+    rows += '<tr><td style="font-weight:600">'+esc(c.head)+'</td><td>'+esc(c.owner)+'</td>'+
+      '<td><span class="pill '+(ok?'pill-ok':'pill-bad')+'">'+(ok?'CONFIGURED':'NOT CONFIGURED')+'</span></td>'+
+      '<td style="color:var(--dim);font-size:12px">'+(ok?'Active':'Action required')+'</td></tr>';
+  }
+  $('cost-tbody').innerHTML = rows;
+}
+
+/* ---- Packages ---- */
+function renderPackages(data) {
+  if (data.error) { $('pkg-stats').innerHTML='<p class="alert alert-error">'+esc(data.error)+'</p>'; return; }
+  const a=data.approved||0, p=data.proposed||0, r=data.rejected||0, t=data.total||a+p+r;
+  $('pkg-stats').innerHTML =
+    statCard(a,'Approved','ok') + statCard(p,'Proposed','warn') + statCard(r,'Rejected','bad') + statCard(t,'Total','accent');
+}
+
+/* ---- Quotations ---- */
+function renderQuotations(data) {
+  if (data.error) { $('quot-stats').innerHTML='<p class="alert alert-error">'+esc(data.error)+'</p>'; return; }
+  const quots = data.quotations || [];
+  const byStatus = {};
+  quots.forEach(q => { const s=q.status||'UNKNOWN'; byStatus[s]=(byStatus[s]||0)+1; });
+  let statsHtml = statCard(quots.length,'Total','accent');
+  for (const [s,c] of Object.entries(byStatus).sort()) {
+    statsHtml += statCard(c, s, s==='ISSUED'?'ok':s==='DRAFT'?'warn':'accent');
+  }
+  $('quot-stats').innerHTML = statsHtml;
+
+  // Recent quotations (last 5)
+  const recent = quots.sort((a,b) => (b.createdAt||'').localeCompare(a.createdAt||'')).slice(0,5);
+  if (!recent.length) { $('quot-recent').innerHTML='<p style="color:var(--dim);font-size:12px;margin-top:8px">No quotations yet</p>'; return; }
+  let rh = '<h3 style="font-size:12px;color:var(--dim);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em">Recent Quotations</h3>';
+  rh += '<div class="overflow-x"><table><thead><tr><th>Quotation</th><th>Customer</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+  for (const q of recent) {
+    const st = q.status||'—';
+    rh += '<tr><td style="font-weight:600;font-size:12px">'+esc(q.quotationNumber||q.quotationId||'—')+'</td>'+
+      '<td>'+esc(q.customerName||q.customer?.name||q.customer?.customerName||(typeof q.customer==='string'?q.customer:'')||'—')+'</td>'+
+      '<td><span class="pill '+(st==='ISSUED'?'pill-ok':st==='DRAFT'?'pill-warn':'pill-neutral')+'">'+esc(st)+'</span></td>'+
+      '<td style="font-size:12px;color:var(--dim)">'+esc((q.createdAt||'').slice(0,10))+'</td></tr>';
+  }
+  rh += '</tbody></table></div>';
+  $('quot-recent').innerHTML = rh;
+}
+
+/* ---- Offers ---- */
+function renderOffers(data) {
+  if (data.error) { $('offers-section').innerHTML='<p class="alert alert-error">'+esc(data.error)+'</p>'; return; }
+  const offers = data.offers || (Array.isArray(data) ? data : []);
+  if (!offers.length) { $('offers-section').innerHTML='<p style="color:var(--dim);font-size:12px">No offers configured</p>'; $('offer-count').textContent='0'; return; }
+  const byStatus = {};
+  offers.forEach(o => { const s=o.status||'UNKNOWN'; byStatus[s]=(byStatus[s]||0)+1; });
+  const active = offers.filter(o => o.status==='ACTIVE');
+  $('offer-count').textContent = active.length+' active / '+offers.length+' total';
+  let html = '<div class="stats">'+statCard(active.length,'Active','ok');
+  for (const [s,c] of Object.entries(byStatus).filter(([s])=>s!=='ACTIVE').sort()) html += statCard(c,s,s==='DRAFT'?'warn':s==='EXPIRED'?'bad':'accent');
+  html += '</div>';
+  if (active.length) {
+    html += '<div class="overflow-x"><table><thead><tr><th>Offer</th><th>System</th><th>Tier</th><th>Size</th><th>Discount</th><th>Expires</th></tr></thead><tbody>';
+    for (const o of active) {
+      html += '<tr><td style="font-weight:600;font-size:12px">'+esc(o.offerId||'—')+'</td>'+
+        '<td>'+esc(o.systemType||o.applicability?.systemType||'—')+'</td>'+
+        '<td>'+esc(o.tier||o.applicability?.tier||'—')+'</td>'+
+        '<td>'+esc(o.systemSize||o.applicability?.systemSize||'—')+'</td>'+
+        '<td style="text-align:right">'+esc(o.discountPct!=null?o.discountPct+'%':o.discountAmount!=null?'₹'+Number(o.discountAmount).toLocaleString('en-IN'):'—')+'</td>'+
+        '<td style="font-size:12px;color:var(--dim)">'+esc((o.expiresAt||o.validUntil||'').slice(0,10)||'—')+'</td></tr>';
+    }
+    html += '</tbody></table></div>';
+  }
+  $('offers-section').innerHTML = html;
+}
+
+function statCard(val, label, cls) {
+  return '<div class="stat '+(cls||'')+'"><div class="val">'+val+'</div><div class="lbl">'+esc(label)+'</div></div>';
+}
+
+/* ---- Init ---- */
+(async function init() {
+  TOKEN = ''; try { TOKEN = sessionStorage.getItem(SESSION_KEY)||''; } catch {}
+  if (TOKEN) {
+    try {
+      const res = await fetch('/api/auth/session', { headers:{'Authorization':'Bearer '+TOKEN} });
+      const d = await res.json();
+      if (res.ok && d.user) {
+        USER = d.user.name||d.user.username||''; USER_ROLE = d.user.role||'';
+        showApp(); return;
+      }
+    } catch {}
+    TOKEN = ''; try { sessionStorage.removeItem(SESSION_KEY); } catch {}
+  }
+  $('login-view').hidden = false; $('main-view').hidden = true;
+})();
+</script>
+</body>
+</html>

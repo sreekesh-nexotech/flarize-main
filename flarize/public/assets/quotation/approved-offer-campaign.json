@@ -1,0 +1,30 @@
+{
+  "_note": "The approved quotation template v1 offer page (page 2) — Onam Solar Fest 2026 — as campaign content. Every value below is copied from the owner's approved artwork bundle (assets/approved-template/Flarize_Solar_Quotation.v1.html); nothing is invented. Admin → Quotation content → 'Load approved Onam design' fills the form with it; the seed script plants it as an OFF campaign. Review the campaign period and slot count before switching it ON.",
+  "name": "Onam Solar Fest 2026 (approved design)",
+  "theme": { "festival": "Onam" },
+  "yearBadge": "2026",
+  "headline": "ഓണം സോളാർ ഫെസ്റ്റ്",
+  "subheadline": "Celebrate Onam with Flarize!",
+  "primaryBenefit": { "headline": "FESTIVAL OFFERS WORTH UP TO", "displayValue": "40,000+" },
+  "urgency": { "enabled": true, "displayText": "LIMITED SLOTS", "remainingCount": 35 },
+  "luckyDraw": {
+    "enabled": true,
+    "title": "Win an Electric Scooter",
+    "description": "Every eligible solar booking during the campaign enters you into our grand festival draw for a brand-new premium electric scooter. Go solar, ride electric — celebrate Onam the sustainable way.",
+    "winners": 5,
+    "image": "assets/quotation/q-page-02-scooter.jpg"
+  },
+  "offers": [
+    { "title": "Win an AC Voucher", "description": "Available for Eligible Bookings", "image": "assets/quotation/q-page-02-ac-voucher.jpg", "enabled": true, "sortOrder": 1 },
+    { "title": "Free Hybrid Upgrade", "description": "+ Buyback Support", "image": "assets/quotation/q-page-02-hybrid-upgrade.jpg", "enabled": true, "sortOrder": 2 },
+    { "title": "Refer Friends & Win More Prizes", "description": "Earn rewards for every successful referral.", "image": "assets/quotation/q-page-02-refer-gift.jpg", "enabled": true, "sortOrder": 3 }
+  ],
+  "period": { "displayText": "29 JULY – 12 AUGUST", "note": "Book before 12th August to avail these exclusive festival offers." },
+  "cta": { "enabled": true, "buttonText": "Book Your Solar System Today!", "description": "Celebrate Onam with clean energy for a brighter tomorrow — limited festival slots available." },
+  "disclaimer": "*T&C Apply. Offer valid during the campaign period. Benefits vary by system configuration and eligibility. Prize terms apply.",
+  "artwork": {
+    "illustrationImage": "assets/quotation/q-page-02-mahabali.jpg",
+    "decorationImage": "assets/quotation/q-page-02-onam-floral.jpg",
+    "qrImage": "assets/quotation/q-page-02-qr.jpg"
+  }
+}

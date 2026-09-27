@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rev2 PAGE 8 — Your Solar Investment — PAINT layer.
+  Purpose: two-panel investment summary.
+    Top panel = RECOMMENDED-tier payment breakdown (recommended-tier
+      resolved via R3-frozen payload.system.recommendedBadge != null;
+      renderer suppresses the whole panel when no tier is recommended)
+    Bottom panel = monthly-savings-range hero
+
+  Contract (per Rev D §5):
+    - REMOVED: bank block (no Flarize account until Finance unblocks)
+    - REMOVED: UPI QR (same rule)
+    - REMOVED: long-term projection graph (no approved formula)
+    - Top-panel title strip painted exactly: "Recommended Package —"
+      (trailing space intended; the tier name is DATA overlay right after)
+    - Body labels painted (static): System Cost (Pre-Subsidy), Down
+      Payment, PM Surya Ghar Subsidy, Amount Payable / Financed, EMI
+      Option, Daily Investment
+    - Bottom-panel title painted: "Monthly Savings"
+    - Payback teaser strip: painted "Payback Period:" + "months → your
+      solar pays for itself" — number is DATA
+    - No prices, no subsidy values, no EMI, no daily payment, no savings,
+      no payback period, no tier name are painted into the raster
+
+  Dimensions: A4 portrait 595 × 842 pt.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 595 842"
+     width="595" height="842">
+  <title>Rev2 Page 8 — Your Solar Investment (PAINT layer)</title>
+  <defs>
+    <style>
+      .h  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; }
+      .b  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; }
+      .r  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 400; }
+      .u  { text-transform: uppercase; letter-spacing: 1.5px; }
+      .guide { fill: none; stroke: #cbd5d0; stroke-width: 0.6; stroke-dasharray: 3 3; opacity: 0.55; }
+    </style>
+    <linearGradient id="p8-hero" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#123f35"/>
+      <stop offset="1" stop-color="#0e3129"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="595" height="842" fill="#ffffff"/>
+
+  <!-- Header -->
+  <g transform="translate(40 42)">
+    <circle cx="14" cy="14" r="8.2" fill="#F5901E"/>
+    <g stroke="#F5901E" stroke-width="2.4" stroke-linecap="round">
+      <line x1="14" y1="0"  x2="14" y2="4"/>
+      <line x1="14" y1="24" x2="14" y2="28"/>
+      <line x1="0"  y1="14" x2="4"  y2="14"/>
+      <line x1="24" y1="14" x2="28" y2="14"/>
+    </g>
+    <text x="38" y="20" class="h" font-size="22" fill="#123f35" letter-spacing="0.3">FLARIZE</text>
+    <text x="38" y="34" class="b u" font-size="7" fill="#5b656a">Backed by Golden Ray</text>
+  </g>
+
+  <!-- Section heading -->
+  <g transform="translate(40 108)">
+    <text x="0" y="0"  class="h" font-size="26" fill="#123f35">Your Solar Investment</text>
+    <rect x="0" y="10" width="90" height="3" fill="#F5901E"/>
+    <text x="0" y="34" class="r" font-size="10.5" fill="#5b656a">Recommended package payment and monthly savings.</text>
+  </g>
+
+  <!-- Savings illustration (top-right — lightning-bolt-with-rupee) -->
+  <g transform="translate(470 90)" opacity="0.9">
+    <circle cx="42" cy="42" r="40" fill="#F5901E" opacity="0.14"/>
+    <path d="M 40 12 L 22 48 L 38 48 L 32 76 L 58 40 L 42 40 L 48 12 Z"
+          fill="#F5901E"/>
+    <text x="42" y="52" class="h" font-size="16" fill="#123f35" text-anchor="middle">₹</text>
+  </g>
+
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+  <!-- TOP PANEL — RECOMMENDED-TIER PAYMENT BREAKDOWN                        -->
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+  <g transform="translate(40 176)">
+    <!-- Panel frame -->
+    <rect x="0" y="0" width="515" height="330" rx="12" fill="url(#p8-hero)"/>
+    <!-- Title strip: exactly "Recommended Package —" (trailing space); tier name is DATA -->
+    <text x="20" y="34" class="b u" font-size="10" fill="#F5901E">Recommended Package —</text>
+    <!-- DATA: recommendedTierName token — sits immediately after the label -->
+    <rect class="guide" x="188" y="18" width="200" height="22" stroke="#F5901E"/>
+
+    <!-- Body labels (static PAINT) + DATA rectangles for values -->
+    <g transform="translate(20 60)">
+      <!-- Label + value rows -->
+      <g>
+        <text x="0" y="24" class="r" font-size="11" fill="#cfe3d6">System Cost (Pre-Subsidy)</text>
+        <rect class="guide" x="330" y="10" width="150" height="20"/>  <!-- recommendedCost -->
+        <line x1="0" y1="34" x2="475" y2="34" stroke="#1c5e50" stroke-width="0.5"/>
+      </g>
+      <g transform="translate(0 42)">
+        <text x="0" y="24" class="r" font-size="11" fill="#cfe3d6">Down Payment</text>
+        <rect class="guide" x="330" y="10" width="150" height="20"/>  <!-- recommendedDown -->
+        <line x1="0" y1="34" x2="475" y2="34" stroke="#1c5e50" stroke-width="0.5"/>
+      </g>
+      <g transform="translate(0 84)">
+        <text x="0" y="24" class="r" font-size="11" fill="#cfe3d6">PM Surya Ghar Subsidy</text>
+        <rect class="guide" x="330" y="10" width="150" height="20"/>  <!-- recommendedSubsidyMinus -->
+        <line x1="0" y1="34" x2="475" y2="34" stroke="#1c5e50" stroke-width="0.5"/>
+      </g>
+      <g transform="translate(0 126)">
+        <rect x="-6" y="4" width="486" height="34" rx="6" fill="#F5901E"/>
+        <text x="4" y="27" class="b" font-size="12" fill="#123f35">Amount Payable / Financed</text>
+        <rect class="guide" x="330" y="10" width="150" height="22" stroke="#123f35"/>  <!-- recommendedFin -->
+      </g>
+      <g transform="translate(0 176)">
+        <text x="0" y="24" class="r" font-size="11" fill="#cfe3d6">EMI Option</text>
+        <rect class="guide" x="80"  y="10" width="200" height="20"/>   <!-- recommendedEmiLabel + recommendedEmiOn -->
+        <rect class="guide" x="330" y="10" width="150" height="20"/>   <!-- recommendedEmi -->
+        <line x1="0" y1="34" x2="475" y2="34" stroke="#1c5e50" stroke-width="0.5"/>
+      </g>
+      <g transform="translate(0 218)">
+        <text x="0" y="24" class="r" font-size="11" fill="#cfe3d6">Daily Investment</text>
+        <rect class="guide" x="330" y="10" width="150" height="20"/>  <!-- recommendedDailyPayment -->
+      </g>
+    </g>
+  </g>
+
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+  <!-- BOTTOM PANEL — MONTHLY SAVINGS RANGE                                  -->
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+  <g transform="translate(40 528)">
+    <rect x="0" y="0" width="515" height="130" rx="12" fill="#FAF3E0"/>
+    <text x="20" y="34" class="b u" font-size="10" fill="#123f35">Monthly Savings</text>
+    <!-- DATA: savingsRange token — large centred value -->
+    <rect class="guide" x="20"  y="46" width="475" height="52"/>
+    <text x="20" y="118" class="r" font-size="9" fill="#8b6a1a">Based on your current KSEB bill and your recommended system.</text>
+  </g>
+
+  <!-- Payback teaser strip -->
+  <g transform="translate(40 680)">
+    <rect x="0" y="0" width="515" height="42" fill="#123f35"/>
+    <text x="20" y="26" class="b" font-size="12" fill="#F5901E">Payback Period:</text>
+    <rect class="guide" x="150" y="12" width="70" height="22" stroke="#F5901E"/>  <!-- returnPeriodMonths -->
+    <text x="232" y="26" class="r" font-size="12" fill="#ffffff">months → your solar pays for itself.</text>
+  </g>
+
+  <!-- Static disclaimer -->
+  <g transform="translate(40 738)">
+    <text x="0" y="12" class="r" font-size="8.5" fill="#5b656a">EMI values are indicative and may vary by bank, credit profile and applicable benchmark rate.</text>
+    <text x="0" y="26" class="r" font-size="8.5" fill="#5b656a">Savings depend on generation, self-consumption, and current tariff. No long-term projection figure is shown on this quotation.</text>
+  </g>
+
+  <!-- Footer teal band with C7-LOCKED issuer identity -->
+  <g transform="translate(0 810)">
+    <rect x="0" y="0" width="595" height="32" fill="#123f35"/>
+    <text x="20"  y="14" class="r" font-size="6.5" fill="#ffffff">FLARIZE TECHNOLOGIES PRIVATE LIMITED  ·  GSTIN 32AAGCF7283D1ZR  ·  Reg. AAP-6531</text>
+    <text x="20"  y="24" class="r" font-size="6.5" fill="#cfe3d6">Floor 01, Building 49/190/B, Tharath Building, Ambalappuzha, Alappuzha North, Alappuzha, Kerala 688007</text>
+    <text x="440" y="24" class="r" font-size="6.5" fill="#cfe3d6">+91 99950 73579  ·  sales@flarize.com  ·  www.flarize.com</text>
+  </g>
+</svg>

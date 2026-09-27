@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Package Approvals — Flarize</title>
+  <style>
+    body { margin: 0; font: 14px/1.4 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #0f172a; }
+    #app { padding: 20px; max-width: 1400px; margin: 0 auto; }
+    h1 { font-size: 22px; margin: 0 0 12px; }
+    h2 { font-size: 16px; margin: 24px 0 8px; color: #334155; }
+    button { padding: 6px 12px; border-radius: 4px; border: 1px solid #cbd5e1; background: white; cursor: pointer; font: inherit; }
+    button.primary { background: #16a34a; color: white; border-color: #16a34a; }
+    button.danger { background: #dc2626; color: white; border-color: #dc2626; }
+    button.warn { background: #f59e0b; color: white; border-color: #f59e0b; }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; background: white; }
+    th, td { border-bottom: 1px solid #e2e8f0; padding: 8px; text-align: left; font-size: 13px; }
+    th { background: #f1f5f9; font-weight: 600; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; }
+    .badge-DRAFT { background: #fef3c7; color: #92400e; }
+    .badge-SUBMITTED { background: #dbeafe; color: #1e40af; }
+    .badge-APPROVED { background: #dcfce7; color: #166534; }
+    .badge-REJECTED { background: #fee2e2; color: #991b1b; }
+    .badge-ARCHIVED { background: #e2e8f0; color: #475569; }
+    .row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+    #panel { background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; margin-top: 16px; }
+    pre { background: #f1f5f9; padding: 12px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    .error { color: #b91c1c; padding: 8px 12px; background: #fee2e2; border-radius: 4px; margin: 8px 0; }
+    .success { color: #166534; padding: 8px 12px; background: #dcfce7; border-radius: 4px; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <script src="/lib/nav.js"></script>
+  <div id="app">
+    <h1>Package Approvals</h1>
+    <div id="msg"></div>
+    <div class="row">
+      <button onclick="pkgApp.refresh()">Refresh</button>
+      <select id="stateFilter" onchange="pkgApp.refresh()">
+        <option value="SUBMITTED">Queue (SUBMITTED)</option>
+        <option value="">All states</option>
+        <option value="APPROVED">APPROVED</option>
+        <option value="REJECTED">REJECTED</option>
+        <option value="ARCHIVED">ARCHIVED</option>
+        <option value="DRAFT">DRAFT</option>
+      </select>
+      <button onclick="pkgApp.compareSelected()">Compare selected</button>
+    </div>
+
+    <table id="list">
+      <thead>
+        <tr>
+          <th style="width:20px"><input type="checkbox" onchange="pkgApp.toggleAll(this.checked)"></th>
+          <th>Package ID</th><th>System</th><th>Size</th><th>Phase</th><th>Tier</th>
+          <th>Rev</th><th>State</th><th>Validation</th><th>Submitted by</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div id="panel" style="display: none;">
+      <h2 id="panelTitle">Detail</h2>
+      <div id="panelBody"></div>
+    </div>
+  </div>
+
+  <script src="/lib/package-approval.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.flarizeNav) flarizeNav.init({ current: 'package-approval' });
+      pkgApp.init();
+    });
+  </script>
+</body>
+</html>

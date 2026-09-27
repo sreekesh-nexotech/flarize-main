@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rev2 PAGE 6 — Homes We've Powered — PAINT layer (Path A per Rev D §4).
+  Purpose: pure marketing social proof. Trust conveyed by:
+    - the completed-installations count (single DATA overlay)
+    - marketing stat tiles (all static labels)
+    - a mosaic of installation photos with location caption strips
+
+  Contract:
+    - No fabricated customer testimonials
+    - No customer names
+    - No star ratings
+    - No quoted testimonials
+    - No invented claims
+    - Location caption strips are static Kerala district names — not
+      per-quotation values
+    - Installation photo slots are placeholder frames — the design team
+      swaps in real Flarize installation photography before publishing
+    - The only DATA rectangle on this page is the completed-installations
+      count (top-left stat tile); renderer suppresses the tile when null
+
+  Dimensions: A4 portrait 595 × 842 pt.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 595 842"
+     width="595" height="842">
+  <title>Rev2 Page 6 — Homes We've Powered (PAINT layer)</title>
+  <defs>
+    <style>
+      .h  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; }
+      .b  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; }
+      .r  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 400; }
+      .u  { text-transform: uppercase; letter-spacing: 1.5px; }
+      .guide { fill: none; stroke: #cbd5d0; stroke-width: 0.6; stroke-dasharray: 3 3; opacity: 0.55; }
+      .placeholder { fill: #e7ecea; stroke: #cbd5d0; stroke-width: 0.6; stroke-dasharray: 4 3; }
+    </style>
+  </defs>
+
+  <rect width="595" height="842" fill="#ffffff"/>
+
+  <!-- Header -->
+  <g transform="translate(40 42)">
+    <circle cx="14" cy="14" r="8.2" fill="#F5901E"/>
+    <g stroke="#F5901E" stroke-width="2.4" stroke-linecap="round">
+      <line x1="14" y1="0"  x2="14" y2="4"/>
+      <line x1="14" y1="24" x2="14" y2="28"/>
+      <line x1="0"  y1="14" x2="4"  y2="14"/>
+      <line x1="24" y1="14" x2="28" y2="14"/>
+    </g>
+    <text x="38" y="20" class="h" font-size="22" fill="#123f35" letter-spacing="0.3">FLARIZE</text>
+    <text x="38" y="34" class="b u" font-size="7" fill="#5b656a">Backed by Golden Ray</text>
+  </g>
+
+  <!-- Page title -->
+  <g transform="translate(40 108)">
+    <text x="0" y="0"  class="h" font-size="26" fill="#123f35">Homes We've Powered</text>
+    <rect x="0" y="10" width="90" height="3" fill="#F5901E"/>
+    <text x="0" y="34" class="r" font-size="10.5" fill="#5b656a">Rooftop installations delivered by Flarize across Kerala.</text>
+  </g>
+
+  <!-- Stat tiles row (labels PAINT; count is DATA overlay on tile 1) -->
+  <g transform="translate(40 172)">
+    <!-- Tile 1 — completedInstallations count (DATA) -->
+    <rect x="0" y="0" width="120" height="72" rx="10" fill="#123f35"/>
+    <rect class="guide" x="12" y="10" width="96" height="28"/>  <!-- completedInstallations token -->
+    <text x="60" y="52" class="r u" font-size="8" fill="#F5901E" text-anchor="middle">Homes Installed</text>
+    <text x="60" y="64" class="r"   font-size="8" fill="#cfe3d6" text-anchor="middle">across Kerala</text>
+
+    <!-- Tile 2 — MNRE (static) -->
+    <rect x="132" y="0" width="120" height="72" rx="10" fill="#ffffff" stroke="#e5e7ea" stroke-width="1"/>
+    <text x="192" y="30" class="h"   font-size="16" fill="#123f35" text-anchor="middle">MNRE</text>
+    <text x="192" y="46" class="r u" font-size="8"  fill="#F5901E" text-anchor="middle">Empanelled</text>
+    <text x="192" y="60" class="r"   font-size="8"  fill="#5b656a" text-anchor="middle">Government certified</text>
+
+    <!-- Tile 3 — Experience (static) -->
+    <rect x="264" y="0" width="120" height="72" rx="10" fill="#ffffff" stroke="#e5e7ea" stroke-width="1"/>
+    <text x="324" y="30" class="h" font-size="16" fill="#123f35" text-anchor="middle">8+ Years</text>
+    <text x="324" y="48" class="r" font-size="9"  fill="#5b656a" text-anchor="middle">Industry experience</text>
+
+    <!-- Tile 4 — Service coverage (static) -->
+    <rect x="396" y="0" width="120" height="72" rx="10" fill="#ffffff" stroke="#e5e7ea" stroke-width="1"/>
+    <text x="456" y="30" class="h" font-size="14" fill="#123f35" text-anchor="middle">Kerala-wide</text>
+    <text x="456" y="48" class="r" font-size="9"  fill="#5b656a" text-anchor="middle">Service coverage</text>
+  </g>
+
+  <!-- Divider strip -->
+  <g transform="translate(40 268)">
+    <line x1="0" y1="0" x2="515" y2="0" stroke="#e5e7ea" stroke-width="1"/>
+    <text x="0" y="18" class="b u" font-size="9" fill="#123f35">Installations across Kerala</text>
+    <text x="515" y="18" class="r" font-size="9" fill="#5b656a" text-anchor="end">Photos from actual Flarize projects</text>
+  </g>
+
+  <!-- Installation-photo mosaic (8 placeholder tiles; design team drops in real photos) -->
+  <!-- Row 1: 4 tiles -->
+  <g transform="translate(40 300)">
+    <g>
+      <rect class="placeholder" x="0"   y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0"   y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60"  y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Alappuzha</text>
+    </g>
+    <g transform="translate(132 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Kuttanad</text>
+    </g>
+    <g transform="translate(264 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Vaikom</text>
+    </g>
+    <g transform="translate(396 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Cherthala</text>
+    </g>
+  </g>
+
+  <!-- Row 2: 4 tiles -->
+  <g transform="translate(40 430)">
+    <g>
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Alappuzha</text>
+    </g>
+    <g transform="translate(132 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Ambalappuzha</text>
+    </g>
+    <g transform="translate(264 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Mararikulam</text>
+    </g>
+    <g transform="translate(396 0)">
+      <rect class="placeholder" x="0" y="0" width="120" height="90" rx="6"/>
+      <text x="60" y="52" class="r" font-size="8" fill="#8b9297" text-anchor="middle">[ install photo ]</text>
+      <rect x="0" y="90" width="120" height="20" fill="#123f35"/>
+      <text x="60" y="104" class="b u" font-size="7" fill="#F5901E" text-anchor="middle">Karumadi</text>
+    </g>
+  </g>
+
+  <!-- Marketing band -->
+  <g transform="translate(40 580)">
+    <rect x="0" y="0" width="515" height="130" rx="12" fill="#FAF3E0"/>
+    <text x="24" y="34" class="h"   font-size="18" fill="#123f35">Real Solar, Real Homes.</text>
+    <text x="24" y="60" class="r"   font-size="10.5" fill="#5b656a">Flarize designs, sources, installs and services every system in-house.</text>
+    <text x="24" y="76" class="r"   font-size="10.5" fill="#5b656a">Panels, inverters and structure sourced only from certified brands.</text>
+    <text x="24" y="92" class="r"   font-size="10.5" fill="#5b656a">Priority servicing across Alappuzha, Kottayam, Kollam and Pathanamthitta.</text>
+    <!-- Right-side badge -->
+    <g transform="translate(380 20)">
+      <rect x="0" y="0" width="120" height="90" rx="8" fill="#123f35"/>
+      <text x="60" y="28" class="b u" font-size="8"  fill="#F5901E" text-anchor="middle">Since 2017</text>
+      <text x="60" y="52" class="h"   font-size="20" fill="#ffffff" text-anchor="middle">Kerala</text>
+      <text x="60" y="70" class="r"   font-size="8"  fill="#cfe3d6" text-anchor="middle">Wide coverage</text>
+    </g>
+  </g>
+
+  <!-- Footer teal band with C7-LOCKED issuer identity -->
+  <g transform="translate(0 810)">
+    <rect x="0" y="0" width="595" height="32" fill="#123f35"/>
+    <text x="20"  y="14" class="r" font-size="6.5" fill="#ffffff">FLARIZE TECHNOLOGIES PRIVATE LIMITED  ·  GSTIN 32AAGCF7283D1ZR  ·  Reg. AAP-6531</text>
+    <text x="20"  y="24" class="r" font-size="6.5" fill="#cfe3d6">Floor 01, Building 49/190/B, Tharath Building, Ambalappuzha, Alappuzha North, Alappuzha, Kerala 688007</text>
+    <text x="440" y="24" class="r" font-size="6.5" fill="#cfe3d6">+91 99950 73579  ·  sales@flarize.com  ·  www.flarize.com</text>
+  </g>
+</svg>

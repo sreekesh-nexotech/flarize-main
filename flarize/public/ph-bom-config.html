@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BOM Configuration · Flarize</title>
+<style>
+:root{--g:#0f7b5f;--g2:#0b6a51;--g-soft:#e6f4ef;--o:#e8680f;--o-soft:#fdeee2;--r:#c0392b;--r-soft:#fbe9e7;--y:#b7791f;--y-soft:#fdf3dc;--b:#2a5db0;--b-soft:#e8effb;--ink:#1c2430;--mut:#66707d;--line:#e3e7ec;--bg:#f4f6f8;--card:#fff;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}html,body{margin:0;height:100%}[hidden]{display:none!important}
+body{font:13px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh}
+a{color:inherit;text-decoration:none}
+button{font:inherit;cursor:pointer}
+/* sidebar */
+.sb{background:#fff;border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+.brand{padding:4px 8px 14px;display:flex;flex-direction:column;gap:2px}.brand b{font-size:22px;color:var(--g);letter-spacing:-.5px}.brand small{color:var(--mut);font-size:10.5px;margin-top:-4px}
+.sb h6{margin:12px 8px 4px;font-size:10px;letter-spacing:.08em;color:var(--mut);font-weight:700}
+.sb a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;color:#333;font-size:12.5px}.sb a.on{background:var(--g-soft);color:var(--g);font-weight:600}.sb a i{width:14px;height:14px;border:1.5px solid currentColor;border-radius:4px;display:inline-block;opacity:.7}
+/* main */
+main{padding:14px 18px 40px;min-width:0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.top h1{margin:0;font-size:18px}.crumb{color:var(--mut);font-size:12px;margin-top:2px}
+.pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;font-weight:600}
+.pill.ok{background:var(--g-soft);color:var(--g);border-color:#cfe8dd}.pill.warn{background:var(--y-soft);color:var(--y);border-color:#f1e2b5}.pill.bad{background:var(--r-soft);color:var(--r);border-color:#f3c9c4}.pill.info{background:var(--b-soft);color:var(--b);border-color:#cdd9f2}.pill.mut{color:var(--mut)}
+.dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.role{display:flex;align-items:center;gap:8px;padding:4px 8px 4px 4px;border:1px solid var(--line);border-radius:999px;background:#fff}
+.role .av{width:26px;height:26px;border-radius:50%;background:var(--g);color:#fff;display:grid;place-items:center;font-weight:700;font-size:11px}
+.role select{border:0;background:transparent;font:inherit;font-weight:600;color:var(--ink)}
+.role small{display:block;color:var(--mut);font-size:10.5px}
+.grid{display:grid;grid-template-columns:1fr 300px;gap:12px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h3{margin:0 0 10px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card h3 small{color:var(--mut);font-weight:500;font-size:11.5px}
+/* config header */
+.cfg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.cfg label{display:block;font-size:10.5px;letter-spacing:.06em;font-weight:700;color:var(--mut);margin-bottom:6px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:#fafbfc}
+.seg button{border:0;background:transparent;padding:7px 12px;font-weight:600;color:#444;border-right:1px solid var(--line)}.seg button:last-child{border-right:0}.seg button.on{background:var(--g);color:#fff}.seg button:disabled{opacity:.45;cursor:not-allowed}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#fafbfc;border-radius:9px;padding:6px 11px;font-weight:600;color:#444}.chip.on{background:var(--g);border-color:var(--g);color:#fff}.chip small{display:block;font-weight:500;font-size:10px;opacity:.75}
+.sub{color:var(--mut);font-size:11.5px;margin-top:6px}
+select,input[type=text],input[type=number],input[type=search]{font:inherit;border:1px solid var(--line);border-radius:8px;padding:6px 8px;background:#fff;color:var(--ink)}
+.bat{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+/* optional sections */
+.opt{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.opt .card{padding:10px 12px}.opt h4{margin:0 0 8px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center}
+.sw{position:relative;width:34px;height:20px;border-radius:999px;background:#cfd6de;border:0;transition:.15s}.sw:after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.15s}.sw.on{background:var(--g)}.sw.on:after{left:16px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:12px}.kv b{color:var(--mut);font-weight:600}
+.alt{display:grid;grid-template-columns:90px 1fr;gap:6px;align-items:center;margin:4px 0}.alt span{font-size:11px;color:var(--mut);font-weight:700}
+.addon{display:flex;gap:6px;align-items:center;margin-top:6px}.addon input[type=number]{width:64px}
+/* validation */
+.val{margin-top:12px}
+.val .hd{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.val table{width:100%;border-collapse:collapse;font-size:12px}.val th{text-align:left;color:var(--mut);font-size:10.5px;letter-spacing:.06em;padding:4px 8px;border-bottom:1px solid var(--line)}.val td{padding:6px 8px;border-bottom:1px solid #eef1f4;vertical-align:top}
+.sev{font-weight:700;font-size:10.5px;padding:2px 6px;border-radius:6px}.sev.BLOCKED{background:var(--r-soft);color:var(--r)}.sev.WARNING{background:var(--y-soft);color:var(--y)}.sev.INFO{background:var(--b-soft);color:var(--b)}
+.rule{font-family:var(--mono);font-size:11px;color:#444}
+/* bom table */
+.bomwrap{margin-top:12px;overflow-x:auto}
+table.bom{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px;min-width:980px}
+.bom th{position:sticky;top:0;background:#fff;text-align:left;font-size:10.5px;letter-spacing:.06em;color:var(--mut);padding:8px 8px;border-bottom:1px solid var(--line);white-space:nowrap;z-index:1}
+.bom td{padding:6px 8px;border-bottom:1px solid #eef1f4;vertical-align:middle;white-space:nowrap}
+.bom tr.g td{background:#f7f9fb;font-weight:700;font-size:11px;letter-spacing:.06em;color:#333;padding:7px 8px;border-top:1px solid var(--line)}
+.bom tr.g td small{font-weight:500;color:var(--mut);letter-spacing:0;margin-left:8px}
+.bom td.n{color:var(--mut);width:34px}
+.bom td.item b{display:block}.bom td.item small{color:var(--mut)}
+.bom td.model{max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.bom td.num{text-align:right;font-variant-numeric:tabular-nums}
+.bom tr.blocked td{background:#fff7f6}.bom tr.dirty td{background:#fffaf0}
+.qty{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff}
+.qty button{border:0;background:#f4f6f8;width:24px;height:26px;font-weight:700;color:#333}.qty button:disabled{opacity:.35;cursor:not-allowed}
+.qty input{width:56px;border:0;text-align:right;padding:4px 6px;font:inherit;font-variant-numeric:tabular-nums}.qty input:disabled{background:#fff;color:var(--ink)}
+.qty.lock{border-style:dashed;background:#fafbfc}.qty.lock input{background:transparent;font-weight:600}
+.src{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:6px;white-space:nowrap}
+.src.PH_CONFIGURED{background:var(--g-soft);color:var(--g)}.src.DERIVED_FROM_CONFIG{background:var(--b-soft);color:var(--b)}.src.DEVICE_ALLOCATED{background:#efe6fb;color:#6b3fb5}.src.ENGINEERING_RULE{background:var(--o-soft);color:var(--o)}.src.FIXED{background:#eef1f4;color:#555}.src.PROJECT_ADDON{background:#e6f7f4;color:#0b7a6b}
+.st{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:11px}.st .dot{width:7px;height:7px}
+.st.VALID{color:var(--g)}.st.WARNING{color:var(--y)}.st.BLOCKED{color:var(--r)}.st.APPROVED{color:var(--g)}.st.PROPOSED{color:var(--y)}.st.RETIRED,.st.UNRESOLVED{color:var(--r)}.st.REJECTED{color:var(--r)}
+.ic{border:1px solid var(--line);background:#fff;border-radius:7px;width:26px;height:26px;display:inline-grid;place-items:center;color:#555;margin-right:4px}.ic:disabled{opacity:.35;cursor:not-allowed}.ic.danger{color:var(--r)}
+.reason{display:block;margin-top:4px}.reason input{width:220px;padding:3px 6px;font-size:11.5px}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px;color:var(--mut);font-size:12px}
+/* add component */
+.addc{display:flex;gap:8px;align-items:center;margin-top:12px;position:relative}
+.addc input[type=search]{flex:1}
+.res{position:absolute;left:0;right:0;top:36px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.08);max-height:260px;overflow:auto;z-index:5}
+.res div{padding:8px 10px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between;gap:8px;cursor:pointer}.res div:hover{background:#f7f9fb}.res div.dis{opacity:.5;cursor:not-allowed}
+/* rail */
+.rail .card{margin-bottom:12px}
+.sum{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:12.5px}.sum b{font-variant-numeric:tabular-nums}
+.btn{width:100%;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 12px;font-weight:700;margin-top:8px;color:var(--ink)}.btn.p{background:var(--g);border-color:var(--g);color:#fff}.btn.o{background:var(--o);border-color:var(--o);color:#fff}.btn:disabled{opacity:.45;cursor:not-allowed}
+.hint{font-size:11px;color:var(--mut);margin-top:4px}
+.hist{font-size:11.5px;display:flex;flex-direction:column;gap:6px;max-height:260px;overflow:auto}.hist div{border-left:2px solid var(--line);padding-left:8px}.hist b{display:block}.hist small{color:var(--mut)}
+.toast{position:fixed;right:18px;bottom:18px;background:#1c2430;color:#fff;padding:10px 14px;border-radius:10px;font-size:12.5px;max-width:420px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:none;z-index:50}.toast.bad{background:var(--r)}.toast.ok{background:var(--g)}
+.ro{background:var(--b-soft);color:var(--b);border:1px solid #cdd9f2;border-radius:10px;padding:8px 12px;font-size:12px;margin-bottom:12px;display:none}
+.fixture{font-size:10.5px;color:var(--mut);margin-top:12px}
+/* login */
+.login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:100}
+.login .card{width:360px}.login input{width:100%;margin:6px 0 10px}
+@media (max-width:1100px){.grid{grid-template-columns:1fr}.cfg{grid-template-columns:1fr 1fr}.opt{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top">
+    <div><h1>BOM Configuration</h1><div class="crumb">Home › Engineering › BOM Configuration</div></div>
+    <div class="pills">
+      <span class="pill" id="pillPkg"><span class="dot"></span> —</span>
+      <span class="pill" id="pillEng"><span class="dot"></span> Engineering Check: —</span>
+      <div class="role"><div class="av" id="avatar">PH</div><div><select id="roleSel"><option value="PROJECT_HEAD">Project Head</option><option value="ADMIN">Admin</option><option value="ENGINEERING">Engineering</option><option value="SALES">Sales (redirects)</option></select><small id="roleSub">Author · Save · Submit</small></div></div>
+    </div>
+  </div>
+  <div class="ro" id="ro"></div>
+  <div class="grid">
+    <section>
+      <div class="card">
+        <h3>Configuration <small id="cfgKey"></small></h3>
+        <div class="cfg">
+          <div><label>SYSTEM TYPE</label><div class="seg" id="segType"></div></div>
+          <div><label>SYSTEM SIZE <span style="font-weight:500">· configured only</span></label><div class="chips" id="chipsSize"></div></div>
+          <div><label>PACKAGE</label><div class="seg" id="segTier"></div><div class="sub" id="tierSub"></div></div>
+          <div><label>PHASE</label><div class="pills"><span class="pill mut" id="pillPhase">—</span><span class="pill mut" id="pillPanels">—</span></div></div>
+        </div>
+        <div class="bat" id="batWrap" hidden>
+          <div><label style="display:block;font-size:10.5px;letter-spacing:.06em;font-weight:700;color:var(--mut);margin-bottom:6px">BATTERY · model (template) · quantity (project configuration)</label>
+            <div style="display:flex;gap:10px;align-items:center"><select id="batModel"></select><div class="seg" id="segBat"></div><span class="sub" id="batNote" style="margin:0"></span></div></div>
+        </div>
+      </div>
+
+      <div class="opt">
+        <div class="card"><h4>Future Upgrade Ready <button class="sw" id="swFR" aria-label="toggle"></button></h4><div class="kv"><b>Variant</b><span id="frVariant">STANDARD</span><b>FR package</b><span id="frPkg">none approved for this capacity</span></div><div class="hint">Enables the FUTURE_READY package variant when one is APPROVED. No engine change.</div></div>
+        <div class="card"><h4>Brand &amp; Model Selection <small style="color:var(--mut);font-weight:500">approved alternates only</small></h4><div id="alts"></div></div>
+        <div class="card"><h4>Site Add-ons <small style="color:var(--mut);font-weight:500">project-level · template unchanged</small></h4><div id="addons"></div><div class="addon"><select id="addonSel"></select><input type="number" id="addonQty" min="1" value="10"><button class="ic" id="addonAdd" title="Add">+</button></div></div>
+      </div>
+
+      <div class="card val" id="valCard">
+        <div class="hd"><h3 style="margin:0">Engineering Validation</h3><span class="pill" id="valPill"><span class="dot"></span> —</span><span class="sub" id="valMeta" style="margin:0"></span></div>
+        <div id="valBody"></div>
+      </div>
+
+      <div class="card bomwrap">
+        <h3>BOM Template <small id="bomMeta"></small></h3>
+        <table class="bom"><thead><tr><th>#</th><th>ITEM</th><th>CATEGORY</th><th>BRAND / MODEL</th><th style="text-align:right">QTY</th><th>UNIT</th><th>RULE / SOURCE</th><th style="text-align:right" class="cost">REF ₹</th><th style="text-align:right" class="cost">TOTAL</th><th>ENG</th><th>APPROVAL</th><th>ACTION</th></tr></thead><tbody id="bomBody"></tbody></table>
+        <div class="addc" id="addWrap"><input type="search" id="addQ" placeholder="Add component — search approved catalog (brand, model, category, id)…"><input type="number" id="addQty" min="1" value="1" style="width:70px"><div class="res" id="addRes" hidden></div></div>
+        <div class="foot"><span id="footL"></span><span id="footR"></span></div>
+      </div>
+      <div class="fixture" id="fixtureNote"></div>
+    </section>
+
+    <aside class="rail">
+      <div class="card"><h3>Summary</h3><div class="sum" id="sum"></div></div>
+      <div class="card"><h3>Actions</h3>
+        <button class="btn p" id="btnSave">Save Draft</button><div class="hint">Stores working configuration. Runs validation.</div>
+        <button class="btn" id="btnCheck">Run Engineering Validation</button>
+        <button class="btn o" id="btnSubmit">Submit for Approval</button><div class="hint">BLOCKED BOM cannot be submitted.</div>
+        <button class="btn" id="btnApprove">Approve &amp; Publish Version</button><div class="hint" id="approveHint">ADMIN only. Project Head cannot approve own package.</div>
+        <button class="btn" id="btnRevise">Create Revision (v+1)</button>
+      </div>
+      <div class="card"><h3>Audit Trail <small id="histMeta"></small></h3><div class="hist" id="hist"></div></div>
+    </aside>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<div class="login" id="login" hidden><div class="card"><h3>Sign in · Flarize workspace</h3><div class="hint">Dev fixture server. Password from <code>ADMIN_PASSWORD</code> (default <code>flarize-dev</code>).</div><input type="text" id="loginUser" placeholder="user id" value="ph1"><input type="text" id="loginPw" placeholder="password" value="flarize-dev"><button class="btn p" id="loginBtn">Sign in</button><div class="hint" id="loginErr" style="color:var(--r)"></div></div></div>
+<script src="/lib/nav.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.flarizeNav&&flarizeNav.init({current:"ph-bom-config"}));</script>
+<script type="module" src="/lib/ph-bom-config.js"></script>
+</body>
+</html>

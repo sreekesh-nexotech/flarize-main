@@ -1,0 +1,6415 @@
+{
+  "summary": {
+    "generatedAtUtc": "2026-08-16T06:21:47.684Z",
+    "packagesEvaluated": 48,
+    "totalComponents": 322,
+    "totalFallbacks": 319,
+    "totalExplicit": 3,
+    "packagesWithZeroFallback": 0,
+    "status": {
+      "VALID": 12,
+      "WARNING": 32,
+      "BLOCKED": 4
+    }
+  },
+  "packages": [
+    {
+      "packageId": "PKG-ONGRID-3-1P-BASE",
+      "systemType": "ongrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i95",
+          "name": "Eastman 1P 3kW",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "explicit",
+          "status": "ACTIVE",
+          "candidateCount": 12,
+          "approvedAlternates": [
+            "i1",
+            "i2",
+            "i3",
+            "i4",
+            "i44",
+            "i45",
+            "i46",
+            "i47",
+            "i68",
+            "i69",
+            "i95",
+            "i96"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d1",
+          "name": "1/1 DCDB Havells MCB 500v 32A + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d1",
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a1",
+          "name": "ETN 32A + Mersen ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a1",
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m1",
+          "name": "Visiontek Single Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m1"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 1,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-3-1P-VALUE",
+      "systemType": "ongrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i87",
+          "name": "Foxess 1P 3.3kW",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "explicit",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i20",
+            "i21",
+            "i22",
+            "i23",
+            "i66",
+            "i67",
+            "i79",
+            "i80",
+            "i87",
+            "i88"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d2",
+          "name": "1/1 DCDB ETN MCB 500v 32A + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "d2",
+            "d3",
+            "d4",
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a1",
+          "name": "ETN 32A + Mersen ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "a1",
+            "a2",
+            "a3",
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m2",
+            "m5"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is1",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 1,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-3-1P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a5",
+          "name": "Enphase ACDB + AJ Box ABB MCB 16A 2P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a5",
+            "ac_hyb_en1p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m2"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5sp-1P-BASE",
+      "systemType": "ongrid",
+      "size": "5sp",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i4",
+          "name": "Growatt MIN 5000 TL-X",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 12,
+          "approvedAlternates": [
+            "i1",
+            "i2",
+            "i3",
+            "i4",
+            "i44",
+            "i45",
+            "i46",
+            "i47",
+            "i68",
+            "i69",
+            "i95",
+            "i96"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d1",
+          "name": "1/1 DCDB Havells MCB 500v 32A + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d1",
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a1",
+          "name": "ETN 32A + Mersen ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a1",
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m1",
+          "name": "Visiontek Single Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m1"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5sp-1P-VALUE",
+      "systemType": "ongrid",
+      "size": "5sp",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i23",
+          "name": "Sungrow SG5K-D",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i20",
+            "i21",
+            "i22",
+            "i23",
+            "i66",
+            "i67",
+            "i79",
+            "i80",
+            "i87",
+            "i88"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d2",
+          "name": "1/1 DCDB ETN MCB 500v 32A + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "d2",
+            "d3",
+            "d4",
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a1",
+          "name": "ETN 32A + Mersen ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "a1",
+            "a2",
+            "a3",
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m2",
+            "m5"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is1",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5sp-1P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "5sp",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a5",
+          "name": "Enphase ACDB + AJ Box ABB MCB 16A 2P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a5",
+            "ac_hyb_en1p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m2"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5tp-3P-BASE",
+      "systemType": "ongrid",
+      "size": "5tp",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i48",
+          "name": "DEYE On-Grid 3P 5kW",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 32,
+          "approvedAlternates": [
+            "i5",
+            "i6",
+            "i7",
+            "i8",
+            "i9",
+            "i10",
+            "i11",
+            "i12",
+            "i13",
+            "i14",
+            "i15",
+            "i16",
+            "i17",
+            "i18",
+            "i19",
+            "i48",
+            "i49",
+            "i50",
+            "i51",
+            "i52",
+            "i53",
+            "i54",
+            "i55",
+            "i70",
+            "i71",
+            "i72",
+            "i73",
+            "i74",
+            "i75",
+            "i76",
+            "i77",
+            "i78"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d6",
+          "name": "2/2 DCDB Havells MCB 500v + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d6",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5tp-3P-VALUE",
+      "systemType": "ongrid",
+      "size": "5tp",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i24",
+          "name": "Sungrow SG5.0RT",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 23,
+          "approvedAlternates": [
+            "i24",
+            "i25",
+            "i26",
+            "i27",
+            "i28",
+            "i29",
+            "i30",
+            "i31",
+            "i32",
+            "i33",
+            "i34",
+            "i81",
+            "i82",
+            "i83",
+            "i84",
+            "i85",
+            "i86",
+            "i89",
+            "i90",
+            "i91",
+            "i92",
+            "i93",
+            "i94"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d7",
+          "name": "2/2 DCDB ETN MCB 500v + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "d7",
+            "d8",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-5tp-3P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "5tp",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a6",
+          "name": "Enphase ACDB + AJ Box 3P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a6",
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-6-3P-BASE",
+      "systemType": "ongrid",
+      "size": "6",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 11,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i5",
+          "name": "Growatt 5000 TL3-S",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 32,
+          "approvedAlternates": [
+            "i5",
+            "i6",
+            "i7",
+            "i8",
+            "i9",
+            "i10",
+            "i11",
+            "i12",
+            "i13",
+            "i14",
+            "i15",
+            "i16",
+            "i17",
+            "i18",
+            "i19",
+            "i48",
+            "i49",
+            "i50",
+            "i51",
+            "i52",
+            "i53",
+            "i54",
+            "i55",
+            "i70",
+            "i71",
+            "i72",
+            "i73",
+            "i74",
+            "i75",
+            "i76",
+            "i77",
+            "i78"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d6",
+          "name": "2/2 DCDB Havells MCB 500v + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d6",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-6-3P-VALUE",
+      "systemType": "ongrid",
+      "size": "6",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 11,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i25",
+          "name": "Sungrow SG6.0RT",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 23,
+          "approvedAlternates": [
+            "i24",
+            "i25",
+            "i26",
+            "i27",
+            "i28",
+            "i29",
+            "i30",
+            "i31",
+            "i32",
+            "i33",
+            "i34",
+            "i81",
+            "i82",
+            "i83",
+            "i84",
+            "i85",
+            "i86",
+            "i89",
+            "i90",
+            "i91",
+            "i92",
+            "i93",
+            "i94"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d7",
+          "name": "2/2 DCDB ETN MCB 500v + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "d7",
+            "d8",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-6-3P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "6",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 11,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a6",
+          "name": "Enphase ACDB + AJ Box 3P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a6",
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-8-3P-BASE",
+      "systemType": "ongrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i7",
+          "name": "Growatt MOD 8000 TL3-X",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 32,
+          "approvedAlternates": [
+            "i5",
+            "i6",
+            "i7",
+            "i8",
+            "i9",
+            "i10",
+            "i11",
+            "i12",
+            "i13",
+            "i14",
+            "i15",
+            "i16",
+            "i17",
+            "i18",
+            "i19",
+            "i48",
+            "i49",
+            "i50",
+            "i51",
+            "i52",
+            "i53",
+            "i54",
+            "i55",
+            "i70",
+            "i71",
+            "i72",
+            "i73",
+            "i74",
+            "i75",
+            "i76",
+            "i77",
+            "i78"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d6",
+          "name": "2/2 DCDB Havells MCB 500v + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d6",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 80,
+          "quantityRule": "fixed:80",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-8-3P-VALUE",
+      "systemType": "ongrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i26",
+          "name": "Sungrow SG8.0RT",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 23,
+          "approvedAlternates": [
+            "i24",
+            "i25",
+            "i26",
+            "i27",
+            "i28",
+            "i29",
+            "i30",
+            "i31",
+            "i32",
+            "i33",
+            "i34",
+            "i81",
+            "i82",
+            "i83",
+            "i84",
+            "i85",
+            "i86",
+            "i89",
+            "i90",
+            "i91",
+            "i92",
+            "i93",
+            "i94"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d7",
+          "name": "2/2 DCDB ETN MCB 500v + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "d7",
+            "d8",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 80,
+          "quantityRule": "fixed:80",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-8-3P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a6",
+          "name": "Enphase ACDB + AJ Box 3P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a6",
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 80,
+          "quantityRule": "fixed:80",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-10-3P-BASE",
+      "systemType": "ongrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i8",
+          "name": "Growatt MOD 10000 TL3-X",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 32,
+          "approvedAlternates": [
+            "i5",
+            "i6",
+            "i7",
+            "i8",
+            "i9",
+            "i10",
+            "i11",
+            "i12",
+            "i13",
+            "i14",
+            "i15",
+            "i16",
+            "i17",
+            "i18",
+            "i19",
+            "i48",
+            "i49",
+            "i50",
+            "i51",
+            "i52",
+            "i53",
+            "i54",
+            "i55",
+            "i70",
+            "i71",
+            "i72",
+            "i73",
+            "i74",
+            "i75",
+            "i76",
+            "i77",
+            "i78"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d6",
+          "name": "2/2 DCDB Havells MCB 500v + Havells SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "d6",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 100,
+          "quantityRule": "fixed:100",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 40,
+          "quantityRule": "fixed:40",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-10-3P-VALUE",
+      "systemType": "ongrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Inverter",
+          "componentId": "i27",
+          "name": "Sungrow SG10.0RT",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 23,
+          "approvedAlternates": [
+            "i24",
+            "i25",
+            "i26",
+            "i27",
+            "i28",
+            "i29",
+            "i30",
+            "i31",
+            "i32",
+            "i33",
+            "i34",
+            "i81",
+            "i82",
+            "i83",
+            "i84",
+            "i85",
+            "i86",
+            "i89",
+            "i90",
+            "i91",
+            "i92",
+            "i93",
+            "i94"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d7",
+          "name": "2/2 DCDB ETN MCB 500v + Mersen 600v SPD",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "d7",
+            "d8",
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a4",
+          "name": "ETN 32A Mersen 3P ACDB",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a4",
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 100,
+          "quantityRule": "fixed:100",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 40,
+          "quantityRule": "fixed:40",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-ONGRID-10-3P-PREMIUM",
+      "systemType": "ongrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a6",
+          "name": "Enphase ACDB + AJ Box 3P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "a6",
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 100,
+          "quantityRule": "fixed:100",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 35,
+          "quantityRule": "fixed:35",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 40,
+          "quantityRule": "fixed:40",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 9,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "9 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-3-1P-BASE",
+      "systemType": "hybrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "hybrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i56",
+          "name": "Deye Hybrid 1P 3-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d9",
+          "name": "1/1 DCDB ABB MCB 500v 32A + Citel 500v SPD + Fuses (Hybrid)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a7",
+          "name": "ACDB WITH CHANGE OVER SWITCH 1PH Hybrid",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m1",
+          "name": "Visiontek Single Phase Meter",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m1"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 30,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-3-1P-VALUE",
+      "systemType": "hybrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "hybrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "explicit",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i56",
+          "name": "Deye Hybrid 1P 3-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d9",
+          "name": "1/1 DCDB ABB MCB 500v 32A + Citel 500v SPD + Fuses (Hybrid)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a7",
+          "name": "ACDB WITH CHANGE OVER SWITCH 1PH Hybrid",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a7"
+          ]
+        },
+        {
+          "role": "mccb_box",
+          "label": "Battery MCCB Box",
+          "componentId": "mb1",
+          "name": "Battery MCCB Box 160A",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "mb1"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt1",
+          "name": "SEG.5 PRO 100AH LV Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt1"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m2",
+            "m5"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 40,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is1",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 12,
+      "explicitCount": 1,
+      "blocked": [
+        "battery: Battery \"SEG.5 PRO 100AH LV Battery\" is PENDING_ENGINEERING_APPROVAL. It is retained in the BOM so the system is not silently shipped without a battery, but the configuration is BLOCKED until Engineering approves it. Open items: exactModel, nominalVoltage, maximumDischargeCurrent, compatibleInverters, communicationProtocol, externalProtectionRequirementConfirmation, protectionDeviceAndRating.",
+        "battery: External battery protection is required for \"SEG.5 PRO 100AH LV Battery\" but the RATING is not recorded. It must not be assumed or derived from Ah. Engineering verification pending (D12)."
+      ],
+      "warnings": [
+        "12 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "BLOCKED"
+    },
+    {
+      "packageId": "PKG-HYBRID-3-1P-PREMIUM",
+      "systemType": "hybrid",
+      "size": "3",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "hybrid_premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 6,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "ac_hyb_en1p",
+          "name": "ACDB Hybrid Enphase 1Ph (ABB MCB+Citel SPD)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ac_hyb_en1p"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt2",
+          "name": "Enphase Flex Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt2"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m2"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 15,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 40,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 2,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-5-1P-BASE",
+      "systemType": "hybrid",
+      "size": "5",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "hybrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i58",
+          "name": "Deye Hybrid 1P 5-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d9",
+          "name": "1/1 DCDB ABB MCB 500v 32A + Citel 500v SPD + Fuses (Hybrid)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a7",
+          "name": "ACDB WITH CHANGE OVER SWITCH 1PH Hybrid",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a7"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m1",
+          "name": "Visiontek Single Phase Meter",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m1"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 30,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-5-1P-VALUE",
+      "systemType": "hybrid",
+      "size": "5",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "hybrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i58",
+          "name": "Deye Hybrid 1P 5-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d9",
+          "name": "1/1 DCDB ABB MCB 500v 32A + Citel 500v SPD + Fuses (Hybrid)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d9"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a7",
+          "name": "ACDB WITH CHANGE OVER SWITCH 1PH Hybrid",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a7"
+          ]
+        },
+        {
+          "role": "mccb_box",
+          "label": "Battery MCCB Box",
+          "componentId": "mb1",
+          "name": "Battery MCCB Box 160A",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "mb1"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt1",
+          "name": "SEG.5 PRO 100AH LV Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt1"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m2",
+            "m5"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 50,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 40,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is1",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 13,
+      "explicitCount": 0,
+      "blocked": [
+        "battery: Battery \"SEG.5 PRO 100AH LV Battery\" is PENDING_ENGINEERING_APPROVAL. It is retained in the BOM so the system is not silently shipped without a battery, but the configuration is BLOCKED until Engineering approves it. Open items: exactModel, nominalVoltage, maximumDischargeCurrent, compatibleInverters, communicationProtocol, externalProtectionRequirementConfirmation, protectionDeviceAndRating.",
+        "battery: External battery protection is required for \"SEG.5 PRO 100AH LV Battery\" but the RATING is not recorded. It must not be assumed or derived from Ah. Engineering verification pending (D12)."
+      ],
+      "warnings": [
+        "13 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "BLOCKED"
+    },
+    {
+      "packageId": "PKG-HYBRID-5-1P-PREMIUM",
+      "systemType": "hybrid",
+      "size": "5",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "hybrid_premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 9,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "ac_hyb_en1p",
+          "name": "ACDB Hybrid Enphase 1Ph (ABB MCB+Citel SPD)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ac_hyb_en1p"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt2",
+          "name": "Enphase Flex Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt2"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m2",
+          "name": "Genius Single Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m2"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 15,
+          "quantityRule": "fixed:50",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 50,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is1",
+          "name": "Honey Well Isolator 2P 40A",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 2,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-8-3P-BASE",
+      "systemType": "hybrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "hybrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i60",
+          "name": "Deye Hybrid 3P 8-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d10",
+          "name": "2/2 DCDB ABB MCB 500v + Mersen 500v SPD + Fuses (Hybrid 3P)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a8",
+          "name": "ACDB Hybrid 3PH",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 120,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 80,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-8-3P-VALUE",
+      "systemType": "hybrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "hybrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i60",
+          "name": "Deye Hybrid 3P 8-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d10",
+          "name": "2/2 DCDB ABB MCB 500v + Mersen 500v SPD + Fuses (Hybrid 3P)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a8",
+          "name": "ACDB Hybrid 3PH",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a8"
+          ]
+        },
+        {
+          "role": "mccb_box",
+          "label": "Battery MCCB Box",
+          "componentId": "mb1",
+          "name": "Battery MCCB Box 160A",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "mb1"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt1",
+          "name": "SEG.5 PRO 100AH LV Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt1"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 120,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 80,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 13,
+      "explicitCount": 0,
+      "blocked": [
+        "battery: Battery \"SEG.5 PRO 100AH LV Battery\" is PENDING_ENGINEERING_APPROVAL. It is retained in the BOM so the system is not silently shipped without a battery, but the configuration is BLOCKED until Engineering approves it. Open items: exactModel, nominalVoltage, maximumDischargeCurrent, compatibleInverters, communicationProtocol, externalProtectionRequirementConfirmation, protectionDeviceAndRating.",
+        "battery: External battery protection is required for \"SEG.5 PRO 100AH LV Battery\" but the RATING is not recorded. It must not be assumed or derived from Ah. Engineering verification pending (D12)."
+      ],
+      "warnings": [
+        "13 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "BLOCKED"
+    },
+    {
+      "packageId": "PKG-HYBRID-8-3P-PREMIUM",
+      "systemType": "hybrid",
+      "size": "8",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "hybrid_premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 15,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "ac_hyb_en3p",
+          "name": "ACDB Hybrid Enphase 3Ph (ABB MCB+Citel SPD)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt2",
+          "name": "Enphase Flex Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt2"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 25,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 160,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 2,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-10-3P-BASE",
+      "systemType": "hybrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "base",
+      "profileKey": "hybrid_base",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p1",
+          "name": "Waaree Mono perc Bifacial 540W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 9,
+          "approvedAlternates": [
+            "p1",
+            "p6",
+            "p7",
+            "p8",
+            "p10",
+            "p11",
+            "p13",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i61",
+          "name": "Deye Hybrid 3P 10-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d10",
+          "name": "2/2 DCDB ABB MCB 500v + Mersen 500v SPD + Fuses (Hybrid 3P)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a8",
+          "name": "ACDB Hybrid 3PH",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a8"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m3",
+          "name": "Visiontek Three Phase Meter",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "m3",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc1",
+          "name": "DC-WACAB-Basic 4sqmm",
+          "quantity": 120,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "dc1",
+            "dc2",
+            "dc5",
+            "dc6"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac1",
+          "name": "AC-RR 4sqmm",
+          "quantity": 80,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac1",
+            "ac3"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb1",
+          "name": "CB Rod 14mm 100u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "cb1",
+            "cb2",
+            "cb3"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec1",
+          "name": "16sqmm Green Cable FLEXGUARD",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec1"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la2",
+          "name": "Kanberry FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la2"
+          ]
+        }
+      ],
+      "fallbackCount": 11,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "11 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-HYBRID-10-3P-VALUE",
+      "systemType": "hybrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "value",
+      "profileKey": "hybrid_value",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p2",
+          "name": "Adani Mono perc Bifacial 550W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "p2",
+            "p3",
+            "p4",
+            "p7",
+            "p9",
+            "p12",
+            "p15",
+            "pa_0006870e2e7d",
+            "pa_a2ea75b89b4d",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "inverter",
+          "label": "Hybrid Inverter",
+          "componentId": "i61",
+          "name": "Deye Hybrid 3P 10-48v",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:nearestKw",
+          "status": "ACTIVE",
+          "candidateCount": 10,
+          "approvedAlternates": [
+            "i56",
+            "i57",
+            "i58",
+            "i59",
+            "i60",
+            "i61",
+            "i62",
+            "i63",
+            "i64",
+            "i65"
+          ]
+        },
+        {
+          "role": "dcdb",
+          "label": "DCDB",
+          "componentId": "d10",
+          "name": "2/2 DCDB ABB MCB 500v + Mersen 500v SPD + Fuses (Hybrid 3P)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "d10"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "a8",
+          "name": "ACDB Hybrid 3PH",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "a8"
+          ]
+        },
+        {
+          "role": "mccb_box",
+          "label": "Battery MCCB Box",
+          "componentId": "mb1",
+          "name": "Battery MCCB Box 160A",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "mb1"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt1",
+          "name": "SEG.5 PRO 100AH LV Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt1"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "m4",
+            "m6",
+            "m7"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc3",
+          "name": "DC-APAR 6sqmm",
+          "quantity": 120,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "dc3",
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac2",
+          "name": "AC-RR 6sqmm",
+          "quantity": 80,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 3,
+          "approvedAlternates": [
+            "ac2",
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "is2",
+            "is_9b53be37fab1"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb4",
+          "name": "CB Rod 14mm 250u 1.2m",
+          "quantity": 3,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb4",
+            "cb5"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec2",
+          "name": "16sqmm Green Poluguards",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ec2",
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 13,
+      "explicitCount": 0,
+      "blocked": [
+        "battery: Battery \"SEG.5 PRO 100AH LV Battery\" is PENDING_ENGINEERING_APPROVAL. It is retained in the BOM so the system is not silently shipped without a battery, but the configuration is BLOCKED until Engineering approves it. Open items: exactModel, nominalVoltage, maximumDischargeCurrent, compatibleInverters, communicationProtocol, externalProtectionRequirementConfirmation, protectionDeviceAndRating.",
+        "battery: External battery protection is required for \"SEG.5 PRO 100AH LV Battery\" but the RATING is not recorded. It must not be assumed or derived from Ah. Engineering verification pending (D12)."
+      ],
+      "warnings": [
+        "13 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "BLOCKED"
+    },
+    {
+      "packageId": "PKG-HYBRID-10-3P-PREMIUM",
+      "systemType": "hybrid",
+      "size": "10",
+      "phase": "3P",
+      "tier": "premium",
+      "profileKey": "hybrid_premium",
+      "components": [
+        {
+          "role": "panel",
+          "label": "Solar Panel",
+          "componentId": "p3",
+          "name": "Adani Bifacial Topcon G2S 620W DCR",
+          "quantity": 18,
+          "quantityRule": "ceil(sizeKw*1000 / panel.watt)",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 4,
+          "approvedAlternates": [
+            "p3",
+            "p5",
+            "p9",
+            "pa_9e35d4adf2a3"
+          ]
+        },
+        {
+          "role": "acdb",
+          "label": "ACDB",
+          "componentId": "ac_hyb_en3p",
+          "name": "ACDB Hybrid Enphase 3Ph (ABB MCB+Citel SPD)",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ac_hyb_en3p"
+          ]
+        },
+        {
+          "role": "battery",
+          "label": "Battery",
+          "componentId": "bt2",
+          "name": "Enphase Flex Battery",
+          "quantity": 1,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "bt2"
+          ]
+        },
+        {
+          "role": "meter",
+          "label": "Meter",
+          "componentId": "m4",
+          "name": "Genius Three Phase Energy Meter",
+          "quantity": 2,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "m4"
+          ]
+        },
+        {
+          "role": "dc_cable",
+          "label": "DC Cable",
+          "componentId": "dc4",
+          "name": "DC-POLY 4sqmm",
+          "quantity": 25,
+          "quantityRule": "fixed:120",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "dc4"
+          ]
+        },
+        {
+          "role": "ac_cable",
+          "label": "AC Cable",
+          "componentId": "ac3",
+          "name": "AC-POLY 4sqmm",
+          "quantity": 160,
+          "quantityRule": "batQty[profile.batteryQuantity][size]",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "ac3",
+            "ac4"
+          ]
+        },
+        {
+          "role": "isolator",
+          "label": "Isolator",
+          "componentId": "is2",
+          "name": "L&T Isolator 40A 4P",
+          "quantity": 1,
+          "quantityRule": "fixed:1",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "is2"
+          ]
+        },
+        {
+          "role": "cb_rod",
+          "label": "CB Rod",
+          "componentId": "cb5",
+          "name": "CB Rod 17.2mm 250u 1.2m",
+          "quantity": 2,
+          "quantityRule": "fixed:3",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 2,
+          "approvedAlternates": [
+            "cb5",
+            "cb6"
+          ]
+        },
+        {
+          "role": "earth_cable",
+          "label": "Earthing Cable",
+          "componentId": "ec3",
+          "name": "16sqmm Green Cable APAR",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "ec3"
+          ]
+        },
+        {
+          "role": "la_cable",
+          "label": "LA Cable",
+          "componentId": "la1",
+          "name": "Excel FLX Al Down conductor 8mm",
+          "quantity": 20,
+          "quantityRule": "fixed:20",
+          "required": true,
+          "resolution": "fallback:firstAvailable",
+          "status": "ACTIVE",
+          "candidateCount": 1,
+          "approvedAlternates": [
+            "la1"
+          ]
+        }
+      ],
+      "fallbackCount": 10,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "10 component(s) resolved by fallback"
+      ],
+      "engineeringStatus": "WARNING"
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-5-BASE",
+      "systemType": "upgrade",
+      "size": "5",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-3-5",
+      "fromSize": 3,
+      "toSize": 5
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-5-VALUE",
+      "systemType": "upgrade",
+      "size": "5",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-3-5",
+      "fromSize": 3,
+      "toSize": 5
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-5-PREMIUM",
+      "systemType": "upgrade",
+      "size": "5",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-3-5",
+      "fromSize": 3,
+      "toSize": 5
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-6-BASE",
+      "systemType": "upgrade",
+      "size": "6",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-6 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-6",
+      "fromSize": 3,
+      "toSize": 6
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-6-VALUE",
+      "systemType": "upgrade",
+      "size": "6",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-6 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-6",
+      "fromSize": 3,
+      "toSize": 6
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-6-PREMIUM",
+      "systemType": "upgrade",
+      "size": "6",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-6 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-6",
+      "fromSize": 3,
+      "toSize": 6
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-8-BASE",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-8 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-8",
+      "fromSize": 3,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-8-VALUE",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-8 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-8",
+      "fromSize": 3,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-3-8-PREMIUM",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [
+        "upgrade path UPG-3-8 has no explicit BOM definition (auto-scaled)"
+      ],
+      "engineeringStatus": "WARNING",
+      "upgradePathId": "UPG-3-8",
+      "fromSize": 3,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-8-BASE",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-8",
+      "fromSize": 5,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-8-VALUE",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-8",
+      "fromSize": 5,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-8-PREMIUM",
+      "systemType": "upgrade",
+      "size": "8",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-8",
+      "fromSize": 5,
+      "toSize": 8
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-10-BASE",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-10",
+      "fromSize": 5,
+      "toSize": 10
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-10-VALUE",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-10",
+      "fromSize": 5,
+      "toSize": 10
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-5-10-PREMIUM",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-5-10",
+      "fromSize": 5,
+      "toSize": 10
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-8-10-BASE",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "base",
+      "profileKey": "ongrid_base",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-8-10",
+      "fromSize": 8,
+      "toSize": 10
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-8-10-VALUE",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "value",
+      "profileKey": "ongrid_value",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-8-10",
+      "fromSize": 8,
+      "toSize": 10
+    },
+    {
+      "packageId": "PKG-UPGRADE-UPG-8-10-PREMIUM",
+      "systemType": "upgrade",
+      "size": "10",
+      "phase": "1P",
+      "tier": "premium",
+      "profileKey": "premium",
+      "components": [],
+      "fallbackCount": 0,
+      "explicitCount": 0,
+      "blocked": [],
+      "warnings": [],
+      "engineeringStatus": "VALID",
+      "upgradePathId": "UPG-8-10",
+      "fromSize": 8,
+      "toSize": 10
+    }
+  ]
+}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quotation Workspace (Internal) — Flarize / Golden Ray</title>
+<!--
+  QUOTATION WORKSPACE UI — INTERNAL VIEW.  (Phase 3, PART H — Step 4)
+
+  THIS IS NOT THE CUSTOMER QUOTATION DOCUMENT.
+  It is the internal viewer for the quotation payload. The printable/PDF
+  document is a separate task and is blocked on decisions C6 (customer-facing
+  tier names), C7 (company/legal identity), C13 (page numbering) and C14
+  (document variants). Nothing on this page pretends to be that document: there
+  is no company header, no legal entity, no tier display name, no page number
+  and no print stylesheet.
+
+  This page implements NO business rule and performs NO calculation. It renders
+  exactly what /api/quotation/* returns:
+    * component identity and quantity come from the LOCKED BOM snapshot
+    * every commercial figure comes from the ISSUED commercial snapshot
+    * the generation gate is evaluated by the service; the disabled Issue button
+      is presentation only and the server refuses regardless
+    * a blocked section renders BLOCKED plus the API's own named dependency —
+      never ₹0, never a blank, never "coming soon"
+    * internal cost and margin appear only when the API sends them; this page
+      has no permission logic of its own
+
+  TIMESTAMPS: the engines refuse to read a clock, so `at` is supplied by the
+  operator through the "Operation timestamp" field. This page has no clock.
+-->
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e6e9ef; --dim:#8b93a5;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --acc:#4493f8; --blocked:#a371f7; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 ui-sans-serif,system-ui,Segoe UI,Roboto,sans-serif; }
+  header { padding:14px 20px; border-bottom:1px solid var(--line); background:var(--panel);
+           display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:16px; margin:0; font-weight:600; }
+  .tag { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim);
+         border:1px solid var(--line); border-radius:4px; padding:2px 7px; }
+  main { padding:18px 20px 60px; max-width:1180px; margin:0 auto; display:grid; gap:14px; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+  section > h2 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.07em; color:var(--dim); }
+  label { display:block; font-size:11px; color:var(--dim); margin-bottom:3px; }
+  input, select, button { background:#0d1017; color:var(--fg); border:1px solid var(--line);
+                          border-radius:6px; padding:7px 9px; font:inherit; }
+  button { cursor:pointer; }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#04121f; font-weight:600; }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--dim); }
+  .kv { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:8px 18px; }
+  .kv div span { display:block; font-size:11px; color:var(--dim); }
+  .muted { color:var(--dim); }
+  .mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
+  .pill { display:inline-block; font-size:11px; font-weight:700; letter-spacing:.05em;
+          border-radius:4px; padding:2px 8px; border:1px solid; }
+  .pill.VALID, .pill.PASS, .pill.ISSUED { color:var(--ok); border-color:var(--ok); }
+  .pill.WARNING, .pill.DRAFT { color:var(--warn); border-color:var(--warn); }
+  .pill.BLOCKED, .pill.FAIL { color:var(--bad); border-color:var(--bad); }
+  .pill.SUPERSEDED, .pill.NOT_QUOTED { color:var(--dim); border-color:var(--line); }
+  .blocked { border-left:3px solid var(--blocked); padding:7px 11px; margin:7px 0; background:#1b1726; border-radius:0 6px 6px 0; }
+  .blocked b { color:var(--blocked); letter-spacing:.05em; }
+  .dep { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--fg); }
+  .err { color:var(--bad); white-space:pre-wrap; }
+  .notice { border:1px dashed var(--line); border-radius:6px; padding:9px 12px; color:var(--dim); font-size:12px; }
+  .amount { text-align:right; font-variant-numeric:tabular-nums; }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<header>
+  <h1>Quotation Workspace</h1>
+  <span class="tag">Internal view — not the customer document</span>
+  <div class="row" style="margin-left:auto">
+    <!-- 2026-09-09: role comes from the login session (server-side RBAC); the
+         switcher and the manual timestamp are hidden — the browser supplies
+         the operation time when Issue / Create revision is clicked. -->
+    <div hidden><label for="role">Acting role</label><select id="role"></select></div>
+    <input id="user" type="hidden" value="operator" />
+    <div hidden><label for="at">Operation timestamp (ISO)</label><input id="at" size="24" placeholder="2026-08-16T00:00:00Z" /></div>
+    <div><label for="qid">Quotation</label><select id="qid"></select></div>
+    <div><button id="reload">Load</button></div>
+  </div>
+</header>
+
+<main>
+  <div id="error" class="err"></div>
+  <div id="identity" class="notice"></div>
+
+  <section id="s-status"><h2>Quotation · status · version</h2><div id="v-status"></div></section>
+  <section id="s-gate"><h2>Generation gate (§28)</h2><div id="v-gate"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="issue" class="primary">Issue</button>
+      <button id="revise">Create revision</button>
+      <span class="muted" id="actionNote"></span>
+    </div>
+  </section>
+  <section id="s-engineering"><h2>Engineering verdict</h2><div id="v-engineering"></div></section>
+  <section id="s-customer"><h2>Customer (§3)</h2><div id="v-customer"></div></section>
+  <section id="s-system"><h2>System configuration (§5)</h2><div id="v-system"></div></section>
+  <section id="s-bom"><h2>BOM summary (§6)</h2><div id="v-bom"></div></section>
+  <section id="s-tech"><h2>Technical specification (§7–§16)</h2><div id="v-tech"></div></section>
+  <section id="s-commercial"><h2>Commercial (§17)</h2><div id="v-commercial"></div></section>
+  <section id="s-gst"><h2>GST (§17 · C67/C73)</h2><div id="v-gst"></div></section>
+  <section id="s-extras"><h2>Extras &amp; customer-side expenses (§18–§19)</h2><div id="v-extras"></div></section>
+  <section id="s-blocked"><h2>Blocked dependencies (§20–§25, §30)</h2><div id="v-blocked"></div></section>
+  <section id="s-versions"><h2>Versions (§26)</h2><div id="v-versions"></div></section>
+</main>
+
+<script>
+flarizeNav.init({ current: 'quotation' });
+// =========================================================================
+// PURE VIEW FUNCTIONS
+// Each takes API data and returns an HTML string. None of them computes a
+// number, sums a column, resolves a component or decides a permission.
+// =========================================================================
+const QV = (() => {
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+  const pill = (s) => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+
+  /**
+   * Display formatting for a figure the API supplied. Grouping only — no
+   * arithmetic. A null is NOT zero: it is a value the API did not supply, and
+   * it is labelled as such.
+   */
+  const money = (v) => v == null
+    ? '<span class="muted">NOT SUPPLIED BY API</span>'
+    : '₹' + Number(v).toLocaleString('en-IN');
+
+  const pct = (v) => v == null ? '<span class="muted">NOT SUPPLIED BY API</span>' : esc(v) + '%';
+
+  const kv = (pairs) => `<div class="kv">${pairs
+    .map(([k, v]) => `<div><span>${esc(k)}</span>${v == null || v === '' ? '<span class="muted">—</span>' : v}</div>`)
+    .join('')}</div>`;
+
+  /** The one renderer for anything the API reports unavailable. */
+  const blocked = (label, s) => `
+    <div class="blocked">
+      <b>BLOCKED</b> — ${esc(label)}
+      <div>Dependency: <span class="dep">${esc(s?.dependency ?? 'UNNAMED')}</span>${
+        s?.reference ? ` · Contract ${esc(s.reference)}` : ''}</div>
+      <div class="muted">${esc(s?.reason ?? 'No reason supplied by the API.')}</div>
+      ${s?.treatment ? `<div>Treatment: ${pill(s.treatment)}</div>` : ''}
+    </div>`;
+
+  // ---- header / status --------------------------------------------------
+  function viewStatus(q, payload) {
+    const meta = payload?.quotation || {};
+    return kv([
+      ['Quotation id', `<span class="mono">${esc(q.quotationId)}</span>`],
+      ['Quotation number', esc(meta.quotationNumber)],
+      ['State', pill(q.status)],
+      ['Current version', q.currentVersion == null ? '<span class="muted">not issued</span>' : esc(q.currentVersion)],
+      ['Quotation date', esc(meta.quotationDate)],
+      ['Valid until', esc(meta.validUntil)],
+      ['Proposal by', esc(meta.proposalBy)],
+      ['Project', `<span class="mono">${esc(q.projectId)}</span>`],
+      ['Variant carried', esc(payload?.variant)],
+      ['Identity model', `<span class="mono">${esc(meta.identityModel)}</span>`],
+    ]) + (payload?.sectionNumberingNote
+      ? `<div class="notice" style="margin-top:10px">${esc(payload.sectionNumberingNote)}</div>` : '');
+  }
+
+  // ---- gate -------------------------------------------------------------
+  function viewGate(gate) {
+    if (!gate) return '<div class="muted">No gate result loaded.</div>';
+    const rows = (gate.checks || []).map(c => `
+      <tr><td>${pill(c.status)}</td><td class="mono">${esc(c.check)}</td>
+          <td class="muted">${esc(c.reason ?? '')}</td></tr>`).join('');
+    return `<div>Gate: ${pill(gate.status)}</div>
+      <table><thead><tr><th>Status</th><th>Check</th><th>Reason</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  /** Server error rendering. Gate refusals show every failed check verbatim. */
+  function viewApiError(err) {
+    if (!err) return '';
+    const head = `<b>${esc(err.code || 'ERROR')}</b> — ${esc(err.error || err.message || '')}`;
+    if (!err.failedChecks) return head;
+    return head + '<ul>' + err.failedChecks.map((c, i) =>
+      `<li class="mono">${esc(c)}<div class="muted">${esc((err.reasons || [])[i] ?? '')}</div></li>`).join('') + '</ul>';
+  }
+
+  // ---- engineering ------------------------------------------------------
+  function viewEngineering(e) {
+    if (!e) return '<div class="muted">No verdict in payload.</div>';
+    if (e.available === false) return blocked('Engineering verdict', e);
+    return kv([
+      ['Verdict', pill(e.status)],
+      ['Blocked findings', (e.blocked || []).length ? `<span class="mono">${esc((e.blocked).join(', '))}</span>` : '<span class="muted">none</span>'],
+      ['Warnings', (e.warnings || []).length ? `<span class="mono">${esc((e.warnings).join(', '))}</span>` : '<span class="muted">none</span>'],
+      ['Acknowledgements', (e.acknowledgements || []).length ? esc(e.acknowledgements.join(', ')) : '<span class="muted">none</span>'],
+      ['Customer visible', String(e.customerVisible)],
+    ]) + (e.note ? `<div class="notice" style="margin-top:8px">${esc(e.note)}</div>` : '');
+  }
+
+  // ---- customer / system ------------------------------------------------
+  function viewCustomer(c) {
+    if (!c) return '<div class="muted">No customer in payload.</div>';
+    if (c.available === false) return blocked('Customer record', c);
+    return kv([
+      ['Customer id', `<span class="mono">${esc(c.customerId)}</span>`],
+      ['Name', esc(c.customerName)], ['Phone', esc(c.phone)], ['Email', esc(c.email)],
+      ['Address', esc(c.address)], ['Pincode', esc(c.pincode)],
+      ['District', esc(c.district)], ['State', esc(c.state)],
+      ['Source', `<span class="mono">${esc(c.source)}</span>`],
+    ]);
+  }
+
+  function viewSystem(s, upgrade) {
+    if (!s) return '<div class="muted">No system configuration in payload.</div>';
+    if (s.available === false) return blocked('System configuration', s);
+    const tier = s.packageTierDisplayName;
+    return kv([
+      ['System type', esc(s.systemType)],
+      ['Size (kW)', esc(s.systemSizeKw)],
+      ['Phase', esc(s.phase)],
+      ['Package tier (internal code)', `<span class="mono">${esc(s.packageTier)}</span>`],
+      ['Roof type', esc(s.roofType)],
+      ['Source', `<span class="mono">${esc(s.source)}</span>`],
+    ])
+    + (tier && tier.available === false ? blocked('Customer-facing tier display name', tier) : '')
+    + (upgrade ? `<div style="margin-top:8px">${kv([
+        ['Upgrade path', `<span class="mono">${esc(upgrade.upgradePathId)}</span>`],
+        ['From → To (kW)', `${esc(upgrade.fromSize)} → ${esc(upgrade.toSize)}`],
+        ['Delta (kW)', esc(upgrade.deltaKw)],
+        ['Approved path', String(upgrade.approved)],
+        ['Source', `<span class="mono">${esc(upgrade.source)}</span>`],
+      ])}</div>` : '');
+  }
+
+  // ---- BOM / technical --------------------------------------------------
+  function viewBom(b) {
+    if (!b) return '<div class="muted">No BOM section in payload.</div>';
+    if (b.available === false) return blocked('BOM summary', b.blocked || b);
+    const rows = (b.rows || []).map(r => `
+      <tr>
+        <td>${esc(r.displayCategory ?? r.role)}</td>
+        <td class="mono">${esc(r.componentId)}</td>
+        <td class="mono">${esc(r.role)}</td>
+        <td class="amount">${esc(r.quantity)}</td>
+        <td>${pill(r.treatment)}</td>
+        <td class="muted mono">${esc(r.identitySource)}</td>
+      </tr>`).join('');
+    return `<table><thead><tr>
+        <th>Category</th><th>Component id</th><th>Role</th><th>Qty</th><th>Treatment</th><th>Identity source</th>
+      </tr></thead><tbody>${rows}</tbody></table>
+      <div class="muted" style="margin-top:8px">${esc(b.internalOnlyNote ?? '')}
+        Internal-only lines withheld: <b>${esc(b.internalOnlyLineCount)}</b>.</div>`;
+  }
+
+  function viewTech(t) {
+    if (!t) return '<div class="muted">No technical section in payload.</div>';
+    if (t.available === false) return blocked('Technical specification', t.blocked || t);
+    const rows = (t.rows || []).map(r => {
+      const a = r.attributes || {};
+      const attrs = Object.keys(a).length
+        ? Object.entries(a).map(([k, v]) => `${esc(k)}: <b>${esc(v)}</b>`).join(' · ')
+        : '<span class="muted">no display attributes supplied — component id shown unchanged, not substituted</span>';
+      const w = r.warranty;
+      return `<tr>
+        <td>${esc(r.displayCategory ?? r.role)}</td>
+        <td class="mono">${esc(r.componentId)}</td>
+        <td>${attrs}</td>
+        <td>${w && w.available ? esc(w.value) : `<span class="muted">${esc(w?.dependency ?? 'NOT SUPPLIED')}</span>`}</td>
+      </tr>`;
+    }).join('');
+    return `<table><thead><tr>
+        <th>Category</th><th>Component id</th><th>Attributes (from API)</th><th>Warranty</th>
+      </tr></thead><tbody>${rows}</tbody></table>`;
+  }
+
+  // ---- commercial / GST / extras ----------------------------------------
+  function viewCommercial(p) {
+    if (!p) return '<div class="muted">No pricing section in payload.</div>';
+    if (!p.available) return blocked('Pricing', p.blocked || p);
+    const c = p.customer || {};
+    let html = kv([
+      ['Selling price before GST', `<b>${money(c.sellingPriceBeforeGST)}</b>`],
+      ['Selling price incl GST', `<b>${money(c.sellingPriceIncludingGST)}</b>`],
+      ['Extras incl GST', money(c.extrasIncludingGST)],
+      ['Customer total incl GST', `<b>${money(c.customerTotalIncludingGST)}</b>`],
+      ['Commercial snapshot', `<span class="mono">${esc(p.snapshotId)}</span>`],
+      ['Source', `<span class="mono">${esc(p.source)}</span>`],
+    ]);
+    if (c.discount && c.discount.available === false) html += blocked('Approved discount', c.discount);
+    else if (c.discount) html += kv([['Approved discount', money(c.discount.value)]]);
+
+    if (p.internal) {
+      html += `<h2 style="margin-top:14px">Internal — cost &amp; margin</h2>` + kv([
+        ['Margin type', `<span class="mono">${esc(p.internal.marginType)}</span>`],
+        ['Target gross margin', esc(p.internal.targetGrossMargin)],
+        ['Gross profit', money(p.internal.grossProfit)],
+        ['Total actual project cost', money(p.internal.cost?.totalActualProjectCost)],
+        ['Material landed cost', money(p.internal.cost?.materialLandedCost)],
+        ['Installation', money(p.internal.cost?.installationCost)],
+        ['Site survey', money(p.internal.cost?.siteSurveyCost)],
+        ['Engineering design', money(p.internal.cost?.engineeringDesignCost)],
+        ['Transportation', money(p.internal.cost?.transportationCost)],
+        ['Service / AMC', money(p.internal.cost?.serviceAmcCost)],
+        ['Miscellaneous', money(p.internal.cost?.miscellaneousCost)],
+        ['Office overhead allocation', money(p.internal.cost?.officeExpenseAllocation)],
+      ]);
+    } else {
+      html += `<div class="notice" style="margin-top:12px">Internal cost and margin are not present in this
+        response. ${esc(p.internalWithheldReason ?? 'Withheld by the service for this actor.')}</div>`;
+    }
+    return html;
+  }
+
+  function viewGst(p) {
+    if (!p || !p.available) return blocked('GST', p?.blocked || p || {});
+    const c = p.customer || {};
+    return kv([
+      ['GST rate', pct(c.gstRatePct)],
+      ['GST amount', money(c.gstAmount)],
+      ['Applied once', String(c.gstAppliedOnce)],
+      ['Regime reference', esc(c.gstReference)],
+    ]);
+  }
+
+  function viewExtras(x) {
+    if (!x) return '<div class="muted">No extras section in payload.</div>';
+    if (!x.available) return blocked('Extras', x.blocked || x);
+    const items = (x.items || []).map(e => `
+      <tr><td class="mono">${esc(e.extraId)}</td><td>${esc(e.description)}</td>
+          <td>${pill(e.treatment)}</td>
+          <td class="amount">${money(e.customerPriceExcludingGST)}</td>
+          <td class="amount">${pct(e.gstRatePct)}</td>
+          <td class="amount">${money(e.customerPriceIncludingGST)}</td></tr>`).join('')
+      || '<tr><td colspan="6" class="muted">No extras on the commercial snapshot.</td></tr>';
+    const side = (x.customerSideExpenses || []).map(e => `
+      <tr><td class="mono">${esc(e.id ?? e.extraId)}</td><td>${esc(e.label ?? e.description)}</td>
+          <td>${pill(e.treatment)}</td><td class="amount">${money(e.amount)}</td>
+          <td class="muted">${esc(e.note ?? '')}</td></tr>`).join('')
+      || '<tr><td colspan="5" class="muted">None recorded.</td></tr>';
+    return `<table><thead><tr><th>Extra</th><th>Description</th><th>Treatment</th>
+        <th class="amount">Ex GST</th><th class="amount">GST</th><th class="amount">Incl GST</th></tr></thead>
+        <tbody>${items}</tbody></table>
+      <h2 style="margin-top:14px">Customer-side expenses</h2>
+      <table><thead><tr><th>Id</th><th>Label</th><th>Treatment</th>
+        <th class="amount">Amount</th><th>Note</th></tr></thead><tbody>${side}</tbody></table>`;
+  }
+
+  // ---- blocked dependencies ---------------------------------------------
+  const BLOCKABLE_SECTIONS = [
+    ['subsidy', 'Subsidy'], ['savings', 'Savings'], ['financing', 'Financing / EMI'],
+    ['consumption', 'Consumption'], ['applianceUsage', 'Appliance usage'],
+    ['testimonials', 'Testimonials'], ['campaign', 'Campaign / offer'],
+    ['terms', 'Terms'], ['company', 'Company identity'],
+  ];
+
+  function viewBlocked(payload) {
+    if (!payload) return '<div class="muted">No payload loaded.</div>';
+    const out = BLOCKABLE_SECTIONS
+      .filter(([k]) => payload[k] && payload[k].available === false)
+      .map(([k, label]) => blocked(label, payload[k])).join('');
+    return out || '<div class="muted">No blocked dependencies reported by the API.</div>';
+  }
+
+  // ---- versions ---------------------------------------------------------
+  function viewVersions(versions, q) {
+    const rows = (versions || []).map(v => `
+      <tr><td class="amount">${esc(v.version)}</td><td>${pill(v.status)}</td>
+          <td>${esc(v.issuedAt)}</td><td>${esc(v.issuedBy)}</td>
+          <td class="mono">${esc(v.commercialSnapshotId)}</td></tr>`).join('')
+      || '<tr><td colspan="5" class="muted">No version has been issued.</td></tr>';
+    const rev = q && q.revisedFromVersion != null
+      ? `<div class="notice" style="margin-top:10px">Revision in progress — superseded version
+         <b>${esc(q.revisedFromVersion)}</b>, revised at ${esc(q.revisedAt)} by ${esc(q.revisedBy)}.
+         The superseded document is unchanged and still readable.</div>` : '';
+    return `<table><thead><tr><th class="amount">Version</th><th>Status</th><th>Issued at</th>
+        <th>Issued by</th><th>Commercial snapshot</th></tr></thead><tbody>${rows}</tbody></table>${rev}`;
+  }
+
+  return { esc, pill, money, pct, kv, blocked, viewStatus, viewGate, viewApiError,
+           viewEngineering, viewCustomer, viewSystem, viewBom, viewTech,
+           viewCommercial, viewGst, viewExtras, viewBlocked, viewVersions,
+           BLOCKABLE_SECTIONS };
+})();
+
+// Exposed so the layer can be exercised without a browser.
+if (typeof globalThis !== 'undefined') globalThis.QuotationView = QV;
+
+// =========================================================================
+// TRANSPORT + MOUNT  (browser only)
+// =========================================================================
+if (typeof document !== 'undefined') (() => {
+  const $ = (id) => document.getElementById(id);
+  let PAYLOAD = null, QUOTATION = null, GATE = null, VERSIONS = [];
+
+  // Shared auth — read Bearer token from application session (set by BOM login).
+  const SESSION_KEY = 'gr_session_token';
+  function getToken() {
+    try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+  }
+  if (!getToken()) { location.href = '/login.html'; }
+
+  async function api(method, url, body) {
+    const token = getToken();
+    if (!token) { location.href = '/login.html'; throw new Error('Session expired'); }
+    const res = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'X-Actor-Role': $('role').value,
+        'X-Actor-User': $('user').value,
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || res.statusText); Object.assign(e, data); throw e; }
+    return data;
+  }
+
+  const showError = (e) => { $('error').innerHTML = e ? QV.viewApiError(e) : ''; };
+  // Operation time: the hidden field (tests / operators) wins; otherwise the
+  // browser clock at the moment the button is clicked — the server still
+  // refuses a missing timestamp and never invents one itself.
+  const atValue = () => ($('at').value || new Date().toISOString());
+
+  async function boot() {
+    const s = await api('GET', '/api/quotation/session');
+    $('role').innerHTML = s.roles.map(r => `<option${r === 'SALES' ? ' selected' : ''}>${QV.esc(r)}</option>`).join('');
+    $('identity').innerHTML = `Identity: <span class="mono">${QV.esc(s.identityModel)}</span> · ` +
+      `${QV.esc(s.workspaceVersion)} · ${QV.esc(s.rbacVersion)}<br>${QV.esc(s.identityNote)}`;
+    await refreshList();
+  }
+
+  async function refreshList() {
+    const { quotations } = await api('GET', '/api/quotation/quotations');
+    // Newest first — the quotation just created by Sales is what a reviewer wants to see.
+    const list = [...quotations].reverse();
+    $('qid').innerHTML = list.map(q =>
+      `<option value="${QV.esc(q.quotationId)}">${QV.esc(q.quotationNumber || q.quotationId)} — ${QV.esc(q.status)}${q.quotationNumber ? ` · ${QV.esc(q.quotationId)}` : ''}</option>`).join('');
+    const urlId = new URLSearchParams(location.search).get('id');
+    if (urlId && list.some(q => q.quotationId === urlId)) $('qid').value = urlId;
+    if (list.length) await load();
+  }
+
+  async function load() {
+    const id = $('qid').value;
+    if (!id) return;
+    QUOTATION = await api('GET', `/api/quotation/quotations/${encodeURIComponent(id)}`);
+    PAYLOAD = (await api('GET', `/api/quotation/quotations/${encodeURIComponent(id)}/payload`)).payload;
+    GATE = await api('GET', `/api/quotation/quotations/${encodeURIComponent(id)}/gate`);
+    VERSIONS = (await api('GET', `/api/quotation/quotations/${encodeURIComponent(id)}/versions`)).versions;
+    render();
+  }
+
+  function render() {
+    $('v-status').innerHTML = QV.viewStatus(QUOTATION, PAYLOAD);
+    $('v-gate').innerHTML = QV.viewGate(GATE);
+    $('v-engineering').innerHTML = QV.viewEngineering(PAYLOAD.engineering);
+    $('v-customer').innerHTML = QV.viewCustomer(PAYLOAD.customer);
+    $('v-system').innerHTML = QV.viewSystem(PAYLOAD.system, PAYLOAD.upgrade);
+    $('v-bom').innerHTML = QV.viewBom(PAYLOAD.bomSummary);
+    $('v-tech').innerHTML = QV.viewTech(PAYLOAD.technicalSpecifications);
+    $('v-commercial').innerHTML = QV.viewCommercial(PAYLOAD.pricing);
+    $('v-gst').innerHTML = QV.viewGst(PAYLOAD.pricing);
+    $('v-extras').innerHTML = QV.viewExtras(PAYLOAD.extras);
+    $('v-blocked').innerHTML = QV.viewBlocked(PAYLOAD);
+    $('v-versions').innerHTML = QV.viewVersions(VERSIONS, QUOTATION);
+
+    // Presentation only. The service enforces the gate and RBAC regardless of
+    // what this page enables — a disabled button prevents nothing.
+    const gateOpen = GATE && GATE.status === 'PASS';
+    const issued = QUOTATION.status === 'ISSUED';
+    $('issue').disabled = !gateOpen || issued;
+    $('revise').disabled = !issued;
+    $('actionNote').textContent = issued
+      ? 'Issued and immutable. A change creates the next version.'
+      : gateOpen ? 'Gate satisfied. The server re-checks on issue.'
+        : 'Gate blocked — see the failed checks above. The server refuses regardless of this button.';
+  }
+
+  const wrap = (fn) => async () => { try { showError(null); await fn(); } catch (e) { showError(e); } };
+
+  $('reload').onclick = wrap(load);
+  $('qid').onchange = wrap(load);
+  $('role').onchange = wrap(load);
+  $('issue').onclick = wrap(async () => {
+    await api('POST', `/api/quotation/quotations/${encodeURIComponent($('qid').value)}/issue`, { at: atValue() });
+    await load();
+  });
+  $('revise').onclick = wrap(async () => {
+    await api('POST', `/api/quotation/quotations/${encodeURIComponent($('qid').value)}/revise`, { at: atValue(), changes: {} });
+    await load();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => { boot().catch(showError); });
+})();
+</script>
+</body>
+</html>

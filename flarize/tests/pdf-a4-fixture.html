@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!--
+  V4 quotation-finalization Phase 2B — A4 PDF contract fixture.
+
+  Renders the finalized Page 1 + Page 2 with a hand-built payload that
+  populates every dynamic region, waits for fonts and images to load,
+  then signals window.__quotationReady = true so headless PDF renderers
+  can snapshot the deterministic output.
+
+  Uses ONLY the same public/lib/quotationDocument.js the customer viewer
+  uses. No new business logic; the fixture is transport plumbing.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flarize Quotation — PDF A4 Contract Fixture</title>
+<!-- Offline fixture: fonts intentionally left to system fallback so the PDF
+     test can run without network egress. Live browser render pulls the fonts. -->
+<style id="q-page-styles"><!-- injected from quotationDocument styles --></style>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:210mm; margin:0; padding:0; background:#fff; font-family:'Poppins',sans-serif; }
+  main#q-document { display:block; }
+</style>
+</head>
+<body>
+<main id="q-document"></main>
+
+<script type="module">
+import {
+  renderPage1, PAGE_ONE_STYLES,
+  renderPage2, PAGE_TWO_STYLES,
+  renderPage3, PAGE_THREE_STYLES,
+  PAGE_A4_CONTRACT_STYLES,
+  FULL_DOCUMENT_STYLES,
+} from '../public/lib/quotationDocument.js';
+
+// Load the shared A4 physical + design-canvas contract FIRST so every page
+// inherits @page A4 portrait, 210×297mm .page dims and .q-canvas scaling.
+// PAGE_TWO_STYLES vendored @font-face rules reference paths relative to the
+// customer HTML (public/quotation-document.html). For the offline fixture
+// living under tests/, rewrite those relative paths to absolute file:// URLs
+// so the same styles work in both contexts without duplication.
+// 2026-09-07: resolve relative to THIS fixture (repo-relative), never a machine-specific absolute path.
+const PUBLIC_ROOT = new URL('../public/', import.meta.url).href;
+const rewrittenTwo = PAGE_TWO_STYLES.replace(
+  /url\("assets\/quotation\//g, `url("${PUBLIC_ROOT}assets/quotation/`
+);
+document.getElementById('q-page-styles').textContent =
+  PAGE_A4_CONTRACT_STYLES + PAGE_ONE_STYLES + rewrittenTwo + PAGE_THREE_STYLES + FULL_DOCUMENT_STYLES;
+
+// Hand-built payload that populates every dynamic region on Pages 1 + 2.
+const payload = {
+  quotation: { quotationNumber: 'FLZ-PDF-QA-001', quotationVersion: 1,
+               quotationDate: '2026-09-03', validUntil: '2026-09-18',
+               proposalBy: 'PDF QA Advisor', status: 'DRAFT' },
+  customer: { customerId: 'C-PDF-QA', customerName: 'PDF QA Customer',
+              address: '10 QA Marg, PDF Colony', pincode: '682000', phone: '9000000000',
+              district: 'Ernakulam', state: 'Kerala',
+              currentBillAmount: 5000, currentBillCycle: 'bi monthly' },
+  system: { systemType: 'ONGRID', systemSizeKw: 5, phase: 'SINGLE', packageTier: 'VALUE', roofType: 'RCC' },
+  engineering: { status: 'VALID', blocked: [], warnings: [] },
+  // Energy profile for Page 3 dynamic overlays (L1, L2, L5, L6, L7).
+  energyProfile: {
+    available: true, source: 'ENERGY_ENGINE', status: 'COMPLETE',
+    value: {
+      dailyGenerationLow: 18, dailyGenerationHigh: 22,
+      monthlyKsebValueLow: 5500, monthlyKsebValueHigh: 6600,
+      homeUsesUnitsPerDay: 13,
+      surplusExportedLow: 4, surplusExportedHigh: 8,
+    },
+  },
+  company: {
+    available: true, source: 'COMPANY_MASTER',
+    value: {
+      companyName: 'Flarize', legalName: 'Golden Ray Renewable',
+      gstNumber: '32ABCDE1234F1Z5', companyRegistration: 'AAP-1234',
+      address: 'Thannikakal, Thumpoly PO', city: 'Alappuzha', pincode: '688008',
+      phone: '+91 9995 073 579', email: 'sales@flarize.com', website: 'www.flarize.com',
+      completedInstallations: 412,
+      mnreEmpanelled: true,
+    },
+  },
+  subsidy: {
+    available: true, treatment: 'ENGINE_RESULT', source: 'PM_SURYA_GHAR', status: 'COMPLETE',
+    value: { subsidyAmount: 78000, schemeName: 'PM Surya Ghar: Muft Bijli Yojana' },
+  },
+  campaign: {
+    available: true, source: 'CMS',
+    value: {
+      id: 'ONAM_PDF_QA', name: 'Onam Solar Fest', active: true,
+      template: null, yearBadge: '2026', theme: null,
+      headline: 'ഓണം സോളാർ ഫെസ്റ്റ്',
+      subheadline: 'Celebrate Onam with Flarize!',
+      heroImage: null,
+      primaryBenefit: { headline: 'Festival Offers Worth Up To', displayValue: '40,000+', description: 'Exclusive Onam solar benefits' },
+      offers: [
+        { id: 'o1', title: 'Win an AC Voucher', description: 'Available for Eligible Bookings', enabled: true, sortOrder: 1, image: null },
+        { id: 'o2', title: 'Free Hybrid Upgrade', description: '+ Buyback Support', enabled: true, sortOrder: 2, image: null },
+        { id: 'o3', title: 'Refer Friends & Win More Prizes', description: 'Earn rewards for every successful referral.', enabled: true, sortOrder: 3, image: null },
+      ],
+      luckyDraw: { enabled: true, title: 'Win an Electric Scooter', description: 'Every eligible solar booking during the campaign enters you into our grand festival draw for a brand-new premium electric scooter. Go solar, ride electric — celebrate Onam the sustainable way.', winners: 5, image: null },
+      referral: { enabled: false },
+      urgency: { enabled: true, displayText: 'LIMITED SLOTS', remainingCount: 35 },
+      cta: { enabled: true, buttonText: 'Book Your Solar System Today!', description: 'Celebrate Onam with clean energy for a brighter tomorrow — limited festival slots available.' },
+      artwork: { illustrationImage: PUBLIC_ROOT + 'assets/quotation/q-page-02-mahabali.jpg', decorationImage: PUBLIC_ROOT + 'assets/quotation/q-page-02-onam-floral.jpg', qrImage: PUBLIC_ROOT + 'assets/quotation/q-page-02-qr.jpg' },
+      disclaimer: '*T&C Apply. Offer valid during the campaign period. Benefits vary by system configuration and eligibility. Prize terms apply.',
+      period: { displayText: '29 JULY – 12 AUGUST', note: 'Book before 12th August to avail these exclusive festival offers.' },
+    },
+  },
+};
+
+// Rewrite Page 1 asset paths so the file:// fixture can find them.
+// (renderPage1 emits assets/quotation/*.jpg relative paths.)
+document.getElementById('q-document').innerHTML =
+  renderPage1(payload) + renderPage2(payload) + renderPage3(payload);
+// Fix relative asset src for headless file:// context.
+for (const img of document.querySelectorAll('#q-document img')) {
+  const src = img.getAttribute('src') || '';
+  if (src.startsWith('assets/quotation/')) {
+    img.setAttribute('src', PUBLIC_ROOT + src);
+  }
+}
+
+// Wait for fonts + images before signalling ready.
+async function waitReady() {
+  // Force-load every declared @font-face by asking the FontFaceSet to load
+  // each family/weight combination explicitly. document.fonts.ready alone is
+  // not enough — Chrome lazily fetches fonts only when a glyph is needed.
+  try {
+    const targets = [
+      ['600 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['700 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['800 16px "Noto Sans Malayalam"', 'ഓണം'],
+      ['400 16px "Poppins"', 'Poppins'],
+      ['500 16px "Poppins"', 'Poppins'],
+      ['600 16px "Poppins"', 'Poppins'],
+      ['700 16px "Poppins"', 'Poppins'],
+      ['800 16px "Poppins"', 'Poppins'],
+    ];
+    await Promise.all(targets.map(([shorthand, text]) =>
+      document.fonts.load(shorthand, text).catch(() => null)
+    ));
+    await document.fonts.ready;
+  } catch (_) {}
+  const imgs = Array.from(document.images || []);
+  await Promise.all(imgs.map(img => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      const done = () => { img.removeEventListener('load', done); img.removeEventListener('error', done); resolve(); };
+      img.addEventListener('load', done, { once:true });
+      img.addEventListener('error', done, { once:true });
+    });
+  }));
+  window.__quotationReady = true;
+}
+waitReady();
+</script>
+</body>
+</html>

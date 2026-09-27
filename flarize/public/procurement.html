@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Procurement Workspace — Flarize / Golden Ray</title>
+<!--
+  PROCUREMENT WORKSPACE UI.  (Phase 3, PART F)
+
+  This page implements NO commercial formula and NO allocation rule. It renders
+  exactly what /api/procurement/* returns. Specifically:
+    * The purchase-value allocation, the reconciliation and the landed unit cost
+      all come from src/lib/procurementBatch.js.
+    * The formula string shown on the material detail screen is the engine's own.
+    * Versions and history come from src/lib/commercialHistory.js. There is no
+      second history mechanism on this page.
+    * A value that has not been configured renders "NOT CONFIGURED", never 0.
+  If a number is missing here, it is missing in the configuration.
+-->
+<style>
+  :root { --bg:#0f1115; --panel:#171a21; --line:#262b36; --fg:#e6e9ef; --dim:#8b93a5;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --acc:#4493f8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  header { padding:12px 18px; border-bottom:1px solid var(--line); display:flex; gap:14px; align-items:center; flex-wrap:wrap; }
+  h1 { font-size:15px; margin:0; font-weight:600; letter-spacing:.2px; }
+  main { display:grid; grid-template-columns:320px 1fr; gap:0; min-height:calc(100vh - 52px); }
+  aside { border-right:1px solid var(--line); padding:14px; }
+  section { padding:16px 20px; }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:14px; margin-bottom:16px; }
+  .panel h2 { font-size:12px; text-transform:uppercase; letter-spacing:.8px; color:var(--dim); margin:0 0 10px; }
+  label { display:block; font-size:11px; color:var(--dim); text-transform:uppercase; letter-spacing:.6px; margin:8px 0 3px; }
+  input, select, button, textarea { font:inherit; background:#0d1017; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+  button { cursor:pointer; background:#1f2733; }
+  button:hover { border-color:var(--acc); }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:11px; text-transform:uppercase; letter-spacing:.6px; color:var(--dim); font-weight:600; }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .pill { display:inline-block; padding:1px 8px; border-radius:999px; font-size:11px; font-weight:600; letter-spacing:.4px; }
+  .VALID,.COMPLETE,.OK,.COMMITTED,.ACTIVE { background:rgba(63,185,80,.15); color:var(--ok); }
+  .WARNING,.INCOMPLETE,.DRAFT,.SUPERSEDED { background:rgba(210,153,34,.15); color:var(--warn); }
+  .BLOCKED,.UNAVAILABLE,.REJECTED,.ARCHIVED { background:rgba(248,81,73,.15); color:var(--bad); }
+  .muted { color:var(--dim); }
+  .notconf { color:var(--bad); font-style:italic; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .err { color:var(--bad); white-space:pre-wrap; }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; color:var(--dim); }
+  .flow { font-size:11px; letter-spacing:.4px; }
+</style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+<header>
+  <h1>Purchase batches</h1>
+  <span class="muted">Flarize / Golden Ray</span>
+  <span class="muted flow">Supplier → purchase batch → item lines &amp; charges → landed cost per item (feeds the project cost check)</span>
+  <span style="flex:1"></span>
+  <label style="margin:0" hidden>Acting role</label>
+  <select id="role" hidden></select>
+  <input id="user" type="hidden" value="" />
+  <span id="ver" class="muted"></span>
+</header>
+<div style="margin:12px 16px 0;padding:10px 14px;border:1px solid #2b3a4a;border-radius:8px;background:#141c26;font-size:13px;line-height:1.5;color:#c9d3dd">
+  <b>Adding items or changing reference prices?</b> Do that in <a href="/catalog.html" style="color:#7fb3ff">Items &amp; Prices</a> — it is the everyday page.
+  This page records what was <i>actually bought</i>: pick or add the supplier → create a purchase batch (invoice / PO) → enter item lines with purchase prices and delivery charges → commit. Each committed batch gives every item a landed unit cost that the project cost check compares against the quoted price.
+</div>
+<main>
+  <aside>
+    <div class="panel">
+      <h2>1 · Supplier</h2>
+      <div class="row">
+        <select id="supplierList" style="flex:1"></select>
+      </div>
+      <label>New supplier id</label>
+      <input id="newSupplierId" placeholder="SUP-001" style="width:100%" />
+      <label>Name</label>
+      <input id="newSupplierName" style="width:100%" />
+      <label>Reference</label>
+      <input id="newSupplierRef" style="width:100%" />
+      <div style="margin-top:8px"><button id="addSupplier">Add supplier</button></div>
+    </div>
+
+    <div class="panel">
+      <h2>2 · New purchase batch</h2>
+      <label>Batch id</label>
+      <input id="newBatchId" placeholder="PB-2026-001" style="width:100%" />
+      <label>Batch date</label>
+      <input id="newBatchDate" placeholder="2026-08-16" style="width:100%" />
+      <label>Supplier reference (invoice / PO)</label>
+      <input id="newBatchRef" placeholder="INV-4471" style="width:100%" />
+      <div style="margin-top:8px"><button id="addBatch">Create batch</button></div>
+      <label>Open existing batch</label>
+      <div class="row">
+        <select id="batchList" style="flex:1"></select>
+        <button id="openBatch">Open</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Scope</h2>
+      <div class="muted" id="scopeNote"></div>
+    </div>
+  </aside>
+
+  <section>
+    <div id="error" class="err"></div>
+
+    <!-- ============================================ A -->
+    <div class="panel">
+      <h2>Batches &amp; landed costs</h2>
+      <div class="row"><button id="dashBtn">Refresh</button><span id="dashSummary" class="muted"></span></div>
+      <div id="dash" style="margin-top:10px" class="muted">Not loaded.</div>
+    </div>
+
+    <!-- ============================================ B -->
+    <div class="panel">
+      <h2>Open batch — item lines &amp; charges</h2>
+      <div id="batchHead" class="muted">No batch open.</div>
+      <div id="batchLines" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:10px">
+        <select id="lineComponent" style="min-width:280px"></select>
+        <input id="lineQty" placeholder="quantity" size="8" />
+        <input id="linePrice" placeholder="purchase unit price" size="16" />
+        <input id="lineOtherLabel" placeholder="other charge label" size="16" />
+        <input id="lineOtherAmt" placeholder="other charge ₹" size="10" />
+        <button id="addLine">Add / replace line</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <label style="margin:0">Procurement delivery ₹ (supplier → warehouse)</label>
+        <input id="deliveryCost" size="10" />
+        <label style="margin:0">Other procurement charges — batch control total ₹</label>
+        <input id="otherDeclared" size="10" />
+        <label style="margin:0">Allocation method</label>
+        <select id="allocMethod"></select>
+        <button id="saveCharges">Save charges</button>
+      </div>
+      <div class="muted" style="margin-top:6px">
+        Project transportation (warehouse → customer site) is a Project Head cost head and is refused here.
+        The batch control total is reconciled against the per-line amounts; it is not allocated by any rule.
+      </div>
+    </div>
+
+    <!-- ============================================ C -->
+    <div class="panel">
+      <h2>Charge allocation review</h2>
+      <div class="row">
+        <button id="allocBtn">Compute allocation preview</button>
+        <span id="allocStatus"></span>
+      </div>
+      <div id="alloc" style="margin-top:10px" class="muted">Not computed.</div>
+      <div class="row" style="margin-top:10px">
+        <label style="margin:0">Effective from</label><input id="effectiveFrom" placeholder="2026-08-16" size="12" />
+        <label style="margin:0">Change reason</label><input id="changeReason" size="34" />
+        <button id="commitBtn">Commit batch → price version</button>
+        <span id="commitMsg" class="muted"></span>
+      </div>
+    </div>
+
+    <!-- ============================================ D -->
+    <div class="panel">
+      <h2>Item landed cost detail</h2>
+      <div class="row">
+        <select id="detailComponent" style="min-width:280px"></select>
+        <input id="detailAsOf" placeholder="as-of date (optional)" size="14" />
+        <button id="detailBtn">Show build-up</button>
+      </div>
+      <div id="detail" style="margin-top:10px" class="muted">Select a material.</div>
+    </div>
+
+    <!-- ============================================ E -->
+    <div class="panel">
+      <h2>Price history &amp; version comparison</h2>
+      <div class="row">
+        <button id="histBtn">Show history</button>
+        <select id="cmpFrom" style="min-width:200px"></select>
+        <select id="cmpTo" style="min-width:200px"></select>
+        <button id="cmpBtn">Compare versions</button>
+      </div>
+      <div id="history" style="margin-top:10px" class="muted">Select a material above.</div>
+      <div id="compare" style="margin-top:10px"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+flarizeNav.init({ current: 'procurement' });
+// ---------------------------------------------------------------- transport
+const $ = (id) => document.getElementById(id);
+let BATCH = null, CAPS = [], CAN_EDIT = false, MATERIALS = [];
+
+// Shared auth — read Bearer token from application session (set by BOM login).
+const SESSION_KEY = 'gr_session_token';
+function getToken() {
+  try { return sessionStorage.getItem(SESSION_KEY) || ''; } catch { return ''; }
+}
+if (!getToken()) { location.href = '/login.html'; }
+// Populate actor identity from login session (replaces hardcoded 'operator')
+try { const u = sessionStorage.getItem('gr_user_name'); if (u) $('user').value = u; } catch {}
+
+// The engines are deterministic and refuse to read a clock, so the CALLER
+// supplies the timestamp with every operation. That caller is this page.
+const now = () => new Date().toISOString();
+
+async function api(method, url, body) {
+  const token = getToken();
+  if (!token) { location.href = '/login.html'; throw new Error('Session expired'); }
+  const res = await fetch(url, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+      'X-Actor-Role': $('role').value,
+      'X-Actor-User': $('user').value,
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error((data.code ? data.code + ': ' : '') + (data.error || res.statusText));
+  return data;
+}
+const show = (e) => { $('error').textContent = e ? String(e.message || e) : ''; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+const pill = (s) => `<span class="pill ${esc(s)}">${esc(s)}</span>`;
+// ₹ formatting. A null amount is NOT money — it is an unconfigured value and
+// must never be rendered as 0.
+const money = (v) => v == null ? '<span class="notconf">NOT CONFIGURED</span>'
+  : '₹' + Number(v).toLocaleString('en-IN');
+const wrap = (fn) => async (...a) => { try { show(null); await fn(...a); } catch (e) { show(e); } };
+const num = (id) => $(id).value === '' ? null : Number($(id).value);
+
+// ---------------------------------------------------------------- session
+async function boot() {
+  const s = await api('GET', '/api/procurement/session');
+  $('role').innerHTML = s.roles.map(r => `<option${r === 'PROCUREMENT' ? ' selected' : ''}>${r}</option>`).join('');
+  $('ver').textContent = `${s.procurementWorkspaceVersion} · ${s.rbacVersion}`;
+  $('ver').title = s.identityNote;
+  $('scopeNote').innerHTML = esc(s.scopeNote) +
+    `<br><br>Delivery charges are spread over the batch lines in proportion to purchase value (<code>${esc(s.allocationMethod)}</code>); the result is each item's landed unit cost.`;
+  $('allocMethod').innerHTML = [s.allocationMethod, ...s.forbiddenAllocationMethods]
+    .map(m => `<option${m === s.allocationMethod ? ' selected' : ''}>${m}</option>`).join('');
+  CAPS = s.capabilities || [];
+  CAN_EDIT = !!s.canEdit;
+  applyCapabilities();
+  const m = await api('GET', '/api/procurement/materials');
+  MATERIALS = m.materials;
+  const opts = MATERIALS.map(x => `<option value="${esc(x.componentId)}">${esc(x.componentId)} — ${esc(x.name || '')} [${esc(x.category)}]</option>`).join('');
+  $('lineComponent').innerHTML = opts;
+  $('detailComponent').innerHTML = opts;
+  await refreshSuppliers();
+  await refreshBatches();
+  await loadDashboard();
+}
+
+/** RBAC in the UI is presentation only. The server enforces it regardless. */
+function applyCapabilities() {
+  const writeButtons = ['addSupplier', 'addBatch', 'addLine', 'saveCharges', 'commitBtn'];
+  for (const id of writeButtons) {
+    $(id).disabled = !CAN_EDIT;
+    $(id).title = CAN_EDIT ? '' : `Role ${$('role').value} lacks PROCUREMENT_PRICE_EDIT / is not the PROCUREMENT_PRICE owner`;
+  }
+  for (const id of ['dashBtn', 'allocBtn', 'detailBtn', 'histBtn', 'cmpBtn']) {
+    const ok = CAPS.includes('COMMERCIAL_HISTORY_VIEW');
+    $(id).disabled = !ok;
+    $(id).title = ok ? '' : `Role ${$('role').value} lacks COMMERCIAL_HISTORY_VIEW`;
+  }
+}
+
+$('role').onchange = wrap(() => boot());
+
+// ---------------------------------------------------------------- suppliers
+async function refreshSuppliers() {
+  const r = await api('GET', '/api/procurement/suppliers');
+  $('supplierList').innerHTML = r.suppliers.map(s =>
+    `<option value="${esc(s.supplierId)}">${esc(s.supplierId)}${s.name ? ' — ' + esc(s.name) : ''}</option>`).join('')
+    || '<option value="">(none)</option>';
+}
+
+$('addSupplier').onclick = wrap(async () => {
+  await api('POST', '/api/procurement/suppliers', {
+    supplierId: $('newSupplierId').value.trim(),
+    name: $('newSupplierName').value || null,
+    reference: $('newSupplierRef').value || null,
+    at: now(),
+  });
+  await refreshSuppliers();
+  await loadDashboard();
+});
+
+// ---------------------------------------------------------------- batches
+async function refreshBatches() {
+  const r = await api('GET', '/api/procurement/batches');
+  $('batchList').innerHTML = r.batches.map(b =>
+    `<option value="${esc(b.batchId)}">${esc(b.batchId)} · ${esc(b.status)}</option>`).join('')
+    || '<option value="">(none)</option>';
+}
+
+$('addBatch').onclick = wrap(async () => {
+  const b = await api('POST', '/api/procurement/batches', {
+    batchId: $('newBatchId').value.trim(),
+    supplierId: $('supplierList').value,
+    batchDate: $('newBatchDate').value || null,
+    batchReference: $('newBatchRef').value || null,
+    at: now(),
+  });
+  await refreshBatches();
+  $('batchList').value = b.batchId;
+  await openBatch(b.batchId);
+});
+
+$('openBatch').onclick = wrap(() => openBatch($('batchList').value));
+
+async function openBatch(id) {
+  if (!id) return;
+  BATCH = await api('GET', '/api/procurement/batches/' + encodeURIComponent(id));
+  renderBatch();
+}
+
+function renderBatch() {
+  const b = BATCH;
+  $('batchHead').innerHTML = `<b>${esc(b.batchId)}</b> ${pill(b.status)}
+    <span class="muted">supplier ${esc(b.supplier.supplierId)}${b.supplier.name ? ' (' + esc(b.supplier.name) + ')' : ''}
+    · date ${esc(b.batchDate || '—')} · ref ${esc(b.batchReference || '—')}
+    · created by ${esc(b.createdBy)}</span>
+    ${b.immutable ? '<span class="muted"> · COMMITTED batches are immutable; record a new batch instead.</span>' : ''}`;
+  $('batchLines').innerHTML = b.lines.length ? `
+    <table><thead><tr><th>Component</th><th class="num">Qty</th><th class="num">Purchase unit price</th>
+      <th>Other procurement charges</th></tr></thead><tbody>
+    ${b.lines.map(l => `<tr>
+      <td><code>${esc(l.componentId)}</code></td>
+      <td class="num">${l.quantity == null ? '<span class="notconf">NOT SET</span>' : l.quantity}</td>
+      <td class="num">${money(l.purchaseUnitPrice)}</td>
+      <td class="muted">${l.otherProcurementCharges.length
+        ? l.otherProcurementCharges.map(c => esc((c.label || 'charge') + ': ') + money(c.amount)).join('<br>') : '—'}</td>
+    </tr>`).join('')}
+    </tbody></table>` : '<span class="muted">No material lines yet.</span>';
+  $('deliveryCost').value = b.deliveryCost == null ? '' : b.deliveryCost;
+  $('otherDeclared').value = b.otherChargesDeclared == null ? '' : b.otherChargesDeclared;
+  $('allocMethod').value = b.allocationMethod;
+}
+
+$('addLine').onclick = wrap(async () => {
+  if (!BATCH) throw new Error('Open a batch first.');
+  const componentId = $('lineComponent').value;
+  const others = $('lineOtherAmt').value === '' ? []
+    : [{ label: $('lineOtherLabel').value || null, amount: Number($('lineOtherAmt').value) }];
+  const lines = BATCH.lines.filter(l => l.componentId !== componentId).map(l => ({
+    componentId: l.componentId, quantity: l.quantity, purchaseUnitPrice: l.purchaseUnitPrice,
+    otherProcurementCharges: l.otherProcurementCharges,
+  }));
+  lines.push({ componentId, quantity: num('lineQty'), purchaseUnitPrice: num('linePrice'), otherProcurementCharges: others });
+  BATCH = await api('PUT', `/api/procurement/batches/${encodeURIComponent(BATCH.batchId)}/lines`, { lines, at: now() });
+  renderBatch();
+});
+
+$('saveCharges').onclick = wrap(async () => {
+  if (!BATCH) throw new Error('Open a batch first.');
+  BATCH = await api('PUT', `/api/procurement/batches/${encodeURIComponent(BATCH.batchId)}/charges`, {
+    deliveryCost: num('deliveryCost'),
+    otherChargesDeclared: num('otherDeclared'),
+    allocationMethod: $('allocMethod').value,
+    at: now(),
+  });
+  renderBatch();
+});
+
+// ---------------------------------------------------------------- C allocation
+$('allocBtn').onclick = wrap(async () => {
+  if (!BATCH) throw new Error('Open a batch first.');
+  const a = await api('GET', `/api/procurement/batches/${encodeURIComponent(BATCH.batchId)}/allocation`);
+  $('allocStatus').innerHTML = pill(a.canCommit ? 'COMPLETE' : 'BLOCKED') +
+    ` <span class="muted">method ${esc(a.allocationMethod)} · scope ${esc(a.scope)}</span>`;
+  $('alloc').innerHTML = `
+    <table><thead><tr><th>Component</th><th class="num">Qty</th><th class="num">Purchase unit</th>
+      <th class="num">Purchase value</th><th class="num">Share %</th><th class="num">Allocated delivery</th>
+      <th class="num">Other charges</th><th class="num">Landed unit cost</th><th>Formula</th></tr></thead><tbody>
+    ${a.lines.map(l => `<tr>
+      <td><code>${esc(l.componentId)}</code><br><span class="muted">${esc(l.componentName || '')}</span></td>
+      <td class="num">${l.quantity}</td>
+      <td class="num">${money(l.purchaseUnitPrice)}</td>
+      <td class="num">${money(l.purchaseValue)}</td>
+      <td class="num">${l.allocationPct}%</td>
+      <td class="num">${money(l.allocatedDeliveryCost)}</td>
+      <td class="num">${money(l.otherProcurementChargesTotal)}</td>
+      <td class="num"><b>${money(l.landedUnitCost)}</b></td>
+      <td class="muted"><code>${esc(l.formula)}</code></td></tr>`).join('')}
+    <tr><th>TOTAL</th><td></td><td></td><td class="num">${money(a.totalPurchaseValue)}</td><td></td>
+      <td class="num"><b>${money(a.allocatedTotal)}</b></td><td class="num">${money(a.otherChargesEntered)}</td><td></td><td></td></tr>
+    </tbody></table>
+    <div class="row" style="margin-top:8px">
+      ${pill(a.reconciled ? 'OK' : 'BLOCKED')}
+      <span class="muted">Entered delivery charge ${a.deliveryCostEntered ? money(a.deliveryCost) : '<span class="notconf">NOT ENTERED</span>'}
+      · allocated total ${money(a.allocatedTotal)} · reconciled exactly: ${a.reconciled}</span>
+    </div>
+    ${a.blockers.length ? '<div class="err" style="margin-top:8px">' + a.blockers.map(x => esc(x.code + ': ' + x.message)).join('<br>') + '</div>' : ''}
+    ${a.engineErrors.length ? '<div class="err" style="margin-top:8px">' + a.engineErrors.map(x => esc(x.code + ': ' + x.message)).join('<br>') + '</div>' : ''}`;
+});
+
+$('commitBtn').onclick = wrap(async () => {
+  if (!BATCH) throw new Error('Open a batch first.');
+  const r = await api('POST', `/api/procurement/batches/${encodeURIComponent(BATCH.batchId)}/commit`, {
+    at: now(),
+    effectiveFrom: $('effectiveFrom').value || null,
+    changeReason: $('changeReason').value || null,
+  });
+  $('commitMsg').innerHTML = pill('COMMITTED') +
+    ` <span class="muted">${r.componentsVersioned} price versions appended · effective ${esc(r.effectiveFrom)}</span>`;
+  await openBatch(BATCH.batchId);
+  await refreshBatches();
+  await loadDashboard();
+});
+
+// ---------------------------------------------------------------- A dashboard
+$('dashBtn').onclick = wrap(loadDashboard);
+
+async function loadDashboard() {
+  const d = await api('GET', '/api/procurement/dashboard');
+  $('dashSummary').textContent =
+    `${d.supplierCount} suppliers · ${d.batchCount} batches (${d.draftBatches} draft, ${d.committedBatches} committed) · `
+    + `${d.landedCostConfiguredCount} components with a landed cost`;
+  $('dash').innerHTML = `
+    <table><thead><tr><th>Batch</th><th>Supplier</th><th>Date</th><th>Reference</th><th>Status</th>
+      <th class="num">Lines</th><th class="num">Delivery</th><th>Effective from</th><th>Committed by</th></tr></thead><tbody>
+    ${d.batches.map(b => `<tr>
+      <td><code>${esc(b.batchId)}</code></td><td>${esc(b.supplierName || b.supplierId)}</td>
+      <td>${esc(b.batchDate || '—')}</td><td>${esc(b.batchReference || '—')}</td>
+      <td>${pill(b.status)}</td><td class="num">${b.lineCount}</td>
+      <td class="num">${b.deliveryCostEntered ? money(b.deliveryCost) : '<span class="notconf">NOT ENTERED</span>'}</td>
+      <td>${esc(b.effectiveFrom || '—')}</td><td class="muted">${esc(b.committedBy || '—')}</td></tr>`).join('')
+      || '<tr><td colspan="9" class="muted">No batches.</td></tr>'}
+    </tbody></table>
+    <h3 style="font-size:12px;margin:14px 0 4px">LANDED COSTS FEEDING THE COST ENGINE</h3>
+    <table><thead><tr><th>Component</th><th class="num">Purchase price</th><th class="num">Landed unit cost</th>
+      <th>Separate</th><th>Version</th><th>Effective</th><th>Supplier</th><th>Usable as project cost</th></tr></thead><tbody>
+    ${d.components.map(c => `<tr>
+      <td><code>${esc(c.componentId)}</code><br><span class="muted">${esc(c.componentName || '')}</span></td>
+      <td class="num">${money(c.purchasePrice)}</td>
+      <td class="num"><b>${money(c.landedUnitCost)}</b></td>
+      <td>${c.differs ? pill('OK') : pill('WARNING')}</td>
+      <td><code>${esc(c.landedCostVersion)}</code></td>
+      <td>${esc(c.effectiveFrom)}</td><td class="muted">${esc(c.supplier || '—')}</td>
+      <td>${c.usableAsProjectCost ? pill('OK') : pill('BLOCKED')}</td></tr>`).join('')
+      || '<tr><td colspan="8" class="muted">No landed cost recorded yet. The Cost Engine will report LANDED_COST_NOT_CONFIGURED — never ₹0.</td></tr>'}
+    </tbody></table>
+    <div class="muted" style="margin-top:8px">${esc(d.note)}</div>`;
+}
+
+// ---------------------------------------------------------------- D detail
+$('detailBtn').onclick = wrap(async () => {
+  const id = $('detailComponent').value;
+  const q = $('detailAsOf').value ? '?asOf=' + encodeURIComponent($('detailAsOf').value) : '';
+  const d = await api('GET', '/api/procurement/materials/' + encodeURIComponent(id) + q);
+  if (!d.configured) {
+    $('detail').innerHTML = `${pill('BLOCKED')} <span class="notconf">NOT CONFIGURED</span>
+      <div class="muted" style="margin-top:6px">${esc(d.projectCostReason || '')}</div>`;
+    return;
+  }
+  $('detail').innerHTML = `
+    <div class="muted">${esc(d.componentId)} — ${esc(d.componentName || '')} · batch ${esc(d.procurementBatchId)}
+      (${esc(d.batchReference || '—')}) · supplier ${esc(d.supplier || '—')}</div>
+    <table style="margin-top:8px"><tbody>
+      <tr><th>Purchase price</th><td class="num">${money(d.purchasePrice)}</td><td class="muted">per unit</td></tr>
+      <tr><th>+ Allocated procurement delivery</th><td class="num">${money(d.buildUp[1].perUnit)}</td>
+        <td class="muted">per unit · batch total ${money(d.allocatedDeliveryCost)} · ${esc(d.allocationMethod)} · ${d.allocationPct}% · ${esc(d.allocationScope)}</td></tr>
+      <tr><th>+ Other procurement charges</th><td class="num">${money(d.buildUp[2].perUnit)}</td>
+        <td class="muted">per unit · batch total ${money(d.otherProcurementChargesTotal)} · entered explicitly</td></tr>
+      <tr><th>= LANDED UNIT COST</th><td class="num"><b>${money(d.landedUnitCost)}</b></td>
+        <td class="muted">${esc(d.landedCostSource)}</td></tr>
+    </tbody></table>
+    <div style="margin-top:8px"><code>${esc(d.formulaShape)}</code></div>
+    <div><code>${esc(d.formula)}</code></div>
+    <div class="muted" style="margin-top:4px">Source: <code>${esc(d.formulaSource)}</code></div>
+    <table style="margin-top:10px"><tbody>
+      <tr><th>Version</th><td><code>${esc(d.version)}</code> ${pill(d.versionStatus)}</td></tr>
+      <tr><th>Effective from</th><td>${esc(d.effectiveFrom)}</td></tr>
+      <tr><th>Changed by</th><td>${esc(d.changedBy)} at ${esc(d.changedAt)}</td></tr>
+      <tr><th>Change reason</th><td>${esc(d.changeReason)}</td></tr>
+      <tr><th>Previous version</th><td>${d.previousVersionId ? '<code>' + esc(d.previousVersionId) + '</code>' : '<span class="muted">— initial</span>'}</td></tr>
+      <tr><th>Procurement uplift</th><td>${d.uplift ? money(d.uplift.delta) + ' <span class="muted">(' + d.uplift.pctOfPurchase.toFixed(2) + '% of purchase price)</span>' : '<span class="muted">—</span>'}</td></tr>
+      <tr><th>Usable as project cost</th><td>${d.usableAsProjectCost ? pill('OK') : pill('BLOCKED')} <span class="muted">${esc(d.priceKind)}</span></td></tr>
+    </tbody></table>
+    <div class="muted" style="margin-top:6px">${esc(d.separationNote)}</div>`;
+});
+
+// ---------------------------------------------------------------- E history
+$('histBtn').onclick = wrap(async () => {
+  const id = $('detailComponent').value;
+  const h = await api('GET', '/api/procurement/materials/' + encodeURIComponent(id) + '/history');
+  if (!h.available) { $('history').innerHTML = '<span class="muted">No recorded price version for this material.</span>'; return; }
+  $('history').innerHTML = `
+    <div class="muted">Owner ${esc(h.owner)} · ${h.versionCount} versions · append-only: ${h.appendOnly}</div>
+    <table style="margin-top:6px"><thead><tr><th>Version</th><th>Status</th><th class="num">Purchase price</th>
+      <th class="num">Landed unit cost</th><th>Effective</th><th>Who</th><th>When</th><th>Why</th><th>Changed fields</th></tr></thead><tbody>
+    ${h.history.map(v => `<tr>
+      <td><code>${esc(v.versionId)}</code></td><td>${pill(v.status)}</td>
+      <td class="num">${money(v.purchasePrice)}</td><td class="num"><b>${money(v.landedUnitCost)}</b></td>
+      <td>${esc(v.effectiveFrom)}${v.effectiveTo ? ' → ' + esc(v.effectiveTo) : ''}</td>
+      <td>${esc(v.changedBy)}</td><td>${esc(v.changedAt)}</td><td>${esc(v.changeReason)}</td>
+      <td class="muted">${v.diff ? v.diff.changes.map(c => esc(c.field)).join(', ') : '<span class="muted">initial</span>'}</td>
+    </tr>`).join('')}
+    </tbody></table>`;
+  const opts = h.history.map(v => `<option value="${esc(v.versionId)}">${esc(v.versionId)} (${esc(v.status)})</option>`).join('');
+  $('cmpFrom').innerHTML = opts;
+  $('cmpTo').innerHTML = opts;
+});
+
+$('cmpBtn').onclick = wrap(async () => {
+  const id = $('detailComponent').value;
+  const c = await api('GET', '/api/procurement/materials/' + encodeURIComponent(id) + '/compare'
+    + '?from=' + encodeURIComponent($('cmpFrom').value || '') + '&to=' + encodeURIComponent($('cmpTo').value || ''));
+  if (!c.comparison) { $('compare').innerHTML = '<span class="muted">Need two readable versions to compare.</span>'; return; }
+  $('compare').innerHTML = `
+    <div class="muted">${esc(c.from.versionId)} (${esc(c.from.status)}) → ${esc(c.to.versionId)} (${esc(c.to.status)})
+      · by ${esc(c.comparison.changedBy)} · ${esc(c.comparison.changeReason)}
+      · both versions readable: from=${c.readable.from} to=${c.readable.to}</div>
+    <table style="margin-top:6px"><thead><tr><th>Field</th><th>Previous</th><th>Current</th></tr></thead><tbody>
+    ${c.comparison.changes.map(x => `<tr><td>${esc(x.field)}</td>
+      <td><code>${esc(JSON.stringify(x.oldValue))}</code></td>
+      <td><code>${esc(JSON.stringify(x.newValue))}</code></td></tr>`).join('')
+      || '<tr><td colspan="3" class="muted">No field differs.</td></tr>'}
+    </tbody></table>`;
+});
+
+boot().catch(show);
+</script>
+</body>
+</html>

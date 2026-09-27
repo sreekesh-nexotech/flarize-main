@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quotation content · Flarize</title>
+<style>
+:root{--g:#0f7b5f;--g-soft:#e6f4ef;--o:#e8680f;--r:#c0392b;--r-soft:#fbe9e7;--y:#b7791f;--y-soft:#fdf3dc;--ink:#1c2430;--mut:#66707d;--line:#e3e7ec;--bg:#f4f6f8;--card:#fff}
+*{box-sizing:border-box}html,body{margin:0}[hidden]{display:none!important}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh}
+button{font:inherit;cursor:pointer}
+main{padding:14px 18px 60px;max-width:1100px;margin:0 auto}
+h1{margin:0 0 4px;font-size:20px}.crumb{color:var(--mut);font-size:13px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.card h2{margin:0 0 4px;font-size:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.card .sub{color:var(--mut);font-size:13px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px 14px}
+label.f{display:block;font-size:11px;letter-spacing:.05em;font-weight:700;color:var(--mut);margin-bottom:4px}
+input[type=text],input[type=number],textarea,select{font:inherit;width:100%;border:1px solid var(--line);border-radius:8px;padding:7px 9px;background:#fff;color:var(--ink)}
+textarea{min-height:64px;resize:vertical}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 14px;font-weight:700;color:var(--ink)}.btn.p{background:var(--g);border-color:var(--g);color:#fff}.btn.sm{padding:5px 10px;font-size:12.5px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;display:inline-block}.tag.ok{background:var(--g-soft);color:var(--g)}.tag.warn{background:var(--y-soft);color:var(--y)}.tag.mut{background:#eef1f4;color:#555}
+.entry{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;background:#fafbfc}
+.entry h3{margin:0 0 8px;font-size:13px;color:var(--mut)}
+.thumb{width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--line);background:#fff;display:block}
+.upl{display:flex;align-items:center;gap:10px}
+.hint{font-size:12px;color:var(--mut)}
+.toast{position:fixed;right:18px;bottom:18px;background:#1c2430;color:#fff;padding:10px 14px;border-radius:10px;font-size:13px;max-width:460px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:none;z-index:50}.toast.bad{background:var(--r)}.toast.ok{background:var(--g)}
+.switch{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.switch input{width:18px;height:18px}
+.doc-tab{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:12.5px}.doc-tab.on{background:var(--g);border-color:var(--g);color:#fff}
+.doc-item{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:8px;background:#fafbfc}
+.doc-item .hd{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--mut);margin-bottom:6px}
+.doc-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.doc-2 label.f span{float:right;font-weight:600}
+.doc-2 label.f span.over{color:var(--r)}
+.ml{font-family:"Noto Sans Malayalam","Segoe UI",sans-serif}
+.doc-table{width:100%;border-collapse:collapse;font-size:13px}.doc-table th,.doc-table td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left}.doc-table input{width:80px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Quotation content</h1>
+  <div class="crumb">Everything a customer reads in the quotation that is not price or engineering. Bank details, UPI QR, seal, signature and trust badges are in <a href="/company-profile.html">Company profile</a>. Changes apply to quotations generated from now on — issued quotations never change.</div>
+
+  <div class="card" id="offerCard">
+    <h2>Offer page (page 2) <span id="offerState" class="tag mut">loading…</span></h2>
+    <div class="sub">Shown as page 2 of every quotation while it is ON. Leave a field blank to hide that block. Type "Onam" as the festival to print the approved Onam artwork and festival wording; any other festival prints its name; blank prints a neutral offer page. Photos: PNG or JPEG, up to 5 MB.</div>
+    <div class="row" style="margin-bottom:12px">
+      <label class="switch"><input type="checkbox" id="offerOn"> Offer page ON (printed in quotations)</label>
+      <span style="flex:1"></span>
+      <button class="btn sm" id="loadApproved" title="Fills every field below with the approved Onam Solar Fest 2026 design (your template v1 page 2). Nothing is saved until you click Save.">Load approved Onam design</button>
+      <button class="btn sm" id="previewOffer" title="Opens the SAVED offer page exactly as it prints (page 2)">Preview page 2</button>
+    </div>
+    <div class="grid">
+      <div><label class="f">Campaign name (internal)</label><input type="text" id="o-name" placeholder="Onam Solar Fest 2026"></div>
+      <div><label class="f">Festival (blank = no festival wording / artwork)</label><input type="text" id="o-festival" placeholder="Onam"></div>
+      <div><label class="f">Year badge</label><input type="text" id="o-yearBadge" placeholder="2026"></div>
+      <div style="grid-column:1/-1"><label class="f">Headline (Malayalam or English)</label><input type="text" id="o-headline" placeholder="ഈ ഓണം സോളാർ ഓണം"></div>
+      <div style="grid-column:1/-1"><label class="f">Sub-headline</label><input type="text" id="o-subheadline" placeholder="Book this festival season and save more"></div>
+      <div><label class="f">Benefit band label</label><input type="text" id="o-pbHeadline" placeholder="FESTIVAL OFFERS WORTH UP TO"></div>
+      <div><label class="f">Benefit value (₹, shown as ₹X IN BENEFITS*)</label><input type="text" id="o-pbValue" placeholder="40,000+"></div>
+      <div><label class="f">Urgency label</label><input type="text" id="o-urgText" placeholder="LIMITED SLOTS"></div>
+      <div><label class="f">Slots left (number, blank = hide count)</label><input type="number" id="o-urgCount" min="0"></div>
+      <div><label class="f">Campaign period (text)</label><input type="text" id="o-periodText" placeholder="15 Aug – 15 Sep 2026"></div>
+      <div><label class="f">Period note</label><input type="text" id="o-periodNote" placeholder="Bookings confirmed within the period"></div>
+      <div><label class="f">Call-to-action headline</label><input type="text" id="o-ctaText" placeholder="Book your slot today"></div>
+      <div><label class="f">Call-to-action text</label><input type="text" id="o-ctaDesc" placeholder="Call or scan the QR to reserve"></div>
+      <div style="grid-column:1/-1"><label class="f">Disclaimer (small print)</label><input type="text" id="o-disclaimer" placeholder="*Offers subject to booking within the campaign period."></div>
+    </div>
+    <div class="entry">
+      <h3>Lucky draw (optional)</h3>
+      <div class="grid">
+        <div><label class="f">Title</label><input type="text" id="o-ldTitle" placeholder="Electric scooter"></div>
+        <div><label class="f">Winners (number)</label><input type="number" id="o-ldWinners" min="0"></div>
+        <div style="grid-column:1/-1"><label class="f">Description</label><input type="text" id="o-ldDesc" placeholder="One lucky customer wins…"></div>
+        <div><label class="f">Prize photo</label><div class="upl"><img class="thumb" id="o-ldImg-thumb" alt=""><input type="file" accept="image/png,image/jpeg" data-target="o-ldImg"><input type="hidden" id="o-ldImg"></div></div>
+      </div>
+    </div>
+    <div class="entry">
+      <h3>More benefits (up to 3 offer cards)</h3>
+      <div id="offers"></div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="btn p" id="saveOffer">Save offer page</button><span class="hint">Saving with the switch ON activates it; OFF keeps the content but removes page 2.</span></div>
+  </div>
+
+
+  <!-- P1 (2026-09-13): bilingual document text — pages 3 / 8 / 9 / 10 / 11 -->
+  <div class="card" id="docCard">
+    <h2>Document text — pages 3, 8, 9, 10, 11 <span id="docState" class="tag mut">loading…</span></h2>
+    <div class="sub">Terms &amp; conditions, booking-to-savings timeline, what we handle / customer scope, required documents, "your life now / with solar", and the appliance profiles per kW. English and Malayalam side by side. Every field has a size limit so the page can never overflow — the counter turns red when it does not fit. <b>Save draft</b> keeps your work; <b>Publish</b> makes it live for new quotations (issued quotations never change).</div>
+    <div class="row" id="docTabs" style="margin-bottom:10px"></div>
+    <div id="docBody"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="docSave">Save draft</button>
+      <button class="btn p" id="docPublish">Publish</button>
+      <button class="btn" id="docDiscard">Discard draft</button>
+      <span class="hint" id="docHint"></span>
+    </div>
+    <div id="docErrors" class="hint" style="margin-top:8px;color:var(--r)"></div>
+  </div>
+  <div class="card" id="testiCard">
+    <h2>Customer testimonials (page 6) <span id="testiState" class="tag mut">loading…</span></h2>
+    <div class="sub">Real customers only — the page is left out of the quotation until at least one testimonial (name + quote) is entered. Up to 3 are printed.</div>
+    <div class="grid"><div style="grid-column:1/-1"><label class="f">Green banner line (optional)</label><input type="text" id="t-intro" placeholder="12 homes in Alappuzha are already running on Flarize solar."></div></div>
+    <div id="testis"></div>
+    <div class="entry">
+      <h3>Video / QR block (optional)</h3>
+      <div class="grid">
+        <div><label class="f">Title</label><input type="text" id="t-vTitle" placeholder="Watch real Kerala homeowners share their experience"></div>
+        <div><label class="f">Link text</label><input type="text" id="t-vLink" placeholder="flarize.in/testimonials"></div>
+        <div style="grid-column:1/-1"><label class="f">Text</label><input type="text" id="t-vText" placeholder="Scan the QR code to watch 2-minute interviews…"></div>
+        <div><label class="f">QR image</label><div class="upl"><img class="thumb" id="t-vQr-thumb" alt=""><input type="file" accept="image/png,image/jpeg" data-target="t-vQr"><input type="hidden" id="t-vQr"></div></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:12px"><button class="btn p" id="saveTesti">Save testimonials</button></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script src="/lib/nav.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>window.flarizeNav&&flarizeNav.init({current:"quotation-content"}));</script>
+<script type="module" src="/lib/quotation-content.js"></script>
+<script type="module" src="/lib/quotation-content-doc.js"></script>
+</body>
+</html>

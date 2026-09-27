@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Rev2 PAGE 1 — Cover — PAINT layer (raster art).
+  Purpose: first customer touch. C7-locked identity. Brand + system size +
+  price hook + issuer identity. No dynamic customer values baked here — all
+  customer/system/quotation values live in DATA overlays per Rev D §2.
+
+  Contract:
+    - No mustache tokens
+    - No customer-specific data
+    - No dynamic prices/dates/names/addresses/system sizes/financial values
+    - DATA rectangles rendered as transparent regions with (thin dotted)
+      guide borders so the design team can align the HTML overlay
+    - Signature + seal placeholder frames (interior transparent — HTML
+      overlay image-slots fill these)
+    - Footer teal band carries the C7-locked issuer identity verbatim
+
+  Dimensions: A4 portrait 595 × 842 pt.
+-->
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 595 842"
+     width="595" height="842">
+  <title>Rev2 Page 1 — Cover (PAINT layer)</title>
+  <defs>
+    <linearGradient id="p1-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#FAF3E0" stop-opacity="0.7"/>
+      <stop offset="0.6" stop-color="#ffffff"/>
+      <stop offset="1"   stop-color="#ffffff"/>
+    </linearGradient>
+    <radialGradient id="p1-hero-glow" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0"   stop-color="#F5901E" stop-opacity="0.20"/>
+      <stop offset="1"   stop-color="#F5901E" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      .h  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; }
+      .b  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; }
+      .r  { font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 400; }
+      .u  { text-transform: uppercase; letter-spacing: 2px; }
+      .guide { fill: none; stroke: #cbd5d0; stroke-width: 0.6; stroke-dasharray: 3 3; opacity: 0.55; }
+    </style>
+  </defs>
+
+  <!-- Full-bleed background wash (teal→cream gradient — top-heavy cream) -->
+  <rect width="595" height="842" fill="url(#p1-bg)"/>
+
+  <!-- Header: FLARIZE wordmark + sun icon + parent line -->
+  <g transform="translate(40 42)">
+    <!-- Sun icon -->
+    <circle cx="14" cy="14" r="8.2" fill="#F5901E"/>
+    <g stroke="#F5901E" stroke-width="2.4" stroke-linecap="round">
+      <line x1="14" y1="0"  x2="14" y2="4"/>
+      <line x1="14" y1="24" x2="14" y2="28"/>
+      <line x1="0"  y1="14" x2="4"  y2="14"/>
+      <line x1="24" y1="14" x2="28" y2="14"/>
+      <line x1="3.5"  y1="3.5"  x2="6.5"  y2="6.5"/>
+      <line x1="21.5" y1="21.5" x2="24.5" y2="24.5"/>
+      <line x1="3.5"  y1="24.5" x2="6.5"  y2="21.5"/>
+      <line x1="21.5" y1="6.5"  x2="24.5" y2="3.5"/>
+    </g>
+    <text x="38" y="20" class="h" font-size="24" fill="#123f35" letter-spacing="0.4">FLARIZE</text>
+    <text x="38" y="34" class="b u" font-size="7" fill="#5b656a">Backed by Golden Ray</text>
+  </g>
+
+  <!-- Decorative solar-hero illustration (right/upper) — house + panels + sun rays -->
+  <g transform="translate(340 96)" opacity="0.95">
+    <ellipse cx="110" cy="102" rx="130" ry="46" fill="url(#p1-hero-glow)"/>
+    <!-- Sun rays behind house -->
+    <g transform="translate(110 40)" stroke="#F5901E" stroke-width="1.6" stroke-linecap="round" opacity="0.55">
+      <line x1="0"   y1="-24" x2="0"   y2="-12"/>
+      <line x1="18"  y1="-18" x2="10"  y2="-8"/>
+      <line x1="-18" y1="-18" x2="-10" y2="-8"/>
+      <line x1="26"  y1="0"   x2="14"  y2="0"/>
+      <line x1="-26" y1="0"   x2="-14" y2="0"/>
+    </g>
+    <circle cx="110" cy="40" r="12" fill="#F5901E"/>
+    <!-- House body -->
+    <path d="M 55 130 L 55 88 L 110 60 L 165 88 L 165 130 Z"
+          fill="#123f35"/>
+    <!-- Roof solar panel array -->
+    <g transform="translate(60 76) skewX(-14)">
+      <rect x="0"  y="0"  width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="16" y="0"  width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="32" y="0"  width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="48" y="0"  width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="0"  y="11" width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="16" y="11" width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="32" y="11" width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+      <rect x="48" y="11" width="14" height="9" fill="#4d7a9a" stroke="#1a2432" stroke-width="0.6"/>
+    </g>
+    <!-- Window + door -->
+    <rect x="82"  y="96" width="14" height="12" fill="#FAF3E0"/>
+    <rect x="124" y="98" width="12" height="22" fill="#F5901E"/>
+    <!-- Ground line -->
+    <line x1="10" y1="130" x2="210" y2="130" stroke="#123f35" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Trust chips column (left) -->
+  <g transform="translate(40 250)">
+    <text x="0" y="0" class="b u" font-size="8" fill="#5b656a">Government Certified</text>
+    <g transform="translate(0 10)">
+      <!-- MNRE chip -->
+      <rect x="0" y="0" width="118" height="24" rx="12" fill="#123f35"/>
+      <text x="12" y="16" class="b" font-size="10" fill="#F5901E">MNRE</text>
+      <text x="52" y="16" class="r" font-size="9" fill="#ffffff">Empanelled</text>
+    </g>
+    <g transform="translate(0 40)">
+      <rect x="0" y="0" width="118" height="24" rx="12" fill="#ffffff" stroke="#123f35" stroke-width="1"/>
+      <text x="12" y="16" class="b" font-size="10" fill="#123f35">KERALA</text>
+      <text x="60" y="16" class="r" font-size="9" fill="#123f35">Wide Service</text>
+    </g>
+    <g transform="translate(0 70)">
+      <rect x="0" y="0" width="118" height="24" rx="12" fill="#ffffff" stroke="#123f35" stroke-width="1"/>
+      <text x="12" y="16" class="b" font-size="10" fill="#123f35">TIER 1</text>
+      <text x="56" y="16" class="r" font-size="9" fill="#123f35">Certified Team</text>
+    </g>
+  </g>
+
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+  <!-- DATA REGIONS — TRANSPARENT / BLANK — HTML overlay fills these         -->
+  <!-- Dotted guides shown for the design team; guides render sub-visible.  -->
+  <!-- ═════════════════════════════════════════════════════════════════════ -->
+
+  <!-- DATA: customer identity block (top-left, ~y 320..500) -->
+  <g>
+    <rect class="guide" x="40"  y="380" width="300" height="24"/>  <!-- customerName -->
+    <rect class="guide" x="40"  y="410" width="300" height="40"/>  <!-- customerAddress -->
+    <rect class="guide" x="40"  y="456" width="180" height="20"/>  <!-- customerPhone -->
+    <rect class="guide" x="40"  y="480" width="200" height="20"/>  <!-- currentBillDisplay -->
+    <text x="40" y="374" class="b u" font-size="7" fill="#8b9297">Prepared For</text>
+  </g>
+
+  <!-- DATA: quotation identity block (top-right, ~y 500..600) -->
+  <g>
+    <text x="410" y="374" class="b u" font-size="7" fill="#8b9297">Quotation</text>
+    <rect class="guide" x="410" y="380" width="150" height="24"/>  <!-- quotationNumber -->
+    <text x="410" y="416" class="r"   font-size="9" fill="#8b9297">Issue Date</text>
+    <rect class="guide" x="410" y="420" width="150" height="20"/>  <!-- quotationDate -->
+    <text x="410" y="454" class="r"   font-size="9" fill="#8b9297">Valid Until</text>
+    <rect class="guide" x="410" y="458" width="150" height="20"/>  <!-- validityDate -->
+    <text x="410" y="492" class="r"   font-size="9" fill="#8b9297">Proposal Owner</text>
+    <rect class="guide" x="410" y="496" width="150" height="20"/>  <!-- proposalOwner -->
+  </g>
+
+  <!-- Recommended-system panel (right-side hero, ~y 570..680) -->
+  <g transform="translate(340 560)">
+    <rect x="0" y="0" width="215" height="120" rx="14" fill="#123f35"/>
+    <text x="18" y="24" class="b u" font-size="8" fill="#F5901E">Recommended System</text>
+    <!-- DATA: recommendedSizeKw — large number DATA overlay -->
+    <rect class="guide" x="18" y="34" width="180" height="60"/>
+    <text x="18" y="110" class="r" font-size="9" fill="#cfe3d6">Solar system size, in kW</text>
+  </g>
+
+  <!-- Subsidy chip band (bottom-left) -->
+  <g transform="translate(40 720)">
+    <rect x="0" y="0" width="380" height="42" rx="8" fill="#F5901E"/>
+    <text x="20" y="18" class="b u" font-size="8" fill="#123f35">PM Surya Ghar</text>
+    <text x="20" y="34" class="h"   font-size="15" fill="#123f35">Subsidy up to ₹78,000</text>
+  </g>
+
+  <!-- Completed-installations chip (background label only; number is DATA) -->
+  <g transform="translate(40 660)">
+    <rect x="0" y="0" width="180" height="42" rx="8" fill="#ffffff" stroke="#123f35" stroke-width="1"/>
+    <rect class="guide" x="10" y="6" width="60" height="30"/>  <!-- completedInstallations -->
+    <text x="76" y="20" class="r" font-size="9" fill="#5b656a">installations</text>
+    <text x="76" y="32" class="r" font-size="9" fill="#5b656a">completed across Kerala</text>
+  </g>
+
+  <!-- Signature + seal frames (bottom-right, transparent interiors) -->
+  <g transform="translate(360 720)">
+    <text x="0" y="-2" class="b u" font-size="7" fill="#8b9297">For Flarize Technologies Private Limited</text>
+    <!-- Signature frame -->
+    <rect x="0"   y="4" width="120" height="60" rx="4" fill="none" stroke="#cbd5d0" stroke-width="0.8" stroke-dasharray="4 3"/>
+    <text x="0"  y="76" class="r" font-size="7" fill="#8b9297">Authorised Signatory</text>
+    <!-- Seal frame -->
+    <rect x="132" y="4" width="80"  height="80" rx="40" fill="none" stroke="#cbd5d0" stroke-width="0.8" stroke-dasharray="4 3"/>
+  </g>
+
+  <!-- Footer teal band with C7-LOCKED issuer identity (verbatim) -->
+  <g transform="translate(0 810)">
+    <rect x="0" y="0" width="595" height="32" fill="#123f35"/>
+    <text x="20"  y="14" class="r" font-size="6.5" fill="#ffffff">FLARIZE TECHNOLOGIES PRIVATE LIMITED  ·  GSTIN 32AAGCF7283D1ZR  ·  Reg. AAP-6531</text>
+    <text x="20"  y="24" class="r" font-size="6.5" fill="#cfe3d6">Floor 01, Building 49/190/B, Tharath Building, Ambalappuzha, Alappuzha North, Alappuzha, Kerala 688007</text>
+    <text x="440" y="24" class="r" font-size="6.5" fill="#cfe3d6">+91 99950 73579  ·  sales@flarize.com  ·  www.flarize.com</text>
+  </g>
+</svg>

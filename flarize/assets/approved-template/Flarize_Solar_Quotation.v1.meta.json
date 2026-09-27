@@ -1,0 +1,14 @@
+{
+  "name": "Flarize Solar Quotation",
+  "version": "v1",
+  "source": "Claude Design self-extracting bundle",
+  "bundleSha256": "fbb4e5e206b867b0391c6c0f696bf040c68abb7678cb626a317ad2923582d1d1",
+  "bundleBytes": 3860840,
+  "manifestSha256": "799e4b10ce2e53783269ffa29b9a6de2af63bac0c8731a27f31bb21daf2e35ce",
+  "manifestBytes": 3745728,
+  "templateSha256": "f632f67e733237e1f1e1037fb9656e3508ebae0389e0ac3df97a603852e8b2be",
+  "templateBytes": 95538,
+  "assetsInManifest": 48,
+  "checkedInAt": "2026-09-03T21:00:00.673089Z",
+  "checkedInBy": "approvedTemplate migration Phase 1"
+}

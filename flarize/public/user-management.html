@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management — Golden Ray Admin</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #f5f6fa; color: #23272f; }
+    .topbar { background: #1a2332; color: #fff; padding: 12px 24px; display: flex; align-items: center; gap: 16px; }
+    .topbar h1 { font-size: 18px; font-weight: 600; }
+    .topbar .back { color: #8fc6ff; text-decoration: none; font-size: 14px; }
+    .topbar .spacer { flex: 1; }
+    .topbar .user-info { font-size: 13px; color: #8fc6ff; }
+    .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+    .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); padding: 24px; margin-bottom: 20px; }
+    .card h2 { font-size: 16px; color: #1a2332; margin-bottom: 16px; border-bottom: 1px solid #e9ecef; padding-bottom: 8px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px; }
+    .form-row.full { grid-template-columns: 1fr; }
+    label.field { display: block; font-size: 12px; font-weight: 600; color: #6b7280; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fi { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; }
+    .fi:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.15); }
+    select.fi { cursor: pointer; }
+    .btn { padding: 8px 18px; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+    .btn-success { background: #10b981; color: #fff; }
+    .btn-success:hover { background: #059669; }
+    .btn-warning { background: #f59e0b; color: #fff; }
+    .btn-warning:hover { background: #d97706; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-outline { background: #fff; color: #374151; border: 1px solid #d1d5db; }
+    .btn-outline:hover { background: #f3f4f6; }
+    .alert { padding: 10px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 14px; }
+    .alert-success { background: #d1fae5; color: #065f46; }
+    .alert-error { background: #fee2e2; color: #991b1b; }
+    .login-box { max-width: 400px; margin: 80px auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; font-size: 11px; padding: 8px 10px; border-bottom: 2px solid #e5e7eb; }
+    td { padding: 10px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    tr:hover td { background: #f9fafb; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+    .badge-active { background: #d1fae5; color: #065f46; }
+    .badge-disabled { background: #fee2e2; color: #991b1b; }
+    .badge-role { background: #dbeafe; color: #1e40af; }
+    .actions-cell { display: flex; gap: 6px; flex-wrap: wrap; }
+    .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal-overlay[hidden] { display: none; } /* author display:flex would otherwise override the hidden attribute → both modals shown on load */
+    .modal { background: #fff; border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal h3 { font-size: 16px; margin-bottom: 16px; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+    @media (max-width: 700px) { .form-row { grid-template-columns: 1fr; } table { font-size: 12px; } .actions-cell { flex-direction: column; } }
+  </style>
+</head>
+<body>
+<script src="/lib/nav.js"></script>
+
+<div class="topbar">
+  <a class="back" href="/">&#8592; Back to App</a>
+  <h1>User Management</h1>
+  <div class="spacer"></div>
+  <div class="user-info" id="admin-info"></div>
+</div>
+
+<div class="container">
+  <!-- Login -->
+  <div id="login-section" class="login-box">
+    <div class="card">
+      <h2>Admin Login</h2>
+      <div id="login-alert"></div>
+      <div class="form-row full">
+        <div><label class="field">Username</label><input class="fi" id="login-user" type="text" placeholder="admin" /></div>
+      </div>
+      <div class="form-row full">
+        <div><label class="field">Password</label><input class="fi" id="login-pw" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()" /></div>
+      </div>
+      <button class="btn btn-primary" onclick="doLogin()" style="margin-top:12px">Login</button>
+    </div>
+  </div>
+
+  <!-- User list -->
+  <div id="users-section" hidden>
+    <div id="alert-area"></div>
+    <div class="card">
+      <div class="toolbar">
+        <h2 style="border:none;margin:0;padding:0;flex:1">Users</h2>
+        <button class="btn btn-primary" onclick="showAddModal()">+ Add User</button>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="user-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div id="modal-overlay" class="modal-overlay" hidden onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modal-title">Add User</h3>
+    <div id="modal-alert"></div>
+    <div class="form-row">
+      <div><label class="field">Username</label><input class="fi" id="m-username" placeholder="e.g. john.doe" /></div>
+      <div><label class="field">Full Name</label><input class="fi" id="m-name" placeholder="e.g. John Doe" /></div>
+    </div>
+    <div class="form-row">
+      <div><label class="field">Email</label><input class="fi" id="m-email" type="email" placeholder="e.g. john@example.com" /></div>
+      <div>
+        <label class="field">Role</label>
+        <select class="fi" id="m-role">
+          <option value="ADMIN">Administrator</option>
+          <option value="SALES_HEAD">Sales Head</option>
+          <option value="SALES_CRS">Sales CRS</option>
+          <option value="FIELD_SALES">Field Sales</option>
+          <option value="SALES">Sales</option>
+          <option value="PROJECT_HEAD">Project Head</option>
+          <option value="ENGINEERING">Engineering</option>
+          <option value="PROCUREMENT">Procurement</option>
+        </select>
+      </div>
+    </div>
+    <div id="password-fields">
+      <div class="form-row full">
+        <div><label class="field">Password</label><input class="fi" id="m-password" type="password" placeholder="Min. 6 characters" /></div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-save-btn" onclick="saveUser()">Create User</button>
+    </div>
+  </div>
+</div>
+
+<!-- Password Reset Modal -->
+<div id="pw-modal-overlay" class="modal-overlay" hidden onclick="if(event.target===this)closePwModal()">
+  <div class="modal">
+    <h3>Reset Password</h3>
+    <div id="pw-modal-alert"></div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:12px">Resetting password for <strong id="pw-user-name"></strong></p>
+    <div class="form-row full">
+      <div><label class="field">New Password</label><input class="fi" id="pw-new" type="password" placeholder="Min. 6 characters" onkeydown="if(event.key==='Enter')resetPassword()" /></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closePwModal()">Cancel</button>
+      <button class="btn btn-warning" onclick="resetPassword()">Reset Password</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const ROLE_LABELS = {
+  ADMIN: 'Administrator',
+  SALES_HEAD: 'Sales Head',
+  SALES_CRS: 'Sales CRS',
+  FIELD_SALES: 'Field Sales',
+  SALES: 'Sales',
+  PROJECT_HEAD: 'Project Head',
+  ENGINEERING: 'Engineering',
+  PROCUREMENT: 'Procurement',
+};
+
+let TOKEN = (function() { try { return sessionStorage.getItem('gr_session_token') || ''; } catch { return ''; } })();
+if (!TOKEN) { location.href = '/login.html'; }
+let USERS = [];
+let editingUserId = null;
+let pwResetUserId = null;
+
+function headers() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN };
+}
+
+async function api(method, url, body) {
+  const opts = { method, headers: headers() };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+function showAlert(id, msg, type) {
+  document.getElementById(id).innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+  if (type === 'success') setTimeout(() => { document.getElementById(id).innerHTML = ''; }, 4000);
+}
+
+// --- Login ---
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pw').value;
+  if (!username || !password) return showAlert('login-alert', 'Username and password required.', 'error');
+  try {
+    const data = await api('POST', '/api/auth/login', { username, password });
+    TOKEN = data.token;
+    try { sessionStorage.setItem('gr_session_token', TOKEN); sessionStorage.setItem('gr_user_role', data.user?.role||''); sessionStorage.setItem('gr_user_name', data.user?.name||data.user?.username||''); } catch {}
+    if (data.user && data.user.role !== 'ADMIN') {
+      showAlert('login-alert', 'Only administrators can access user management.', 'error');
+      TOKEN = '';
+      try { sessionStorage.removeItem('gr_session_token'); } catch {}
+      return;
+    }
+    showApp(data.user);
+  } catch (e) {
+    showAlert('login-alert', e.message, 'error');
+  }
+}
+
+async function checkSession() {
+  if (!TOKEN) return;
+  try {
+    const data = await api('GET', '/api/auth/session');
+    if (data.user && data.user.role === 'ADMIN') {
+      showApp(data.user);
+    } else {
+      TOKEN = '';
+      try { sessionStorage.removeItem('gr_session_token'); } catch {}
+    }
+  } catch {
+    TOKEN = '';
+    try { sessionStorage.removeItem('gr_session_token'); } catch {}
+  }
+}
+
+function showApp(user) {
+  flarizeNav.init({ current: 'users' });
+  document.getElementById('login-section').hidden = true;
+  document.getElementById('users-section').hidden = false;
+  document.getElementById('admin-info').textContent = user ? (user.name || user.username) : '';
+  loadUsers();
+}
+
+// --- Users ---
+async function loadUsers() {
+  try {
+    const data = await api('GET', '/api/admin/users');
+    USERS = data.users || [];
+    renderUsers();
+  } catch (e) {
+    showAlert('alert-area', e.message, 'error');
+  }
+}
+
+function renderUsers() {
+  const tbody = document.getElementById('user-tbody');
+  if (!USERS.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#9ca3af;padding:24px">No users found.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = USERS.map(u => `
+    <tr>
+      <td><strong>${esc(u.name || u.username)}</strong></td>
+      <td>${esc(u.username)}</td>
+      <td>${esc(u.email || '—')}</td>
+      <td><span class="badge badge-role">${ROLE_LABELS[u.role] || u.role}</span></td>
+      <td><span class="badge ${u.status === 'ACTIVE' ? 'badge-active' : 'badge-disabled'}">${u.status}</span></td>
+      <td>${u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
+      <td>
+        <div class="actions-cell">
+          <button class="btn btn-sm btn-outline" onclick="showEditModal('${u.userId}')">Edit</button>
+          ${u.status === 'ACTIVE'
+            ? `<button class="btn btn-sm btn-danger" onclick="toggleStatus('${u.userId}','DISABLED')">Disable</button>`
+            : `<button class="btn btn-sm btn-success" onclick="toggleStatus('${u.userId}','ACTIVE')">Enable</button>`}
+          <button class="btn btn-sm btn-warning" onclick="showPwModal('${u.userId}')">Reset PW</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+// --- Add/Edit Modal ---
+function showAddModal() {
+  editingUserId = null;
+  document.getElementById('modal-title').textContent = 'Add User';
+  document.getElementById('modal-save-btn').textContent = 'Create User';
+  document.getElementById('m-username').value = '';
+  document.getElementById('m-username').disabled = false;
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-email').value = '';
+  document.getElementById('m-role').value = 'SALES_CRS';
+  document.getElementById('m-password').value = '';
+  document.getElementById('password-fields').hidden = false;
+  document.getElementById('modal-alert').innerHTML = '';
+  document.getElementById('modal-overlay').hidden = false;
+}
+
+function showEditModal(userId) {
+  const u = USERS.find(x => x.userId === userId);
+  if (!u) return;
+  editingUserId = userId;
+  document.getElementById('modal-title').textContent = 'Edit User';
+  document.getElementById('modal-save-btn').textContent = 'Save Changes';
+  document.getElementById('m-username').value = u.username;
+  document.getElementById('m-username').disabled = true;
+  document.getElementById('m-name').value = u.name || '';
+  document.getElementById('m-email').value = u.email || '';
+  document.getElementById('m-role').value = u.role;
+  document.getElementById('password-fields').hidden = true;
+  document.getElementById('modal-alert').innerHTML = '';
+  document.getElementById('modal-overlay').hidden = false;
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').hidden = true;
+  editingUserId = null;
+}
+
+async function saveUser() {
+  const name = document.getElementById('m-name').value.trim();
+  const email = document.getElementById('m-email').value.trim();
+  const role = document.getElementById('m-role').value;
+
+  if (editingUserId) {
+    // Edit
+    try {
+      await api('PATCH', '/api/admin/users/' + editingUserId, { name, email, role });
+      closeModal();
+      showAlert('alert-area', 'User updated.', 'success');
+      loadUsers();
+    } catch (e) {
+      showAlert('modal-alert', e.message, 'error');
+    }
+  } else {
+    // Create
+    const username = document.getElementById('m-username').value.trim();
+    const password = document.getElementById('m-password').value;
+    if (!username) return showAlert('modal-alert', 'Username required.', 'error');
+    if (!password || password.length < 6) return showAlert('modal-alert', 'Password must be at least 6 characters.', 'error');
+    try {
+      await api('POST', '/api/admin/users', { username, name: name || username, email, role, password });
+      closeModal();
+      showAlert('alert-area', 'User created.', 'success');
+      loadUsers();
+    } catch (e) {
+      showAlert('modal-alert', e.message, 'error');
+    }
+  }
+}
+
+// --- Status Toggle ---
+async function toggleStatus(userId, newStatus) {
+  const action = newStatus === 'DISABLED' ? 'disable' : 'enable';
+  if (!confirm(`Are you sure you want to ${action} this user?`)) return;
+  try {
+    await api('PATCH', '/api/admin/users/' + userId, { status: newStatus });
+    showAlert('alert-area', `User ${action}d.`, 'success');
+    loadUsers();
+  } catch (e) {
+    showAlert('alert-area', e.message, 'error');
+  }
+}
+
+// --- Password Reset ---
+function showPwModal(userId) {
+  const u = USERS.find(x => x.userId === userId);
+  if (!u) return;
+  pwResetUserId = userId;
+  document.getElementById('pw-user-name').textContent = u.name || u.username;
+  document.getElementById('pw-new').value = '';
+  document.getElementById('pw-modal-alert').innerHTML = '';
+  document.getElementById('pw-modal-overlay').hidden = false;
+}
+
+function closePwModal() {
+  document.getElementById('pw-modal-overlay').hidden = true;
+  pwResetUserId = null;
+}
+
+async function resetPassword() {
+  const password = document.getElementById('pw-new').value;
+  if (!password || password.length < 6) return showAlert('pw-modal-alert', 'Password must be at least 6 characters.', 'error');
+  try {
+    await api('PUT', '/api/admin/users/' + pwResetUserId + '/password', { password });
+    closePwModal();
+    showAlert('alert-area', 'Password reset successfully.', 'success');
+  } catch (e) {
+    showAlert('pw-modal-alert', e.message, 'error');
+  }
+}
+
+// --- Init ---
+checkSession();
+</script>
+</body>
+</html>
